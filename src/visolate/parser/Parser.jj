@@ -1,0 +1,854 @@
+/**
+ * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
+ *
+ * Copyright (C) 2004 Marsette A. Vona, III
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+ **/
+
+options
+{
+  STATIC = false;
+}
+
+PARSER_BEGIN(Parser)
+
+package visolate.parser;
+
+import visolate.simulator.*;
+import visolate.model.*;
+
+import java.io.*;
+import java.util.*;
+
+public class Parser {
+
+  private static final String cvsid =
+  "$Id: Parser.jj,v 1.3 2006/08/26 20:17:30 vona Exp $";
+
+  public static final int HALT = 0;
+  public static final int OPTSTOP = 1;
+
+  public void setSimulator(Simulator simulator) {
+    this.simulator = simulator;
+  }
+
+  public static void main(String args[]) throws ParseException {
+    Parser parser = new Parser(System.in);
+    parser.setSimulator(new Simulator());
+    parser.Input();
+  }
+
+  private static double getModifier(List modifiers, int index) {
+    return ((Double) modifiers.get(index)).doubleValue();
+  }
+
+  private Simulator simulator;
+}
+
+PARSER_END(Parser)
+
+//SPECIAL_TOKEN :
+//{
+//  < COMMENT: "G04" ( ~["\n","\r"] )* ( "\n" | "\r" | "\r\n" )? >
+//}
+
+SKIP :
+{
+  " " 
+| "\t"  
+| "\n"
+| "\r"
+}
+
+TOKEN :
+{
+  < PARAM_DELIM: "%" >
+| < CODE_DELIM:  "*" >
+| < SIGN: ["+","-"] >
+| < DIGITS:  (<DIGIT>)+ >
+| < DIGIT:  ["0"-"9"] >
+| < IN: "IN" > : TEXT_EXPECTED
+| < LN: "LN" > : TEXT_EXPECTED
+| < ADD: "ADD" > : ALNUMS_EXPECTED
+| < AM: "AM" > : TEXT_EXPECTED
+| < COMMENT: "G04" > : TEXT_EXPECTED
+}
+
+< TEXT_EXPECTED > TOKEN :
+{
+  < TEXT: (~["*","\n","\r"])* > : DEFAULT
+}
+
+< ALNUMS_EXPECTED > TOKEN :
+{
+  < DIGITS2:  (<DIGIT2>)+ >
+| < DIGIT2:  ["0"-"9"] >
+| < ALNUMS: <AL>(<AL>|<DIGIT>)* > : DEFAULT
+| < AL: ["a"-"z","A"-"Z"] >
+}
+
+void Input() :
+{
+  boolean stop = false;
+}
+{
+  (
+    Parameter()
+  |
+    stop = Code()
+    { if (stop) return; }
+  )*
+  <EOF>
+}
+
+void Parameter() :
+{}
+{
+  <PARAM_DELIM> ( ParameterCode() )* <PARAM_DELIM>
+}
+
+boolean Code() :
+{
+  int stop = -1;
+  Token seq = null;
+  Token t;
+}
+{
+
+  [ "N" seq = <DIGITS> ]
+
+  [
+    GCode() [ DCode() ]
+  |
+    DCode()
+  |
+    stop = MCode()
+  ]
+
+  t = <CODE_DELIM>
+
+  { return (stop == HALT) ||
+           ((stop == OPTSTOP) &&
+            !simulator.askContinue(t.beginLine,
+                                   ((seq != null) ? Integer.parseInt(seq.image)
+                                                  : -1))); }
+}
+
+void GCode() :
+{
+  Token txt;
+}
+{
+  "G00" //move
+  { simulator.setMode(Simulator.RAPID); }
+|
+  "G01" //linear interp 1x
+  { simulator.setMode(Simulator.LINEAR); }
+|
+  "G02" //CW circular interp
+  { simulator.setMode(Simulator.CW); }
+|
+  "G03" //CCW circular interp
+  { simulator.setMode(Simulator.CCW); }
+|
+  <COMMENT> txt = <TEXT> //comment
+  { simulator.comment(txt.beginLine, txt.image); }
+|
+  "G36" //polygon area fill on
+  { simulator.setMode(Simulator.POLYGON); }
+|
+  "G37" //polygon area fill off
+  { simulator.setMode(Simulator.LINEAR); }
+|
+  "G54" //tool prepare
+  //ignore
+| 
+  "G70" //specify inches
+  //ignore
+|
+  "G71" //specify millimeters
+  { simulator.setMetric(); }
+|
+  "G74" //360deg circular interp off
+  { simulator.set360(false); }
+|
+  "G75" //360deg circular interp on
+  { simulator.set360(true); }
+|
+  "G90" //specify absolute
+  { simulator.setIncremental(false); }
+|
+  "G91" //specify incremental
+  { simulator.setIncremental(true); }
+}
+
+void DCode() :
+{
+  boolean flash = false;
+}
+{
+  CoordinateDCode()
+|
+  flash = NonCoordinateDCode()
+  {
+    if (flash)
+      simulator.addFlash();
+  }
+}
+
+void CoordinateDCode() :
+{
+  String[] c = new String[4]; 
+}
+{ 
+
+  Coordinates(c) [ NonCoordinateDCode() ]
+
+  {
+    if ((c[2] != null) || (c[3] != null))
+      simulator.setCenter(c[2], c[3]);
+
+    if ((c[0] != null) || (c[1] != null))
+      simulator.setPosition(c[0], c[1]);
+  }
+}
+
+boolean NonCoordinateDCode() :
+{
+  Token aperture = null;
+}
+{
+  ( "D01" [ aperture = <DIGITS> ] )      //exposure on
+  {
+    if (aperture == null)
+      simulator.setExposure(Simulator.OPEN);
+    else
+      simulator.setAperture(Integer.parseInt("1" + aperture.image));
+
+    return false;
+  }
+|
+  ( "D02" [ aperture = <DIGITS> ] )      //exposure off
+  {
+    if (aperture == null)
+      simulator.setExposure(Simulator.CLOSED);
+    else
+      simulator.setAperture(Integer.parseInt("2" + aperture.image));
+
+    return false;
+  }
+|
+  ( "D03" [ aperture = <DIGITS> ] )      //flash
+  {
+    if (aperture == null)
+      simulator.setExposure(Simulator.FLASH);
+    else
+      simulator.setAperture(Integer.parseInt("3" + aperture.image));
+
+    return true;
+  }
+|
+  "D" aperture = <DIGITS>          //select aperture
+  {
+    simulator.setAperture(Integer.parseInt(aperture.image));
+    return false;
+  }
+}
+
+void Coordinates(String[] c) :
+{}
+{
+  ( XCoord(c) | YCoord(c) | ICoord(c) | JCoord(c) )+
+}
+
+void XCoord(String[] c) :
+{}
+{
+  "X" c[0] = Coord() 
+}
+
+void YCoord(String[] c) :
+{}
+{
+  "Y" c[1] = Coord() 
+}
+
+void ICoord(String[] c) :
+{}
+{
+  "I" c[2] = Coord() 
+}
+
+void JCoord(String[] c) :
+{}
+{
+  "J" c[3] = Coord() 
+}
+
+String Coord() :
+{
+  Token sign = null, digits;
+}
+{
+  [ sign = <SIGN> ] digits = <DIGITS>
+  { return ((sign != null) ? sign.image : "") + digits.image; }
+}
+
+double Double() :
+{
+  Token sign = null, digitsBefore = null, digitsAfter = null;
+}
+{
+  [ sign = <SIGN> ]
+  (
+    digitsBefore = <DIGITS> [ "." [ digitsAfter = <DIGITS> ] ]
+  |
+    "." digitsAfter = <DIGITS>
+  )
+    {
+      double value =
+        Double.parseDouble(
+          ((digitsBefore != null) ? digitsBefore.image : "") +
+          ((digitsAfter != null) ? "." + digitsAfter.image : ""));
+
+      if ((sign != null) && ("-".equals(sign.image)))
+        value = -value;
+
+      return value;
+    }
+}
+
+int MCode() :
+{}
+{
+  "M00" //program stop
+  { return HALT; }
+|
+  "M01" //optional stop
+  { return OPTSTOP; }
+|
+  "M02"  //end of program
+  { return HALT; }
+}
+
+void ParameterCode() :
+{}
+{
+  InputEncoding()
+|
+  Offset()
+|
+  FormatStatement()
+|
+  ImagePolarity()
+|
+  LayerPolarity()
+|
+  ApertureDescription()
+|
+  ApertureMacro()
+|
+  AxisSelect()
+|
+  ImageName()
+|
+  Mode()
+|  
+  ScaleFactor()
+|
+  LayerName()
+|
+  StepAndRepeat()   
+}
+
+void InputEncoding() :
+{
+  Token e;
+}
+{
+  "IC" ( e = "AS" | e = "EB" | e = "BC" | e = "IS" | e = "EI" ) <CODE_DELIM>
+
+  {
+    if (!"AS".equals(e.image) && !"IS".equals(e.image))
+      System.err.println(
+        "WARNING: unsupported image encoding \"" + e.image + "\"");
+  }
+}
+
+void AxisSelect() :
+{
+  Token a, b;
+}
+{
+  "AS" "A" ( a = "X" | a = "Y" ) "B" ( b = "X" | b = "Y" ) <CODE_DELIM>
+
+  {System.err.println(
+    "WARNING: ignoring axis select ASA" + a.image + "B" + b.image);}
+}
+
+void FormatStatement() :
+{
+  Token ignore, mode, fmt;
+}
+{
+  "FS"
+
+  [ ( ignore = "L" | ignore = "T" )
+    { if ("T".equals(ignore.image))
+        simulator.ignoreTrailingZeros(); } ]
+
+  [ ( mode = "A" | mode = "I" ) 
+    { if ("I".equals(mode.image))
+        simulator.setIncremental(true);
+      else
+        simulator.setIncremental(false); } ]
+
+  [ "N" <DIGITS> ] 
+
+  [ "G" <DIGITS> ] 
+
+  [ "X" fmt = <DIGITS>
+    { 
+      if (fmt.image.length() != 2) {
+        System.err.println("WARNING: ignoring bad X format, not 2 digits: " +
+                           fmt);
+      } else {
+        simulator.setFormatX(Integer.parseInt(fmt.image.substring(0, 1)),
+                             Integer.parseInt(fmt.image.substring(1, 2)));
+      }
+    }
+  ] 
+
+  [ "Y" fmt = <DIGITS>
+    { 
+      if (fmt.image.length() != 2) {
+        System.err.println("WARNING: ignoring bad Y format, not 2 digits: " +
+                           fmt);
+      } else {
+        simulator.setFormatY(Integer.parseInt(fmt.image.substring(0, 1)),
+                             Integer.parseInt(fmt.image.substring(1, 2)));
+      }
+    }
+  ] 
+
+  [ "Z" <DIGITS> ] 
+
+  [ "D" <DIGITS> ] 
+
+  [ "M" <DIGITS> ] 
+
+  <CODE_DELIM>
+}
+
+void ImageName() :
+{
+  Token name;
+}
+{
+  <IN> name = <TEXT> <CODE_DELIM>
+  {System.out.println("image name: " + name.image);}
+}
+
+void ImagePolarity() :
+{
+  Token polarity;
+}
+{
+  "IP" ( polarity = "POS" | polarity = "NEG" ) <CODE_DELIM>
+  {System.err.println("WARNING: ignoring image polarity IP" + polarity.image);}
+}
+
+void LayerName() :
+{
+  Token name;
+}
+{
+  <LN> name = <TEXT> <CODE_DELIM>
+  {System.out.println("layer name: " + name.image);}
+}
+
+void LayerPolarity() :
+{
+  Token polarity;
+}
+{
+  "LP" ( polarity = "C" | polarity = "D" ) <CODE_DELIM>
+  {System.err.println("WARNING: ignoring layer polarity LP" + polarity.image);}
+}
+
+void Mode() :
+{
+  Token mode;
+}
+{
+  ( mode = "MOIN" | mode = "MOMM" ) <CODE_DELIM>
+  {if ("MOMM".equals(mode.image)) simulator.setMetric();}
+}
+
+void Offset() :
+{
+  double a = Double.NaN, b = Double.NaN;
+}
+{
+  "OF" [ "A" a = Double() ] [ "B" b = Double() ] <CODE_DELIM>
+  {System.err.println("WARNING: ignoring offset OF" +
+                      ((!Double.isNaN(a)) ? ("A" + a) : "") + 
+                      ((!Double.isNaN(b)) ? ("B" + b) : ""));}
+}
+
+void ScaleFactor() :
+{
+  double a = Double.NaN, b = Double.NaN;
+}
+{
+  "SF" [ "A" a = Double() ] [ "B" b = Double() ] <CODE_DELIM>
+  {System.err.println("WARNING: ignoring scale factor SF" +
+                      ((!Double.isNaN(a)) ? ("A" + a) : "") + 
+                      ((!Double.isNaN(b)) ? ("B" + b) : ""));}
+}
+
+void StepAndRepeat() :
+{
+  Token x = null;
+  Token y = null;
+  double i = Double.NaN;
+  double j = Double.NaN;
+}
+{
+  "SR"
+  [ "X" x = <DIGITS> ]
+  [ "Y" y = <DIGITS> ]
+  [ "I" i = Double() ]
+  [ "J" j = Double() ]
+  <CODE_DELIM>
+  {System.err.println("WARNING: ignoring step and repeat SR" +
+                      ((x != null) ? ("X" + x.image) : "") + 
+                      ((y != null) ? ("Y" + y.image) : "") +
+                      ((!Double.isNaN(i)) ? ("I" + i) : "") +
+                      ((!Double.isNaN(j)) ? ("J" + j) : ""));}
+}
+
+void ApertureDescription() :
+{
+  Token number;
+  Token typeToken;
+  List modifiers = new LinkedList(); 
+}
+{
+  <ADD>
+  number = <DIGITS2>
+  typeToken = <ALNUMS>
+  [ "," ModifierList(modifiers) ]
+  <CODE_DELIM>
+
+  {
+    int num = Integer.parseInt(number.image);
+    
+    String type = typeToken.image;
+
+    if ("C".equals(type)) {
+
+      switch (modifiers.size()) {  
+      case 0:
+        System.err.println(
+          "WARNING: ignoring circle aperture with no modifiers on line " +
+          number.beginLine);
+        break;
+      case 1:
+        simulator.
+          addAperture(new CircleAperture(num, getModifier(modifiers, 0)));
+        break;
+      case 2:
+        simulator.
+          addAperture(new CircleAperture(num,
+                                         getModifier(modifiers, 0),
+                                         getModifier(modifiers, 1)));
+        break;
+      case 3:
+        simulator.
+          addAperture(new CircleAperture(num,
+                                         getModifier(modifiers, 0),
+                                         getModifier(modifiers, 1),
+                                         getModifier(modifiers, 2)));
+        break;
+      default:
+        System.err.println(
+          "WARNING: ignoring circle aperture with extra modifiers on line " +
+          number.beginLine);
+        break;
+      }
+
+    } else if ("R".equals(type)) {
+
+      switch (modifiers.size()) {  
+        case 0:
+        case 1:
+        System.err.println(
+          "WARNING: ignoring rectangle aperture with < 2 modifiers on line " +
+          number.beginLine);
+        break;
+        case 2:
+        simulator.
+        addAperture(new RectangleAperture(num,
+                                          getModifier(modifiers, 0),
+                                          getModifier(modifiers, 1)));
+        break;
+        case 3:
+        simulator.
+        addAperture(new RectangleAperture(num,
+                                          getModifier(modifiers, 0),
+                                          getModifier(modifiers, 1),
+                                          getModifier(modifiers, 2)));
+                                          
+        break;
+        case 4:
+        simulator.
+        addAperture(new RectangleAperture(num,
+                                          getModifier(modifiers, 0),
+                                          getModifier(modifiers, 1),
+                                          getModifier(modifiers, 2),
+                                          getModifier(modifiers, 3)));
+        break;
+        default:
+        System.err.println(
+          "WARNING: ignoring rectangle aperture with extra modifiers on line "+
+          number.beginLine);
+        break;
+      }
+      
+    } else if ("O".equals(type)) {
+      
+      switch (modifiers.size()) {  
+        case 0:
+        case 1:
+        System.err.println(
+          "WARNING: ignoring obround aperture with < 2 modifiers on line " +
+          number.beginLine);
+        break;
+        case 2:
+        simulator.
+        addAperture(new ObroundAperture(num,
+                                        getModifier(modifiers, 0),
+                                        getModifier(modifiers, 1)));
+        break;
+        case 3:
+        simulator.
+        addAperture(new ObroundAperture(num,
+                                        getModifier(modifiers, 0),
+                                        getModifier(modifiers, 1),
+                                        getModifier(modifiers, 2)));
+        break;
+        case 4:
+        simulator.
+        addAperture(new ObroundAperture(num,
+                                        getModifier(modifiers, 0),
+                                        getModifier(modifiers, 1),
+                                        getModifier(modifiers, 2),
+                                        getModifier(modifiers, 3)));
+        break;
+        default:
+        System.err.println(
+          "WARNING: ignoring obround aperture with extra modifiers on line "+
+          number.beginLine);
+        break;
+      }
+      
+    } else if ("P".equals(type)) {
+
+      switch (modifiers.size()) {  
+        case 0:
+        case 1:
+        System.err.println(
+          "WARNING: ignoring polygon aperture with < 2 modifiers on line " +
+          number.beginLine);
+        break;
+        case 2:
+        simulator.
+        addAperture(new PolygonAperture(num,
+                                        getModifier(modifiers, 0),
+                                        (int) getModifier(modifiers, 1)));
+        break;
+        case 3:
+        simulator.
+        addAperture(new PolygonAperture(num,
+                                        getModifier(modifiers, 0),
+                                        (int) getModifier(modifiers, 1),
+                                        getModifier(modifiers, 2)));
+        break;
+        case 4:
+        simulator.
+        addAperture(new PolygonAperture(num,
+                                        getModifier(modifiers, 0),
+                                        (int) getModifier(modifiers, 1),
+                                        getModifier(modifiers, 2),
+                                        getModifier(modifiers, 3)));
+        case 5:
+        simulator.
+        addAperture(new PolygonAperture(num,
+                                        getModifier(modifiers, 0),
+                                        (int) getModifier(modifiers, 1),
+                                        getModifier(modifiers, 2),
+                                        getModifier(modifiers, 3),
+                                        getModifier(modifiers, 4)));
+        break;
+        default:
+        System.err.println(
+          "WARNING: ignoring polygon aperture with extra modifiers on line "+
+          number.beginLine);
+        break;
+      }
+      
+    } else {
+
+      try {
+        simulator.addAperture(new MacroAperture(Integer.parseInt(number.image),
+                                                simulator.getMacro(type),
+                                                modifiers));
+
+      } catch (NoSuchElementException e) {
+        System.err.println(
+          "WARNING: ignoring aperture definition on line " + number.beginLine +
+          " which references unknown aperture macro \"" + type + "\"");
+      }
+    }
+  }
+}
+
+void ModifierList(List list) :
+{
+  double modifier;
+}
+{
+  modifier = Double() [ "X" ModifierList(list) ]
+  {list.add(0, new Double(modifier));}
+}
+
+void ApertureMacro() :
+{
+  Token name;
+  List primitives = new LinkedList();
+}
+{
+  <AM> name = <TEXT> <CODE_DELIM> PrimitiveList(primitives) 
+  { simulator.addMacro(new Macro(name.image, primitives)); } 
+}
+
+void PrimitiveList(List primitives) :
+{
+  MacroPrimitive primitive;
+}
+{
+  primitive = Primitive() [ PrimitiveList(primitives) ]
+  {
+    if (primitive != null)
+      primitives.add(0, primitive);
+  } 
+}
+
+MacroPrimitive Primitive() :
+{
+  List exprs = new LinkedList();
+  Token numberToken;
+}
+{
+  <CODE_DELIM>
+  {
+    return null;
+  }
+|
+  numberToken = <DIGITS> [ "," ExprList(exprs) ] <CODE_DELIM>
+  { 
+    int primitiveNumber = Integer.parseInt(numberToken.image);
+    switch (primitiveNumber) {
+    case 1: return new CirclePrimitive(exprs);
+    case 2: return new LineVectorPrimitive(exprs);
+    case 20: return new LineVectorPrimitive(exprs);
+    case 21: return new LineCenterPrimitive(exprs);
+    case 22: return new LineLLPrimitive(exprs);
+    case 3: return null;
+    case 4: return new OutlinePrimitive(exprs);
+    case 5: return new PolygonPrimitive(exprs);
+    case 6: return new MoirePrimitive(exprs);
+    case 7: return new ThermalPrimitive(exprs);
+    default:
+      System.err.println("WARNING: ignoring unknown macro primitive type " +
+                         primitiveNumber);
+      return null;
+    }
+  }
+}
+
+void ExprList(List exprs) :
+{
+  MacroExpression expr;
+}
+{
+  expr = Expr() [ "," ExprList(exprs) ]
+  {exprs.add(0, expr);} 
+}
+
+MacroExpression Expr() :
+{
+  MacroExpression lhs = null;
+  MacroExpression rhs = null;
+
+  Token op = null;
+}
+{
+  lhs = MulExpr() [ op = <SIGN> rhs = MulExpr() ]
+  { 
+    if (rhs == null)
+      return lhs;
+
+    return new MacroBinOp((("+".equals(op.image)) ?
+                           MacroBinOp.ADD : MacroBinOp.SUBTRACT),
+                          lhs, rhs);
+  }
+}
+
+MacroExpression MulExpr() :
+{
+  MacroExpression lhs = null;
+  MacroExpression rhs = null;
+  Token op = null;
+}
+{
+  lhs = UnaryExpr() [ ( op = "X" | op = "x" | op = "/" ) rhs = UnaryExpr() ]
+  {
+    if (op == null)
+      return lhs;
+
+    int operator = MacroBinOp.MULTIPLY;
+    
+    if ("-".equals(op.image))
+      operator = MacroBinOp.DIVIDE;
+
+    return new MacroBinOp(operator, lhs, rhs);
+  }
+}
+
+MacroExpression UnaryExpr() :
+{
+  double value;
+  Token index;
+}
+{
+  value = Double()
+  { return new MacroConstant(value); }
+|
+  "$" index = <DIGITS>
+  { return new MacroVariable(Integer.parseInt(index.image)); }
+}

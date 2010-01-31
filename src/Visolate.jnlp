@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<jnlp spec="1.0+"
+  codebase="http://www.mit.edu/~vona/Visolate/"
+  href="Visolate.jnlp">
+
+  <information>
+    <title>Visolate</title>
+    <vendor>Marsette Vona</vendor>
+    <homepage href="http://www.mit.edu/~vona/Visolate/Visolate-info.html"/>
+    <offline-allowed/>
+  </information>
+
+  <resources>
+    <j2se version="1.5+"/>
+    <jar href="Visolate.jar" main="true"/>
+    <extension href="http://download.java.net/media/java3d/webstart/release/java3d-latest.jnlp"/>
+  </resources>
+
+  <application-desc main-class="visolate.Main"/>
+
+</jnlp>

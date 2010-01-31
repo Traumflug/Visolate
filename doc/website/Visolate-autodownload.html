@@ -1,0 +1,47 @@
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<meta name="Author" content="Marsette Vona">
+<title>Visolate Applet</title>
+</head>
+
+<body bgcolor="FFFFFF">
+
+<p align="center">
+<a href="Visolate-info.html">info</a>&nbsp;|&nbsp;<a href="Visolate.html">applet without library auto-download</a>&nbsp;|&nbsp;<a href="Visolate.jnlp">webstart</a>&nbsp;|&nbsp;<a href="Visolate.jar">download</a>&nbsp;|&nbsp;<a href="visolate">browse source</a>&nbsp;|&nbsp;<a href="javadoc-Visolate/index.html">javadoc</a>
+</p>
+
+<p align="center">
+<applet code="org.jdesktop.applet.util.JNLPAppletLauncher"
+        width=595 height=853
+        archive="Visolate.jar,
+                 http://download.java.net/media/applet-launcher/applet-launcher.jar,
+                 http://download.java.net/media/java3d/webstart/release/j3d/latest/j3dcore.jar,
+                 http://download.java.net/media/java3d/webstart/release/j3d/latest/j3dutils.jar,
+                 http://download.java.net/media/java3d/webstart/release/vecmath/latest/vecmath.jar,
+                 http://download.java.net/media/jogl/builds/archive/jsr-231-webstart-current/jogl.jar,
+                 http://download.java.net/media/gluegen/webstart/gluegen-rt.jar">
+    <param name="codebase_lookup" value="false">
+    <param name="subapplet.classname" value="visolate.Main">
+    <param name="subapplet.displayname" value="Visolate">
+    <param name="jnlpNumExtensions" value="1">
+    <param name="jnlpExtension1" value="http://download.java.net/media/java3d/webstart/release/java3d-latest.jnlp">
+    <param name="progressbar" value="true">
+    <param name="noddraw.check" value="true">
+</applet>
+</p>
+
+</body>
+</html>

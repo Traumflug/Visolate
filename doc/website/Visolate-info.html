@@ -1,0 +1,225 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+
+<html>
+<head>
+ <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+ <style type="text/css">
+body {
+  background: #ffffff;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  font-size: 14px;
+  color: #000000;
+/*  margin-left: 0;
+  margin-right: 0; */
+}
+
+h1 {
+  color: #333399;
+}
+
+h2.separator {
+  margin-bottom: 0px;
+  border-bottom: 2px solid #9999cc;
+}
+
+h3.separator {
+  margin-bottom: 0px;
+  border-bottom: 2px solid #9999cc;
+}
+
+h4.separator {
+  margin-bottom: 0px;
+  border-bottom: 2px solid #9999cc;
+}
+
+h5.separator {
+  margin-bottom: 0px;
+  border-bottom: 2px solid #9999cc;
+}
+
+h6.separator {
+  margin-bottom: 0px;
+  border-bottom: 2px solid #9999cc;
+}
+
+img {
+  border: 0px;
+}
+
+code {
+  font-family: Courier New, Courier, mono, monospace;
+  font-size: 12px;
+  color: #000066;
+  background-color: #ffeedd;
+}
+
+table.itemlist {
+  /* border-top: 1px solid #000000; */
+  padding-top: 0px;
+  margin-top: 4px;
+}
+
+p {
+  text-indent: 1.5em;
+  margin-top: 0.6em;
+  margin-bottom: 0.6em;
+}
+
+pre {
+  font-family: monospace;
+}
+
+ </style>
+  
+ <title>Marsette Vona:  Visolate Info </title>
+</head>
+
+<body>
+
+  <table border="0" cellspacing="0" cellpadding="0">
+    <tr valign="top">
+      <td nowrap="true">
+        <font size="5"><a href="http://www.mit.edu/~vona">Marsette Vona</a>:</font>
+      </td>
+      
+      <td><font size="5">Visolate Info</font></td>
+    </tr>
+  </table>
+
+
+<p>
+&nbsp;<br/>
+<center>
+<img width="640" height="422" src="ATM0PCB0-three-ways-med.jpg" alt="Visolate example image"/><br/>
+<!-- <a href="Visolate-info.html">info</a>&nbsp;|&nbsp -->
+<!-- <a href="Visolate-autodownload.html">JOGL auto-download applet</a>&nbsp;|&nbsp; -->
+<!-- <a href="Visolate.html">applet</a>&nbsp;|&nbsp; -->
+<a href="Visolate.jnlp">webstart</a>&nbsp;|&nbsp;
+<a href="#Download">download</a>&nbsp;|&nbsp;
+<a href="visolate">browse source</a>&nbsp;|&nbsp;
+<a href="javadoc-Visolate/index.html">javadoc</a>
+</center>
+</p>
+
+
+<h2 class="separator"><a name="Introduction"/a>Introduction</h2>
+
+<p>Printed circuit boards are in virtually every piece of modern electronics.  They typically start out as a sheet of fiberglass coated on one or both sides with copper.  A photochemical process is normally used to remove much of that copper, leaving a pattern of traces to which electronic components are soldered forming the desired circuit.</p>
+
+<p>For some applications, particularly very low-volume production in home or office environments or rapid-design cycle R&amp;D, the setup costs, environmental hazards, and sensitivity of the chemical process suggest exploring other methods of PCB production.  Mechanical etch is one alternative.  This process also starts with a copper-clad PCB.  However, the unwanted copper is removed mechanically rather than chemically.  Most often, a fine-point rotary tool bit is used to create a separation in the copper around the boundary of each trace.  The extra copper remaining between the traces is usually left in-place, as it is no longer electrically connected to any trace.</p>
+
+<p>Here we explore an alternate method: compute the Voronoi region associated with each trace and cut along the boundaries between such regions.  The image above shows the same printed circuit board (PCB) manufactured three different ways: by traditional photochemical process (right, this one has also been drilled and plated); by mechanical etch with standard outline toolpaths (middle); by mechanical etch with Voronoi toolpaths (left).</p>
+
+<p>We developed a Java application, <i>Visolate</i>, which computes PCB isolation routing toolpaths, optionally following the boundaries of the entity Voronoi diagram induced by the traces.  Given a board design, the program computes a toolpath for a CNC mill to cut out the traces.</p>
+
+<!-- <p>If Voronoi diagram is new to you, here's a commonly used intuitive definition.  Imagine that instead of a PCB we are talking about a big flat field of uniform dry grass.  Now, simultaneously and uniformly, start little fires where all the traces would be.  As each trace's fire spreads, the burned region it leaves is the trace's Voronoi region.  You can imagine that the fires from two nearby traces will eventually expand, meet each other, and go out.  These meetings of fires occur at the boundaries between the Voronoi regions.</p> -->
+
+<p>Cutting the Voronoi boundaries has both advantages and disadvantages.  Compared with boundary tracing, the Voronoi method produces only one cut instead of two to separate traces.  This can produce cleaner and more consistent results for closely spaced traces.  While there is no guarantee that the overall length of the Voronoi toolpath will be shorter than boundary tracing, in practice on real board designs we found that the Voronoi toolpath was on average nearly 40% shorter (see paper below).  The Voronoi method usually produces "fat" traces, thus maximizing current carrying capacity, though in its basic form there is no way to specify particular traces that should be fattened more than others.  On the downside, the Voronoi traces will have different second-order properties, such as parasitic capacitance, than the originally designed traces.</p>
+ 
+<p>More information is available in a paper we wrote about the algorithms in our system: "<a href="http://www.mit.edu/~vona/publications/Vona_Rus__2005__Voronoi_toolpaths_for_PCB_mechanical_etch_Simple_and_intuitive_algorithms_with_the_3D_GPU.pdf">Voronoi toolpaths for PCB mechanical etch: Simple and intuitive algorithms with the 3D GPU</a>" by Marsette A. Vona and Daniela Rus, which is published in the proceedings of the International Conference on Robotics and Automation, 2005.</p>
+
+<h2 class="separator"><a name="Download"/a>Download</h2>
+
+<p>Visolate is <a href="Visolate.jar">released</a> in precompiled source form under the <a href="http://www.gnu.org">GNU</a> <a href="http://www.gnu.org/copyleft/gpl.html">GPL</a>.</p>
+
+<h2 class="separator"><a name="Status"/a>Status</h2>
+
+<p>This is highly experimental code.  In particular, the gerber parser is incomplete (polygons and inverted images are not implemented, for example).  We do not recommend driving any a CNC machine with g-code generated by Visolate unless you first carefully verify its safety.</p>
+
+<h2 class="separator"><a name="Requirements and Installation"/a>Requirements and Installation</h2>
+
+<p>Visolate has been tested under 1.5+ JREs from Sun with <a
+href="https://java3d.dev.java.net/binary-builds.html">Java3D 1.5+</a> on
+GNU/Linux (Mozilla) and Windows (Firefox).  Other JREs may work, but working
+installations of Java3D (not typically included with a JRE) and Swing
+(typically only included in full with Sun JREs, at the time of this writing)
+are required to run as a stand-alone application. Note that Java3D 1.5+ on Mac
+OS X itself <a
+href="http://www.nofluffjuststuff.com/blog_detail.jsp?rssItemId=97558">apparrently</a>
+requires <a href="http://jogl.dev.java.net">JOGL</a>.</p>
+
+<h2 class="separator"><a name="Acknowledgements"/a>Acknowledgements</h2>
+<p>
+<ul>
+  <li>The raster-to-vector algorithm is heavily inspired by Peter Selinger's <a href="http://potrace.sourceforge.net">potrace</a> and his writeup <a href="http://potrace.sourceforge.net/potrace.pdf">Potrace: a polygon-based tracing algorithm</a>.</li>
+  <li>The voronoi computation is based on the following paper: Kenneth E. Hoff III, Tim Culver, John Keyser, Ming Lin, Dinesh Manocha.  <a href="http://www.cs.unc.edu/~geom/voronoi/siggraph_paper/voronoi.pdf">Fast Computation of Generalized Voronoi Diagrams Using Graphics Hardware</a>.  1999.</li>
+  <li>I learned some undocumented details of the <a href="http://members.optusnet.com.au/~eseychell/rs274xrevd_e.pdf">gerber format</a> from the source code for C. Scott Ananian's PCBMill Web Utilities and also the <a href="http://gerbv.sourceforge.net/">gerbv</a> source code.</li>
+</ul>
+</p>
+
+<h2 class="separator"><a name="Disclaimer"/a>Disclaimer</h2>
+
+<p><p>THIS INFORMATION AND/OR SOFTWARE IS PROVIDED BY THE AUTHOR "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS INFORMATION AND/OR SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p></p>
+
+
+<table border="0" cellspacing="0" cellpadding="0">
+<tr><td>&nbsp;</td></tr>
+</table>
+
+<hr size="0" noshade="true">
+
+<table border="0" cellspacing="0" cellpadding="0" width="100%">
+  <tr valign="top">
+    <td align="left" width="33%"><a href=mailto:vona@mit.edu>vona@mit.edu</a></td>
+    <td align="center" width="34%">
+      <font size="-1">&copy; 2008 Marsette Vona</font>
+		</td>
+    <td align="right" width="33%">Sun Sep 14 20:29:08 EDT 2008</td>
+  </tr>
+</table>
+
+<!-- Begin MIT-use only web reporting counter -->
+<img src="http://counter.mit.edu/tally" width="1" height="1" alt="">
+<!-- End MIT-use only web reporting counter -->
+
+</body>
+</html>
+
+
+

@@ -1,0 +1,164 @@
+package:  visolate
+class:  visolate.Main
+args:  ../gerber/examples/rs232_cm.top
+graphics device: :0.0
+pixel format 8:8:8 24-bit depth
+Comment at line 2:  Mass Parameters 
+Comment at line 4:  Image 
+image name: \\NCC1701LEONARDO\DINO\PANNE~DQ\RS232~CM.TOP
+Comment at line 13:  Aperture Definitions 
+Comment at line 40:  Plot Data 
+computing inch coords...
+making nets...
+21 nets
+making half edge loops...
+39 loops
+Thu Aug 05 17:09:13 EDT 2004: TopologyProcessor started
+border: true
+line: false
+voronoi: false
+flat: true
+translucent: false
+gcode: false
+tool diameter: 0.0
+DPI: 500
+Thu Aug 05 17:09:15 EDT 2004: TopologyProcessor finished (2050ms)
+0 nets
+Thu Aug 05 17:09:18 EDT 2004: FatnessProcessor started
+border: true
+line: false
+voronoi: false
+flat: true
+translucent: false
+gcode: false
+tool diameter: 0.0
+DPI: 500
+0 misses
+avg fatness = 0.035958615804262
+Thu Aug 05 17:09:19 EDT 2004: FatnessProcessor finished (921ms)
+0 nets
+0 nets
+Thu Aug 05 17:09:24 EDT 2004: FatnessProcessor started
+border: true
+line: false
+voronoi: true
+flat: true
+translucent: false
+gcode: false
+tool diameter: 0.0
+DPI: 500
+0 misses
+avg fatness = 0.09164561076719369
+Thu Aug 05 17:09:26 EDT 2004: FatnessProcessor finished (1443ms)
+0 nets
+model bounds: LLC: (0.04349999502301216, 0.09199999645352364); width = 1.056350038355589; height = 0.537850008314848
+board bounds: LLC: (0.04349999502301216, 0.09199999645352364); width = 1.056350038355589; height = 0.537850008314848
+21 nets
+(146, 160, 77): 0 siblings; 2 strokes; 2 pads
+  bounds: LLC: (0.21499999463558198, 0.3599999904632568); width = 0.05000000000000002; height = 0.19300000000000006
+  length: 0.12914212327450514; area: 0.009764; fatness: 0.07560662433314336; areaDPI: 500; areaPixels: 2441
+(82, 167, 134): 0 siblings; 6 strokes; 2 pads
+  bounds: LLC: (0.93935, 0.09199999645352364); width = 0.1605000333786012; height = 0.267349996393919
+  length: 0.38007103465497494; area: 0.03596; fatness: 0.09461389245998228; areaDPI: 500; areaPixels: 8990
+(125, 248, 10): 0 siblings; 21 strokes; 5 pads
+  bounds: LLC: (0.5679999833106995, 0.09199999645352364); width = 0.49265001668930064; height = 0.1899999901652336
+  length: 0.8358373739756644; area: 0.088812; fatness: 0.1062551194349749; areaDPI: 500; areaPixels: 22203
+(225, 43, 115): 0 siblings; 9 strokes; 3 pads
+  bounds: LLC: (0.04349999502301216, 0.46699999046325685); width = 0.49849997636675836; height = 0.16285001430511475
+  length: 0.5596529478207231; area: 0.043840000000000004; fatness: 0.07833426084989287; areaDPI: 500; areaPixels: 10960
+(91, 101, 190): 0 siblings; 3 strokes; 2 pads
+  bounds: LLC: (0.2680000011920929, 0.3849999964237213); width = 0.06700000119209287; height = 0.16799999403953558
+  length: 0.11535533145070076; area: 0.009488; fatness: 0.08225020795033537; areaDPI: 500; areaPixels: 2372
+(81, 227, 74): 0 siblings; 3 strokes; 2 pads
+  bounds: LLC: (0.41800000715255736, 0.37000001072883604); width = 0.062000005960464455; height = 0.18299997973442084
+  length: 0.13414212688803673; area: 0.013244; fatness: 0.09873110190845757; areaDPI: 500; areaPixels: 3311
+(76, 128, 178): 0 siblings; 6 strokes; 2 pads
+  bounds: LLC: (0.04349999502301216, 0.3114999942481518); width = 0.34850000020861627; height = 0.2833499842941761
+  length: 0.5607017185539007; area: 0.041712000000000006; fatness: 0.07439249536737455; areaDPI: 500; areaPixels: 10428
+(149, 62, 172): 0 siblings; 5 strokes; 2 pads
+  bounds: LLC: (0.41800000715255736, 0.09200000536441803); width = 0.12199997854232791; height = 0.1929999850988388
+  length: 0.17778171971440315; area: 0.012744; fatness: 0.0716834105355295; areaDPI: 500; areaPixels: 3186
+(166, 161, 55): 0 siblings; 8 strokes; 2 pads
+  bounds: LLC: (0.04349999502301216, 0.20249999687075615); width = 0.3263500192821026; height = 0.3504999935925007
+  length: 0.4552769586443901; area: 0.04144; fatness: 0.09102151824987952; areaDPI: 500; areaPixels: 10360
+(66, 202, 115): 0 siblings; 3 strokes; 2 pads
+  bounds: LLC: (0.3679999952316284, 0.09200000536441803); width = 0.07699999165534971; height = 0.1929999850988388
+  length: 0.14156852662563324; area: 0.010932; fatness: 0.07722055361152984; areaDPI: 500; areaPixels: 2733
+(208, 143, 31): 0 siblings; 10 strokes; 2 pads
+  bounds: LLC: (0.2680000011920929, 0.09200000536441803); width = 0.5799999925196171; height = 0.3178500005960465
+  length: 0.7592741521075368; area: 0.087352; fatness: 0.11504671897171108; areaDPI: 500; areaPixels: 21838
+(36, 193, 153): 0 siblings; 3 strokes; 2 pads
+  bounds: LLC: (0.19999999403953553, 0.09200000390410423); width = 0.05000000000000002; height = 0.16300000026822092
+  length: 0.09707107534632087; area: 0.013596; fatness: 0.14006231981559383; areaDPI: 500; areaPixels: 3399
+(208, 93, 82): 0 siblings; 6 strokes; 2 pads
+  bounds: LLC: (0.46799998927116393, 0.09200000536441803); width = 0.2800000402033329; height = 0.28399999293684963
+  length: 0.3837767285294831; area: 0.026416000000000002; fatness: 0.06883168789628846; areaDPI: 500; areaPixels: 6604
+(38, 106, 238): 0 siblings; 3 strokes; 2 pads
+  bounds: LLC: (0.46799998927116393, 0.41000000238418577); width = 0.19200000119209293; height = 0.1429999880790711
+  length: 0.21535532549023628; area: 0.025016000000000004; fatness: 0.11616151094965224; areaDPI: 500; areaPixels: 6254
+(248, 40, 95): 0 siblings; 2 strokes; 2 pads
+  bounds: LLC: (0.31500000357627866, 0.09200000536441803); width = 0.04999999999999999; height = 0.16799999403953553
+  length: 0.10999998450279236; area: 0.009292; fatness: 0.08447273917355981; areaDPI: 500; areaPixels: 2323
+(154, 158, 71): 0 siblings; 0 strokes; 1 pads
+  bounds: LLC: (0.93935, 0.38064998688697815); width = 0.1213; height = 0.0787
+  length: 0.0; area: 0.017332; fatness: 0.14288540807914263; areaDPI: 500; areaPixels: 4333
+(43, 229, 111): 0 siblings; 0 strokes; 1 pads
+  bounds: LLC: (0.939350001513958, 0.48259998112916946); width = 0.12129999697208405; height = 0.07479999959468842
+  length: 0.0; area: 0.0434; fatness: 0.35779061074492907; areaDPI: 500; areaPixels: 10850
+(154, 13, 215): 0 siblings; 0 strokes; 1 pads
+  bounds: LLC: (0.04349999502301216, 0.09349999949336052); width = 0.12300000339746475; height = 0.06300000101327896
+  length: 0.0; area: 0.011204; fatness: 0.0910894283782673; areaDPI: 500; areaPixels: 2801
+(142, 237, 4): 0 siblings; 0 strokes; 1 pads
+  bounds: LLC: (0.04349999502301216, 0.4204999916255474); width = 0.12300000339746475; height = 0.06300000101327896
+  length: 0.0; area: 0.012216000000000001; fatness: 0.0993170704274289; areaDPI: 500; areaPixels: 3054
+(123, 147, 113): 0 siblings; 0 strokes; 1 pads
+  bounds: LLC: (0.5179999713897705, 0.09200000536441803); width = 0.024; height = 0.086
+  length: 0.0; area: 0.003892; fatness: 0.16216666666666665; areaDPI: 500; areaPixels: 973
+(45, 245, 92): 0 siblings; 0 strokes; 1 pads
+  bounds: LLC: (0.5679999833106995, 0.46699999046325685); width = 0.024; height = 0.086
+  length: 0.0; area: 0.017952000000000003; fatness: 0.7480000000000001; areaDPI: 500; areaPixels: 4488
+21 collected nets (0 supernets)
+Thu Aug 05 17:09:30 EDT 2004: ToolpathsProcessor started
+border: true
+line: false
+voronoi: true
+flat: true
+translucent: false
+gcode: false
+tool diameter: 0.0
+DPI: 500
+mosaic: 531 x 271
+tile: 502 x 487
+generating voronoi toolpaths
+extracting nodes...
+5871 nodes
+making paths...
+22 paths
+total length: 11.78600000590086
+total segments: 5915
+optimizing paths...
+total length: 10.403299977770075
+total segments: 414
+Thu Aug 05 17:09:32 EDT 2004: ToolpathsProcessor finished (2777ms)
+Thu Aug 05 17:09:35 EDT 2004: ToolpathsProcessor started
+border: true
+line: false
+voronoi: true
+flat: true
+translucent: false
+gcode: false
+tool diameter: 0.0
+DPI: 500
+mosaic: 531 x 271
+tile: 502 x 487
+generating outline toolpaths
+extracting nodes...
+8370 nodes
+making paths...
+21 paths
+total length: 16.73999985307455
+total segments: 8391
+optimizing paths...
+total length: 15.00066932151094
+total segments: 656
+Thu Aug 05 17:09:37 EDT 2004: ToolpathsProcessor finished (2096ms)

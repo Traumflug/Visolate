@@ -1,0 +1,154 @@
+#-*-makefile-*-
+
+# these will be automatically set iff they are not manually set here
+#
+# makefile.package can override APPNAME to give subprojects different names
+BASE_PACKAGE = visolate
+APPNAME = Visolate
+
+# uncomment this to make some things debug-only
+#DBG = -n
+
+# this is optional
+#
+# if you set it then the makefile will try to find the various
+# tools (javac etc) here first
+#
+# if you don't set it then it defaults to /usr
+# you can also set the environment variable TOOLS_HOME, which if set overrides
+# all this
+#
+# tools that aren't found in tools home are searched for with "which"
+PROJECT_TOOLS_HOME =
+
+# default source and target versions
+#
+# makefile.package can override these on a per-package basis
+SOURCE_VERSION = 1.4
+TARGET_VERSION = 1.4
+JAVADOC_SOURCE_VERSION = 1.4
+
+# total heap size to use for JVMs that run classes
+TOTAL_HEAP_SIZE = 768m 
+#TOTAL_HEAP_SIZE = 512m 
+#TOTAL_HEAP_SIZE = 64m 
+
+# java options
+
+# Report information about use of native methods and other Java Native Interface activity.
+#JAVA_OPTIONS += -verbose:jni
+
+# Display information about each class loaded.
+#JAVA_OPTIONS += -verbose:class
+
+# Report on each garbage collection event.
+#JAVA_OPTIONS += -verbose:gc
+
+# enable OGL 2D pipeline
+#JAVA_OPTIONS += -Dsun.java2d.opengl
+
+# enable OGL 2D pipeline with debug output
+#JAVA_OPTIONS += -Dsun.java2d.opengl=True
+
+# Use parallel garbage collection (available beginning in J2SE 1.4.1)
+#JAVA_OPTIONS += -XX:+UseParallelGC
+#JAVA_OPTIONS += -XX:+UseSerialGC
+
+# (available beginning with J2SE 1.4.1)
+#JAVA_OPTIONS += -XX:+UseConcMarkSweepGC 
+
+# Use Train GC
+#JAVA_OPTIONS += -Xincgc 	
+
+# Do not use Train Garbage Collection (default)
+#JAVA_OPTIONS += -Xnoincgc 	
+
+# disable class garbage collection
+#JAVA_OPTIONS += -Xnoclassgc       
+
+# (J2SE 5.0 ?)
+#JAVA_OPTIONS += -XX:+UseAdaptiveSizePolicy
+
+# (J2SE 5.0) A hint to the virtual machine that pause times of nnn milliseconds or less are desired.
+#JAVA_OPTIONS += -XX:MaxGCPauseMillis=100
+
+# (J2SE 5.0) A hint to the virtual machine that it's desirable that not more than 1 / (1 + nnn) of the application execution time be spent in the collector.
+# 99->1%
+# 19->5%
+#JAVA_OPTIONS += -XX:GCTimeRatio=19
+
+# workaround flags for runtime JVMs
+#WORKAROUND_FLAGS += -Dsun.java2d.pmoffscreen=false
+#WORKAROUND_FLAGS += -Dj3d.sharedctx=false
+#WORKAROUND_FLAGS += -Dsun.java2d.noddraw=true
+#WORKAROUND_FLAGS += -Dsun.java2d.d3d=false
+
+# jarfile names
+JARFILE = $(APPNAME).jar
+JARFILE_LITE = $(APPNAME)-lite.jar
+JARFILE_XLITE = $(APPNAME)-xlite.jar
+
+# filename extensions to put in the jars, empty to include all files
+JARFILE_EXTS = 
+JARFILE_LITE_EXTS = .class .txt
+JARFILE_XLITE_EXTS = .class
+
+# extra files to put in the jars (relative to parent of base package)
+JAR_EXTRA = 
+JAR_LITE_EXTRA = $(JAR_EXTRA)
+JAR_XLITE_EXTRA = visolate/LICENSE.txt visolate/README.txt
+
+# the jar manifest file
+JAR_MF_NAME = $(addsuffix .mf,$(basename $(JARFILE)))
+JAR_MF = $(PROJECT_HOME)/$(JAR_MF_NAME)
+
+# list of packages to include in jarfile
+#
+# all descendant subpackages of these will also be included
+#
+# makefile.package can override this for making sub-project jars
+SUBPROJECT_PACKAGES = $(BASE_PACKAGE)
+LITE_SUBPROJECT_PACKAGES = $(SUBPROJECT_PACKAGES)
+XLITE_SUBPROJECT_PACKAGES = $(LITE_SUBPROJECT_PACKAGES)
+
+# 3rd party jars, found in EXT_DIR, on which the whole project depends
+#
+# these will be folded into built jarfiles
+#
+# makefile.package can append to this (or override it) for making sub-project
+# jars
+EXT_JARS = 
+EXT_JARS_LITE = $(EXT_JARS)
+EXT_JARS_XLITE = $(EXT_JARS_LITE)
+
+# name of key used to sign jars
+#
+# makefile.package can override this for making sub-project jars
+#
+# presence of $(JAR_CRT) triggers signing of built jarfile
+#
+# make target keygen to generate the key initially, then check in the .crt file
+# *in the base package*
+JARKEY = mykey
+JAR_CRT_NAME = $(JARKEY).crt
+JAR_CRT = $(PROJECT_HOME)/$(JAR_CRT_NAME)
+
+# publish rsync destination
+#
+# empty disables publish
+#
+# makefile.package can override this sub-project publish
+PUBLISH_DEST = /afs/athena.mit.edu/user/v/o/vona/www/Visolate
+
+# jarfile to unpack at $(PUBLISH_DEST), if any
+JARFILE_PUBLISH_UNPACK = $(JARFILE)
+
+# name of subdir in which javadoc is built
+JAVADOC_DIR_NAME = javadoc-$(APPNAME)
+JAVADOC_DIR = $(PROJECT_HOME)/$(JAVADOC_DIR_NAME)
+
+# uncomment this to disable the source-gen phase of package and project builds
+#NO_SOURCE_GEN=1
+
+# uncomment this to ensure code is built before it's run via the run targets
+#BUILD_BEFORE_RUN=1
