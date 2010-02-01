@@ -68,17 +68,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	 */
 	public static final double CLEARANCE_Z = 0.1;
 
-	/**
-	 * Gcode to write to move the cutter up from cutting to moving.
-	 */
-	public static final String CUTTER_UP =
-		"G1 Z" + gCodeFormat.format(CLEARANCE_Z) + "\n";
-
-	/**
-	 * Gcode to write to move the cutter down from moving to cutting.
-	 */
-	public static final String CUTTER_DOWN =
-		"G1 Z" + gCodeFormat.format(-CLEARANCE_Z) + "\n";
 
 	public static final Color3f G_CODE_COLOR_NORMAL = new Color3f(0.0f,
 			1.0f,
@@ -88,9 +77,117 @@ public class ToolpathsProcessor extends MosaicProcessor {
 			1.0f,
 			0.0f);
 
-	public ToolpathsProcessor(Visolate visolate, int mode) {
+	/**
+	 * If set to true, output absolute coordinates instead of relative.
+	 */
+	private boolean outputAbsoluteCoordinates;
+
+	/**
+	 * We move this much upward from cutting to traveling.
+	 */
+	private double myzClearance;
+
+	/**
+	 * If we use absolute coordinates,
+	 * then this is the height-value for cutting.
+	 * @see #isOutputAbsoluteCoordinates()
+	 */
+	private double myZCuttingHeight = 0.0;
+
+	/**
+	 * If we use absolute coordinates,
+	 * then this is the X-value for the left upper corner.
+	 * @see #isOutputAbsoluteCoordinates()
+	 */
+	private double myAbsoluteXStart = 0.0;
+
+	/**
+	 * @return If we use absolute coordinates, then this is the X-value for the left upper corner.
+	 * @see #isOutputAbsoluteCoordinates()
+	 */
+	public double getAbsoluteXStart() {
+		return myAbsoluteXStart;
+	}
+
+	/**
+	 * @param myZCuttingHeight If we use absolute coordinates, then this is the X-value for the left upper corner.
+	 * @see #isOutputAbsoluteCoordinates()
+	 */
+	public void setAbsoluteXStart(final double setAbsoluteXStart) {
+		this.myAbsoluteXStart = setAbsoluteXStart;
+	}
+
+	/**
+	 * @return If we use absolute coordinates, then this is the Y-value for the left upper corner.
+	 * @see #isOutputAbsoluteCoordinates()
+	 */
+	public double getAbsoluteYStart() {
+		return myAbsoluteYStart;
+	}
+
+	/**
+	 * @param myZCuttingHeight If we use absolute coordinates, then this is the Y-value for the left upper corner.
+	 * @see #isOutputAbsoluteCoordinates()
+	 */
+	public void setAbsoluteYStart(final double setAbsoluteYStart) {
+		this.myAbsoluteYStart = setAbsoluteYStart;
+	}
+
+	/**
+	 * If we use absolute coordinates,
+	 * then this is the X-value for the left upper corner.
+	 * @see #isOutputAbsoluteCoordinates()
+	 */
+	private double myAbsoluteYStart = 0.0;
+	/**
+	 * @return If we use absolute coordinates, then this is the height-value for cutting.
+	 * @see #isOutputAbsoluteCoordinates()
+	 */
+	public double getZCuttingHeight() {
+		return myZCuttingHeight;
+	}
+
+	/**
+	 * @param myZCuttingHeight If we use absolute coordinates, then this is the height-value for cutting.
+	 * @see #isOutputAbsoluteCoordinates()
+	 */
+	public void setZCuttingHeight(final double myZCuttingHeight) {
+		this.myZCuttingHeight = myZCuttingHeight;
+	}
+
+	/**
+	 * @return  We move this much upward from cutting to traveling.
+	 */
+	public double getZClearance() {
+		return myzClearance;
+	}
+
+	/**
+	 * @param myzClearance  We move this much upward from cutting to traveling.
+	 */
+	public void setZClearance(final double myzClearance) {
+		this.myzClearance = myzClearance;
+	}
+
+	/**
+	 * @return If true, output absolute coordinates instead of relative.
+	 */
+	public boolean isOutputAbsoluteCoordinates() {
+		return outputAbsoluteCoordinates;
+	}
+
+	/**
+	 * @param outputAbsoluteCoordinates If true, output absolute coordinates instead of relative.
+	 */
+	public void setOutputAbsoluteCoordinates(final boolean outputAbsoluteCoordinates) {
+		this.outputAbsoluteCoordinates = outputAbsoluteCoordinates;
+	}
+
+	public ToolpathsProcessor(final Visolate visolate, final int mode, final boolean useAbsoluteCoordinates, final double zClearance) {
 		super(visolate);
 		this.mode = mode;
+		this.outputAbsoluteCoordinates = useAbsoluteCoordinates;
+		this.myzClearance = zClearance;
 	}
 
 	public void processTile(int r, int c,
@@ -743,9 +840,9 @@ public class ToolpathsProcessor extends MosaicProcessor {
 			}
 		}
 
-		public void writeGCode(Writer w, Point2d p) throws IOException {
+		public void writeGCode(Writer w, Point3d p) throws IOException {
 
-			gCodeCutterUp(w);
+			gCodeCutterUp(w, p);
 
 			boolean first = true;
 
@@ -755,7 +852,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 					if (first) {
 						gCodeRapidMovement(w, p, node.x, node.y); //rapid to start
-						gCodeCutterDown(w);
+						gCodeCutterDown(w, p);
 						first = false;
 					} else {
 						gCodeLinear(w, p, node.x, node.y);
@@ -770,7 +867,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 					if (first) {
 						gCodeRapidMovement(w, p, node.x, node.y); //rapid to start
-						gCodeCutterDown(w);
+						gCodeCutterDown(w, p);
 						first = false;
 					} else {
 						gCodeLinear(w, p, node.x, node.y);
@@ -959,13 +1056,13 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		private void findOptimalPath() {
 
-			for (PathNode node = optimalPathStart;
-			node != null;
-			node = node.getFirstNext())
+			for (PathNode node = optimalPathStart; node != null; node = node.getFirstNext()) {
 				node.d = Double.POSITIVE_INFINITY;
+			}
 
-			if (optimalPathStart != null)
+			if (optimalPathStart != null) {
 				optimalPathStart.d = 0;
+			}
 
 			for (PathNode node = optimalPathStart;
 			node != null;
@@ -1085,8 +1182,9 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		PathNode getFirstNext() {
 
-			if (nexts.isEmpty())
+			if (nexts.isEmpty()) {
 				return null;
+			}
 
 			//      return (PathNode) nexts.getFirst();
 			return (PathNode) nexts.get(0);
@@ -1104,11 +1202,13 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		PathNode getBestPrev() {
 
-			if (optimalPrev != null)
+			if (optimalPrev != null) {
 				return optimalPrev;
+			}
 
-			if (prevs.isEmpty())
+			if (prevs.isEmpty()) {
 				return null;
+			}
 
 			return (PathNode) prevs.iterator().next();
 		}
@@ -1194,14 +1294,14 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		return (float) (mosaicBounds.y + modelHeight-y/((float) dpi));
 	}
 
-	private Path getClosestPath(Collection<Path> paths, Point2d p) {
+	private Path getClosestPath(Collection<Path> paths, Point3d p) {
 
 		double minDist = Double.POSITIVE_INFINITY;
 		Path closest = null;
 
 		for (Path path : paths) {
 
-			double dist = p.distance(path.getStartPoint());
+			double dist = new Point2d(p.x, p.y).distance(path.getStartPoint());
 
 			if (dist < minDist) {
 				minDist = dist;
@@ -1221,7 +1321,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		gCodePreAmble(w);
 
-		Point2d p = new Point2d(0.0, 0.0);
+		Point3d p = new Point3d(0.0, 0.0, 0.0);
 
 		//    for (Iterator it = paths.iterator(); it.hasNext(); )
 		//      ((Path) it.next()).writeGCode(w, p);
@@ -1313,16 +1413,21 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		}
 
 		w.write("G20\n");    // inches //TODO: allow metric too
-		w.write("G17 ");     // X-Y plane
-		w.write("G40 G49 "); // Cancel tool lengh & cutter dia compensation
-		//    w.write("G53 ");     // Motion in machine co-ordinate system
+		w.write("G17\n ");     // X-Y plane
+		w.write("G40\nG49\n"); // Cancel tool lengh & cutter dia compensation
+		//    w.write("G53\n");     // Motion in machine co-ordinate system
 		w.write("G80\n");    // Cancel any existing motion cycle
-		w.write("G91\n");    // Relative distance mode //TODO: allow absolute coordinates too
+
+		if (isOutputAbsoluteCoordinates()) {
+			w.write("G90\n");    // Absolute distance mode
+		} else {
+			w.write("G91\n");    // Relative distance mode
+		}
 	}
 
-	private void gCodePostAmble(Writer w, Point2d p) throws IOException {
+	private void gCodePostAmble(Writer w, Point3d p) throws IOException {
 
-		gCodeCutterUp(w);
+		gCodeCutterUp(w, p);
 		gCodeRapidMovement(w, p, 0.0, 0.0); //rapid to origin
 
 		if (w == null) {
@@ -1333,27 +1438,43 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		w.write("M2\n"); // End of program
 	}
 
-	private void gCodeCutterUp(Writer w) throws IOException {
+	private void gCodeCutterUp(Writer w, final Point3d p) throws IOException {
 
 		if (w != null) {
-			w.write(CUTTER_UP);
+			if (isOutputAbsoluteCoordinates()) {
+				w.write("G1 X" +
+						gCodeFormat.format(p.x + getAbsoluteXStart()) + " Y" +
+						gCodeFormat.format(p.y + getAbsoluteYStart()) + "Z" + 
+						gCodeFormat.format(getZCuttingHeight() + getZClearance()) + "\n");
+				p.z = getZClearance();
+			} else {
+				w.write("G1 Z" + gCodeFormat.format(getZClearance()) + "\n");
+			}
 		}
 
 		gCodeStrokes.add(new GCodeStroke(new Vector3f(0.0f,
 				0.0f,
-				(float) CLEARANCE_Z),
+				(float) getZClearance()),
 				G_CODE_COLOR_NORMAL));
 	}
 
-	private void gCodeCutterDown(final Writer w) throws IOException {
+	private void gCodeCutterDown(final Writer w, final Point3d p) throws IOException {
 
 		if (w != null) {
-			w.write(CUTTER_DOWN);
+			if (isOutputAbsoluteCoordinates()) {
+				w.write("G1 X" +
+						gCodeFormat.format(p.x + getAbsoluteXStart()) + " Y" +
+						gCodeFormat.format(p.y + getAbsoluteYStart()) + "Z" +
+						gCodeFormat.format(getZCuttingHeight()) + "\n");
+				p.z = 0.0;
+			} else {
+				w.write("G1 Z" + gCodeFormat.format(-1 * getZClearance()) + "\n");
+			}
 		}
 
 		gCodeStrokes.add(new GCodeStroke(new Vector3f(0.0f,
 				0.0f,
-				(float) (-CLEARANCE_Z)),
+				(float) (-1 * getZClearance())),
 				G_CODE_COLOR_NORMAL));
 	}
 
@@ -1366,17 +1487,23 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	 * @param y the absolute location to move to
 	 * @throws IOException
 	 */
-	private void gCodeRapidMovement(final Writer w, final Point2d p, final double x, final double y)
+	private void gCodeRapidMovement(final Writer w, final Point3d p, final double x, final double y)
 	throws IOException {
 
-		//TODO: allow absolute coordinates too
 		double dx = x - p.x;
 		double dy = y - p.y;
 
 		if (w != null) {
-			w.write("G0 X" +
-					gCodeFormat.format(dx) + " Y" +
-					gCodeFormat.format(dy) + "\n");
+			if (isOutputAbsoluteCoordinates()) {
+				w.write("G0 X" +
+						gCodeFormat.format(x + getAbsoluteXStart()) + " Y" +
+						gCodeFormat.format(y + getAbsoluteYStart()) + " Z"+
+						gCodeFormat.format(p.z + getZCuttingHeight()) + "\n");
+			} else {
+				w.write("G0 X" +
+						gCodeFormat.format(dx) + " Y" +
+						gCodeFormat.format(dy) + "\n");
+			}
 		}
 
 		p.x += dx;
@@ -1388,16 +1515,24 @@ public class ToolpathsProcessor extends MosaicProcessor {
 				G_CODE_COLOR_RAPID));
 	}
 
-	private void gCodeLinear(Writer w, Point2d p, double x, double y)
+	private void gCodeLinear(Writer w, Point3d p, double x, double y)
 	throws IOException {
 
 		double dx = x - p.x;
 		double dy = y - p.y;
 
-		if (w != null)
-			w.write("G1 X" +
-					gCodeFormat.format(dx) + " Y" +
-					gCodeFormat.format(dy) + "\n");
+		if (w != null) {
+			if (isOutputAbsoluteCoordinates()) {
+				w.write("G1 X" +
+						gCodeFormat.format(x + getAbsoluteXStart()) + " Y" +
+						gCodeFormat.format(y + getAbsoluteYStart()) + " Z" +
+						gCodeFormat.format(p.z + getZCuttingHeight()) + "\n");
+			} else {
+				w.write("G1 X" +
+						gCodeFormat.format(dx) + " Y" +
+						gCodeFormat.format(dy) + "\n");
+			}
+		}
 
 		p.x += dx;
 		p.y += dy;

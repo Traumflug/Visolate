@@ -26,13 +26,22 @@ import visolate.model.*;
 import visolate.processor.*;
 
 import java.io.*;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.*;
 import java.util.List;
 import java.net.*;
 
 import javax.swing.*;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyVetoException;
+import java.beans.VetoableChangeListener;
 import java.security.*;
 
 public class Visolate extends JPanel implements SimulatorUI {
@@ -41,6 +50,12 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 	private static final String cvsid =
 		"$Id: Visolate.java,v 1.11 2006/09/15 19:48:24 vona Exp $";
+
+	private double selectedZClearance = ToolpathsProcessor.CLEARANCE_Z;
+	private double selectedZCuttingHeight = 0;
+	private double selectedInitialXCoordinate = 0;
+	private double selectedInitialYCoordinate = 0;
+
 
 	public Visolate() {
 		this(null);
@@ -55,104 +70,154 @@ public class Visolate extends JPanel implements SimulatorUI {
 		setBackground(Color.WHITE);
 		setOpaque(true);
 
-		Box loadBox = Box.createHorizontalBox();
+		Dimension d;
 
-		loadField = new JTextField();
-		Dimension d = loadField.getPreferredSize();
-		loadField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
-		loadField.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				loadFile();
-			} });
-		//    loadField.addFocusListener(new FocusAdapter() {
-		//        public void focusLost(FocusEvent e) { 
-		//          loadFile();
-		//        } });
 
-		loadBox.add(loadField);
+		Box processingBox = getProcessingBox();
 
-		loadButton = new JButton("Browse...");
-		loadButton.setBackground(Color.WHITE);
-		loadButton.setVerticalAlignment(AbstractButton.CENTER);
-		loadButton.setHorizontalAlignment(AbstractButton.CENTER);
-		d = loadButton.getPreferredSize();
-		loadButton.setMaximumSize(new Dimension(d.width, d.height));
-		loadButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				File file = browse();
-				if (file != null)
-					loadFile(file);
-			}});
 
-		loadBox.add(loadButton);
+		Box box = Box.createVerticalBox();
 
-		loadBox.setBorder(BorderFactory.createTitledBorder("Input File"));
+		box.add(getLoadFileBox());
+		box.add(display);
+		box.add(model);
+		box.add(getGCodeOptionsBox());
+		box.add(processingBox);
 
-		Box mosaicBox = Box.createHorizontalBox();
+		setLayout(new BorderLayout());
+		add(box, "Center");
 
-		mosaicButton = new JButton("Save High-Res");
-		mosaicButton.setBackground(Color.WHITE);
-		mosaicButton.setVerticalAlignment(AbstractButton.CENTER);
-		mosaicButton.setHorizontalAlignment(AbstractButton.CENTER);
-		d = mosaicButton.getPreferredSize();
-		mosaicButton.setMaximumSize(new Dimension(d.width, d.height));
-		mosaicButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				saveMosaic();
-			}});
-		mosaicBox.add(mosaicButton);
+		//make display take up max available space
 
-		mosaicField = new JTextField();
-		d = mosaicField.getPreferredSize();
-		mosaicField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
-		mosaicField.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) { saveMosaic(); } });
-		//    mosaicField.addFocusListener(new FocusAdapter() {
-		//        public void focusLost(FocusEvent e) { saveMosaic(); } });
-		mosaicBox.add(mosaicField);
+		Dimension orig = getPreferredSize();
 
-		mosaicBrowseButton = new JButton("Browse...");
-		mosaicBrowseButton.setBackground(Color.WHITE);
-		mosaicBrowseButton.setVerticalAlignment(AbstractButton.CENTER);
-		mosaicBrowseButton.setHorizontalAlignment(AbstractButton.CENTER);
-		d = mosaicBrowseButton.getPreferredSize();
-		mosaicBrowseButton.setMaximumSize(new Dimension(d.width, d.height));
-		mosaicBrowseButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				File file = browse();
-				if (file != null)
-					saveMosaic(file);
-			}});
-		mosaicBox.add(mosaicBrowseButton);
+		d = getLoadFileBox().getPreferredSize();
+		getLoadFileBox().setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
 
-		mosaicTilesButton = new JCheckBox("individual tiles");
-		mosaicTilesButton.setBackground(Color.WHITE);
-		mosaicTilesButton.setSelected(false);
-		mosaicBox.add(mosaicTilesButton);
+		d = model.getPreferredSize();
+		model.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
 
-		Box topologyBox = Box.createHorizontalBox();
+		d = processingBox.getPreferredSize();
+		processingBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
 
-		topologyButton = new JButton("Fix Topology");
-		topologyButton.setBackground(Color.WHITE);
-		topologyButton.setVerticalAlignment(AbstractButton.CENTER);
-		topologyButton.setHorizontalAlignment(AbstractButton.CENTER);
-		d = topologyButton.getPreferredSize();
-		topologyButton.setMaximumSize(new Dimension(d.width, d.height));
-		topologyButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				fixTopology();
-			}});
-		topologyBox.add(topologyButton);
+		display.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+		setPreferredSize(orig);
 
-		//    topologyBox.add(Box.createHorizontalStrut(16));
+		if (file != null)
+			loadFile(file);
+	}
 
-		manualTopology = new JCheckBox("manual");
-		manualTopology.setBackground(Color.WHITE);
-		manualTopology.setSelected(false);
-		topologyBox.add(manualTopology);
+	private Box getLoadFileBox() {
+		if (myLoadFileBox == null) {
+			myLoadFileBox = Box.createHorizontalBox();
 
-		//    topologyBox.add(Box.createHorizontalGlue());
+			loadField = new JTextField();
+			Dimension d = loadField.getPreferredSize();
+			loadField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+			loadField.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					loadFile();
+				} });
+			//    loadField.addFocusListener(new FocusAdapter() {
+			//        public void focusLost(FocusEvent e) { 
+			//          loadFile();
+			//        } });
 
+			myLoadFileBox.add(loadField);
+
+			loadButton = new JButton("Browse...");
+			loadButton.setBackground(Color.WHITE);
+			loadButton.setVerticalAlignment(AbstractButton.CENTER);
+			loadButton.setHorizontalAlignment(AbstractButton.CENTER);
+			d = loadButton.getPreferredSize();
+			loadButton.setMaximumSize(new Dimension(d.width, d.height));
+			loadButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent event) {
+					File file = browse();
+					if (file != null)
+						loadFile(file);
+				}});
+
+			myLoadFileBox.add(loadButton);
+
+			myLoadFileBox.setBorder(BorderFactory.createTitledBorder("Input File"));
+		}
+		return myLoadFileBox;
+	}
+
+	private Box getGcodeBox() {
+		if (myGcodeBox == null) {
+			Dimension d;
+			myGcodeBox = Box.createHorizontalBox();
+
+			gcodeButton = new JButton("Save G-Code");
+			gcodeButton.setEnabled(false);
+			gcodeButton.setBackground(Color.WHITE);
+			gcodeButton.setVerticalAlignment(AbstractButton.CENTER);
+			gcodeButton.setHorizontalAlignment(AbstractButton.CENTER);
+			d = gcodeButton.getPreferredSize();
+			gcodeButton.setMaximumSize(new Dimension(d.width, d.height));
+			gcodeButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent event) {
+					saveGCode();
+				}});
+			myGcodeBox.add(gcodeButton);
+
+			gcodeField = new JTextField();
+			gcodeField.setEnabled(false);
+			d = gcodeField.getPreferredSize();
+			gcodeField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+			gcodeField.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) { saveGCode(); } });
+			//    gcodeField.addFocusListener(new FocusAdapter() {
+			//        public void focusLost(FocusEvent e) { saveGCode(); } });
+			myGcodeBox.add(gcodeField);
+
+			gcodeBrowseButton = new JButton("Browse...");
+			gcodeBrowseButton.setEnabled(false);
+			gcodeBrowseButton.setBackground(Color.WHITE);
+			gcodeBrowseButton.setVerticalAlignment(AbstractButton.CENTER);
+			gcodeBrowseButton.setHorizontalAlignment(AbstractButton.CENTER);
+			d = gcodeBrowseButton.getPreferredSize();
+			gcodeBrowseButton.setMaximumSize(new Dimension(d.width, d.height));
+			gcodeBrowseButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent event) {
+					File file = browse();
+					if (file != null)
+						saveGCode(file);
+				}});
+			myGcodeBox.add(gcodeBrowseButton);
+
+			stopButton = new JButton("Stop");
+			stopButton.setBackground(Color.WHITE);
+			//    stopButton.setVerticalAlignment(AbstractButton.CENTER);
+			//    stopButton.setHorizontalAlignment(AbstractButton.CENTER);
+			stopButton.setAlignmentX(0.5f);
+			d = stopButton.getPreferredSize();
+			stopButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+			stopButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent event) { stopProcess(); } });
+			stopButton.setEnabled(false);
+
+			innerProgressBar = new JProgressBar();
+			innerProgressBar.setBackground(Color.WHITE);
+
+			outerProgressBar = new JProgressBar();
+			outerProgressBar.setBackground(Color.WHITE);
+		}
+		return myGcodeBox;
+	}
+
+	private Box getTopologyAndToolpathsBox() {
+		Box topologyAndToolpathsBox = Box.createHorizontalBox();
+		topologyAndToolpathsBox.add(getTopologyBox());
+		topologyAndToolpathsBox.add(Box.createHorizontalGlue());
+		topologyAndToolpathsBox.add(getToolpathBox());
+		return topologyAndToolpathsBox;
+	}
+
+	private Box getToolpathBox() {
+		Dimension d;
 		Box toolpathsBox = Box.createHorizontalBox();
 
 		toolpathsButton = new JButton("Make Toolpaths");
@@ -181,114 +246,302 @@ public class Visolate extends JPanel implements SimulatorUI {
 		outlineButton = new JRadioButton("outline");
 		modeGroup.add(outlineButton);
 		outlineButton.setBackground(Color.WHITE);
-		if (ToolpathsProcessor.DEF_MODE == ToolpathsProcessor.OUTLINE_MODE)
+		if (ToolpathsProcessor.DEF_MODE == ToolpathsProcessor.OUTLINE_MODE) {
 			outlineButton.setSelected(true);
+		}
 		toolpathsBox.add(outlineButton);
+		return toolpathsBox;
+	}
 
-		//    toolpathsBox.add(Box.createHorizontalGlue());
+	private Box getTopologyBox() {
+		Dimension d;
+		Box topologyBox = Box.createHorizontalBox();
 
-		Box topologyAndToolpathsBox = Box.createHorizontalBox();
-		topologyAndToolpathsBox.add(topologyBox);
-		topologyAndToolpathsBox.add(Box.createHorizontalGlue());
-		topologyAndToolpathsBox.add(toolpathsBox);
-
-		Box gcodeBox = Box.createHorizontalBox();
-
-		gcodeButton = new JButton("Save G-Code");
-		gcodeButton.setEnabled(false);
-		gcodeButton.setBackground(Color.WHITE);
-		gcodeButton.setVerticalAlignment(AbstractButton.CENTER);
-		gcodeButton.setHorizontalAlignment(AbstractButton.CENTER);
-		d = gcodeButton.getPreferredSize();
-		gcodeButton.setMaximumSize(new Dimension(d.width, d.height));
-		gcodeButton.addActionListener(new ActionListener() {
+		topologyButton = new JButton("Fix Topology");
+		topologyButton.setBackground(Color.WHITE);
+		topologyButton.setVerticalAlignment(AbstractButton.CENTER);
+		topologyButton.setHorizontalAlignment(AbstractButton.CENTER);
+		d = topologyButton.getPreferredSize();
+		topologyButton.setMaximumSize(new Dimension(d.width, d.height));
+		topologyButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent event) {
-				saveGCode();
+				fixTopology();
 			}});
-		gcodeBox.add(gcodeButton);
+		topologyBox.add(topologyButton);
 
-		gcodeField = new JTextField();
-		gcodeField.setEnabled(false);
-		d = gcodeField.getPreferredSize();
-		gcodeField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
-		gcodeField.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) { saveGCode(); } });
-		//    gcodeField.addFocusListener(new FocusAdapter() {
-		//        public void focusLost(FocusEvent e) { saveGCode(); } });
-		gcodeBox.add(gcodeField);
+		//    topologyBox.add(Box.createHorizontalStrut(16));
 
-		gcodeBrowseButton = new JButton("Browse...");
-		gcodeBrowseButton.setEnabled(false);
-		gcodeBrowseButton.setBackground(Color.WHITE);
-		gcodeBrowseButton.setVerticalAlignment(AbstractButton.CENTER);
-		gcodeBrowseButton.setHorizontalAlignment(AbstractButton.CENTER);
-		d = gcodeBrowseButton.getPreferredSize();
-		gcodeBrowseButton.setMaximumSize(new Dimension(d.width, d.height));
-		gcodeBrowseButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				File file = browse();
-				if (file != null)
-					saveGCode(file);
-			}});
-		gcodeBox.add(gcodeBrowseButton);
+		manualTopology = new JCheckBox("manual");
+		manualTopology.setBackground(Color.WHITE);
+		manualTopology.setSelected(false);
+		topologyBox.add(manualTopology);
+		return topologyBox;
+	}
 
-		stopButton = new JButton("Stop");
-		stopButton.setBackground(Color.WHITE);
-		//    stopButton.setVerticalAlignment(AbstractButton.CENTER);
-		//    stopButton.setHorizontalAlignment(AbstractButton.CENTER);
-		stopButton.setAlignmentX(0.5f);
-		d = stopButton.getPreferredSize();
-		stopButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
-		stopButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) { stopProcess(); } });
-		stopButton.setEnabled(false);
+	private Box getMosaicBox() {
+		Dimension d;
+		if (myMosaicBox == null) {
+			myMosaicBox = Box.createHorizontalBox();
 
-		innerProgressBar = new JProgressBar();
-		innerProgressBar.setBackground(Color.WHITE);
+			mosaicButton = new JButton("Save High-Res");
+			mosaicButton.setBackground(Color.WHITE);
+			mosaicButton.setVerticalAlignment(AbstractButton.CENTER);
+			mosaicButton.setHorizontalAlignment(AbstractButton.CENTER);
+			d = mosaicButton.getPreferredSize();
+			mosaicButton.setMaximumSize(new Dimension(d.width, d.height));
+			mosaicButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent event) {
+					saveMosaic();
+				}});
+			myMosaicBox.add(mosaicButton);
 
-		outerProgressBar = new JProgressBar();
-		outerProgressBar.setBackground(Color.WHITE);
+			mosaicField = new JTextField();
+			d = mosaicField.getPreferredSize();
+			mosaicField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+			mosaicField.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) { saveMosaic(); } });
+			//    mosaicField.addFocusListener(new FocusAdapter() {
+			//        public void focusLost(FocusEvent e) { saveMosaic(); } });
+			myMosaicBox.add(mosaicField);
 
-		Box processingBox = Box.createVerticalBox();
-		processingBox.setBorder(BorderFactory.createTitledBorder("Processing"));
-		processingBox.add(mosaicBox);
-		processingBox.add(topologyAndToolpathsBox);
-		processingBox.add(gcodeBox);
-		//    processingBox.add(Box.createVerticalStrut(8));
-		processingBox.add(stopButton);
-		//    processingBox.add(Box.createVerticalStrut(8));
-		processingBox.add(innerProgressBar);
-		processingBox.add(outerProgressBar);
+			mosaicBrowseButton = new JButton("Browse...");
+			mosaicBrowseButton.setBackground(Color.WHITE);
+			mosaicBrowseButton.setVerticalAlignment(AbstractButton.CENTER);
+			mosaicBrowseButton.setHorizontalAlignment(AbstractButton.CENTER);
+			d = mosaicBrowseButton.getPreferredSize();
+			mosaicBrowseButton.setMaximumSize(new Dimension(d.width, d.height));
+			mosaicBrowseButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent event) {
+					File file = browse();
+					if (file != null)
+						saveMosaic(file);
+				}});
+			myMosaicBox.add(mosaicBrowseButton);
 
+			mosaicTilesButton = new JCheckBox("individual tiles");
+			mosaicTilesButton.setBackground(Color.WHITE);
+			mosaicTilesButton.setSelected(false);
+			myMosaicBox.add(mosaicTilesButton);
+		}
+		return myMosaicBox;
+	}
 
-		Box box = Box.createVerticalBox();
+	private Box getProcessingBox() {
+		if (myProcessingBox == null) {
+			myProcessingBox = Box.createVerticalBox();
+			myProcessingBox.setBorder(BorderFactory.createTitledBorder("Processing"));
+			myProcessingBox.add(getMosaicBox());
+			myProcessingBox.add(getTopologyAndToolpathsBox());
+			myProcessingBox.add(getGcodeBox());
+			//    processingBox.add(Box.createVerticalStrut(8));
+			myProcessingBox.add(stopButton);
+			//    processingBox.add(Box.createVerticalStrut(8));
+			myProcessingBox.add(innerProgressBar);
+			myProcessingBox.add(outerProgressBar);
+		}
+		return myProcessingBox;
+	}
 
-		box.add(loadBox);
-		box.add(display);
-		box.add(model);
-		box.add(processingBox);
+	private Box getGCodeOptionsBox() {
+		if (myGCodeOptionsBox == null) {
+			myGCodeOptionsBox = Box.createVerticalBox();
+			myGCodeOptionsBox.setBorder(BorderFactory.createTitledBorder("G-Code"));
+			JPanel panel = new JPanel();
+			panel.setLayout(new GridLayout(3, 3));
 
-		setLayout(new BorderLayout());
-		add(box, "Center");
+			panel.add(new JLabel("Coordinates"));
+			panel.add(new JLabel("Z-coordinates"));
+			panel.add(new JLabel("left upper coordinates"));
 
-		//make display take up max available space
+			panel.add(getRelativeCoordinatesButton());
+			panel.add(getZCuttingHeightPanel());
+			panel.add(getInitialXPanel());
 
-		Dimension orig = getPreferredSize();
+			panel.add(getAbsoluteCoordinatesButton());
+			panel.add(getZDownMovementPanel());
+			panel.add(getInitialYPanel());
 
-		d = loadBox.getPreferredSize();
-		loadBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+			myGCodeOptionsBox.add(panel);
+		}
+		return myGCodeOptionsBox;
+	}
 
-		d = model.getPreferredSize();
-		model.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+	private JPanel getInitialXPanel() {
+		if (myInitialXPanel == null) {
+			myInitialXPanel = new JPanel();
+			myInitialXPanel.setLayout(new BorderLayout());
+			myInitialXPanel.add(new JLabel("X"), BorderLayout.WEST);
+			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
+			myInitialXPanel.add(field, BorderLayout.CENTER);
+			myInitialXPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
+				
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					field.setEnabled(myInitialXPanel.isEnabled());
+				}
+			});
+			myInitialXPanel.setEnabled(false);
 
-		d = processingBox.getPreferredSize();
-		processingBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
+				
+				@Override
+				public void undoableEditHappened(UndoableEditEvent evt) {
+					try {
+						selectedInitialXCoordinate = NumberFormat.getInstance().parse(field.getText()).doubleValue();
+						if (myAoolpathsProcessor != null) {
+							myAoolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
+						}
+					} catch (ParseException e) {
+						evt.getEdit().undo();
+					}
+					
+				}
+			});
+		}
+		return myInitialXPanel;
+	}
+	private JPanel getInitialYPanel() {
+		if (myInitialYPanel == null) {
+			myInitialYPanel = new JPanel();
+			myInitialYPanel.setLayout(new BorderLayout());
+			myInitialYPanel.add(new JLabel("Y"), BorderLayout.WEST);
+			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
+			myInitialYPanel.add(field, BorderLayout.CENTER);
+			myInitialYPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
+				
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					field.setEnabled(myInitialYPanel.isEnabled());
+				}
+			});
+			myInitialYPanel.setEnabled(false);
 
-		display.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
-		setPreferredSize(orig);
+			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
+				
+				@Override
+				public void undoableEditHappened(UndoableEditEvent evt) {
+					try {
+						selectedInitialYCoordinate = NumberFormat.getInstance().parse(field.getText()).doubleValue();
+						if (myAoolpathsProcessor != null) {
+							myAoolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
+						}
+					} catch (ParseException e) {
+						evt.getEdit().undo();
+					}
+					
+				}
+			});
+		}
+		return myInitialYPanel;
+	}
 
-		if (file != null)
-			loadFile(file);
+	private Component getZDownMovementPanel() {
+		if (myZDownMovementPanel == null) {
+			myZDownMovementPanel = new JPanel();
+			myZDownMovementPanel.setLayout(new BorderLayout());
+			myZDownMovementPanel.add(new JLabel("travel clearance"), BorderLayout.WEST);
+			final JTextField field = new JTextField(NumberFormat.getInstance().format(ToolpathsProcessor.CLEARANCE_Z));
+			myZDownMovementPanel.add(field, BorderLayout.CENTER);
+			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
+				
+				@Override
+				public void undoableEditHappened(UndoableEditEvent evt) {
+					try {
+						selectedZClearance = NumberFormat.getInstance().parse(field.getText()).doubleValue();
+						if (myAoolpathsProcessor != null) {
+							myAoolpathsProcessor.setZClearance(selectedZClearance);
+						}
+					} catch (ParseException e) {
+						evt.getEdit().undo();
+					}
+					
+				}
+			});
+		}
+		return myZDownMovementPanel;
+	}
+
+	private JPanel getZCuttingHeightPanel() {
+		if (myZCuttingHeightPanel == null) {
+			myZCuttingHeightPanel = new JPanel();
+			myZCuttingHeightPanel.setLayout(new BorderLayout());
+			myZCuttingHeightPanel.add(new JLabel("cutting height"), BorderLayout.WEST);
+			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
+			myZCuttingHeightPanel.add(field, BorderLayout.CENTER);
+			myZCuttingHeightPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
+				
+				@Override
+				public void propertyChange(PropertyChangeEvent evt) {
+					field.setEnabled(myZCuttingHeightPanel.isEnabled());
+				}
+			});
+			myZCuttingHeightPanel.setEnabled(false);
+
+			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
+				
+				@Override
+				public void undoableEditHappened(UndoableEditEvent evt) {
+					try {
+						selectedZCuttingHeight = NumberFormat.getInstance().parse(field.getText()).doubleValue();
+						if (myAoolpathsProcessor != null) {
+							myAoolpathsProcessor.setZCuttingHeight(selectedZCuttingHeight);
+						}
+					} catch (ParseException e) {
+						evt.getEdit().undo();
+					}
+					
+				}
+			});
+		}
+		return myZCuttingHeightPanel;
+	}
+
+	private JRadioButton getAbsoluteCoordinatesButton() {
+		if (myAbsoluteCoordinatesButton == null) {
+			myAbsoluteCoordinatesButton = new JRadioButton("absolute");
+			myAbsoluteCoordinatesButton.setSelected(false);
+			myAbsoluteCoordinatesButton.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					if (myAbsoluteCoordinatesButton.isSelected()) {
+						getRelativeCoordinatesButton().setSelected(false);
+						getZCuttingHeightPanel().setEnabled(true);
+						getInitialXPanel().setEnabled(true);
+						getInitialYPanel().setEnabled(true);
+						if (myAoolpathsProcessor != null) {
+							myAoolpathsProcessor.setOutputAbsoluteCoordinates(true);
+						}
+					}
+					
+				}
+			});
+		}
+		return myAbsoluteCoordinatesButton;
+	}
+
+	private JRadioButton getRelativeCoordinatesButton() {
+		if (myRelativeCoordinatesButton == null) {
+			myRelativeCoordinatesButton = new JRadioButton("relative");
+			myRelativeCoordinatesButton.setSelected(true);
+			myRelativeCoordinatesButton.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					if (myRelativeCoordinatesButton.isSelected()) {
+						getAbsoluteCoordinatesButton().setSelected(false);
+						getZCuttingHeightPanel().setEnabled(false);
+						getInitialXPanel().setEnabled(false);
+						getInitialYPanel().setEnabled(false);
+						if (myAoolpathsProcessor != null) {
+							myAoolpathsProcessor.setOutputAbsoluteCoordinates(false);
+						}
+					}
+					
+				}
+			});
+		}
+		return myRelativeCoordinatesButton;
 	}
 
 	public void saveMosaic() {
@@ -334,9 +587,12 @@ public class Visolate extends JPanel implements SimulatorUI {
 		else
 			mode = ToolpathsProcessor.OUTLINE_MODE;
 
-		toolpathsProcessor = new ToolpathsProcessor(this, mode);
+		myAoolpathsProcessor = new ToolpathsProcessor(this, mode, getAbsoluteCoordinatesButton().isSelected(), selectedZClearance );
+		myAoolpathsProcessor.setZCuttingHeight(selectedZCuttingHeight);
+		myAoolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
+		myAoolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
 
-		startProcess(toolpathsProcessor);
+		startProcess(myAoolpathsProcessor);
 	}
 
 	private File browse() {
@@ -423,7 +679,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			Parser parser = new Parser(inputStream);
 			parser.setSimulator(simulator);
 			parser.Input();
-		} catch (ParseException e) {
+		} catch (visolate.parser.ParseException e) {
 			JOptionPane.
 			showMessageDialog(this,
 					"Parse Error: " + e.getMessage(),
@@ -442,7 +698,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 		gcodeField.setText(file.toString());
 
-		if (toolpathsProcessor == null) {
+		if (myAoolpathsProcessor == null) {
 			return;
 		}
 
@@ -450,10 +706,10 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 			if (file.exists()) {
 				int yesno = JOptionPane.
-							showConfirmDialog(this,
-									"Overwrite existing G-Code file " + file + "?",
-									"Overwrite?",
-									JOptionPane.YES_NO_OPTION);
+				showConfirmDialog(this,
+						"Overwrite existing G-Code file " + file + "?",
+						"Overwrite?",
+						JOptionPane.YES_NO_OPTION);
 				if (yesno != JOptionPane.YES_OPTION) {					
 					return;
 				}
@@ -461,7 +717,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 			try {
 				FileWriter w = new FileWriter(file);
-				toolpathsProcessor.writeGCode(w);
+				myAoolpathsProcessor.writeGCode(w);
 				w.close();
 			} catch (IOException e) {
 				JOptionPane.
@@ -476,7 +732,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			accessControlError();
 
 			try {
-				toolpathsProcessor.writeGCode(null);
+				myAoolpathsProcessor.writeGCode(null);
 			} catch (IOException e2) {
 				//nope
 			}
@@ -638,7 +894,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		voronoiButton.setEnabled(enable);
 		outlineButton.setEnabled(enable);
 
-		if (toolpathsProcessor != null) {
+		if (myAoolpathsProcessor != null) {
 			gcodeButton.setEnabled(enable);
 			gcodeField.setEnabled(enable);
 			gcodeBrowseButton.setEnabled(enable);
@@ -772,10 +1028,27 @@ public class Visolate extends JPanel implements SimulatorUI {
 	/**
 	 * The ToolpathsProcessor generates the g-code that we write to a file.
 	 */
-	private ToolpathsProcessor toolpathsProcessor = null;
+	private ToolpathsProcessor myAoolpathsProcessor = null;
 
 	private Set<Net> selectedNets = new LinkedHashSet<Net>();
 	private Net selectedNet = null;
 
 	private List<UndoTask> undoHistory = new LinkedList<UndoTask>();
+
+	private Box myProcessingBox;
+	private Box myGCodeOptionsBox;
+
+	private Box myMosaicBox;
+
+	private Box myLoadFileBox;
+
+	private Box myGcodeBox;
+
+	private JRadioButton myRelativeCoordinatesButton;
+
+	private JRadioButton myAbsoluteCoordinatesButton;
+	private JPanel myZCuttingHeightPanel;
+	private JPanel myZDownMovementPanel;
+	private JPanel myInitialXPanel;
+	private JPanel myInitialYPanel;
 }
