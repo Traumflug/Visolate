@@ -29,7 +29,7 @@ public class Main extends JApplet {
   private static final String cvsid =
   "$Id: Main.java,v 1.5 2006/08/29 00:13:02 vona Exp $";
 
-  public static final String APPNAME = "Visolate 2.0.0";
+  public static final String APPNAME = "Visolate 2.1.0";
   public static final int DEF_LOC_X = 100;
   public static final int DEF_LOC_Y = 100;
 

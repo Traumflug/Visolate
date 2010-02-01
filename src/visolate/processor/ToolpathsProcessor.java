@@ -58,6 +58,8 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 	public static final int DEF_MODE = VORONOI_MODE;
 
+	public static final double MMPERINCH = 25.4;
+
 	/**
 	 * This is the number format used for all numbers in the gcode.
 	 */
@@ -81,6 +83,25 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	 * If set to true, output absolute coordinates instead of relative.
 	 */
 	private boolean outputAbsoluteCoordinates;
+
+	/**
+	 * If set to true, output metric coordinates instead of relative.
+	 */
+	private boolean outputMetricCoordinates;
+
+	/**
+	 * @return If set to true, output metric coordinates instead of relative.
+	 */
+	public boolean isOutputMetricCoordinates() {
+		return outputMetricCoordinates;
+	}
+
+	/**
+	 * @param outputMetricCoordinates If set to true, output metric coordinates instead of relative.
+	 */
+	public void setOutputMetricCoordinates(final boolean outputMetricCoordinates) {
+		this.outputMetricCoordinates = outputMetricCoordinates;
+	}
 
 	/**
 	 * We move this much upward from cutting to traveling.
@@ -183,9 +204,10 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		this.outputAbsoluteCoordinates = outputAbsoluteCoordinates;
 	}
 
-	public ToolpathsProcessor(final Visolate visolate, final int mode, final boolean useAbsoluteCoordinates, final double zClearance) {
+	public ToolpathsProcessor(final Visolate visolate, final int mode, final boolean useAbsoluteCoordinates, final double zClearance, final boolean metric) {
 		super(visolate);
 		this.mode = mode;
+		this.outputMetricCoordinates = metric;
 		this.outputAbsoluteCoordinates = useAbsoluteCoordinates;
 		this.myzClearance = zClearance;
 	}
@@ -1412,7 +1434,11 @@ public class ToolpathsProcessor extends MosaicProcessor {
 			return;
 		}
 
-		w.write("G20\n");    // inches //TODO: allow metric too
+		if (isOutputMetricCoordinates()) {
+			w.write("G21\n");    // millimeters
+		} else {
+			w.write("G20\n");    // inches
+		}
 		w.write("G17\n");     // X-Y plane
 		w.write("G40\nG49\n"); // Cancel tool lengh & cutter dia compensation
 		//    w.write("G53\n");     // Motion in machine co-ordinate system
@@ -1496,13 +1522,13 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		if (w != null) {
 			if (isOutputAbsoluteCoordinates()) {
 				w.write("G0 X" +
-						gCodeFormat.format(x + getAbsoluteXStart()) + " Y" +
-						gCodeFormat.format(y + getAbsoluteYStart()) + " Z"+
+						gCodeFormat.format(convertUnits(x) + getAbsoluteXStart()) + " Y" +
+						gCodeFormat.format(convertUnits(y) + getAbsoluteYStart()) + " Z"+
 						gCodeFormat.format(p.z + getZCuttingHeight()) + "\n");
 			} else {
 				w.write("G0 X" +
-						gCodeFormat.format(dx) + " Y" +
-						gCodeFormat.format(dy) + "\n");
+						gCodeFormat.format(convertUnits(dx)) + " Y" +
+						gCodeFormat.format(convertUnits(dy)) + "\n");
 			}
 		}
 
@@ -1524,13 +1550,13 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		if (w != null) {
 			if (isOutputAbsoluteCoordinates()) {
 				w.write("G1 X" +
-						gCodeFormat.format(x + getAbsoluteXStart()) + " Y" +
-						gCodeFormat.format(y + getAbsoluteYStart()) + " Z" +
+						gCodeFormat.format(convertUnits(x) + getAbsoluteXStart()) + " Y" +
+						gCodeFormat.format(convertUnits(y) + getAbsoluteYStart()) + " Z" +
 						gCodeFormat.format(p.z + getZCuttingHeight()) + "\n");
 			} else {
 				w.write("G1 X" +
-						gCodeFormat.format(dx) + " Y" +
-						gCodeFormat.format(dy) + "\n");
+						gCodeFormat.format(convertUnits(dx)) + " Y" +
+						gCodeFormat.format(convertUnits(dy)) + "\n");
 			}
 		}
 
@@ -1541,6 +1567,13 @@ public class ToolpathsProcessor extends MosaicProcessor {
 				(float) dy,
 				0.0f),
 				G_CODE_COLOR_NORMAL));
+	}
+
+	private double convertUnits(final double x) {
+		if (isOutputMetricCoordinates()) {
+			return x * MMPERINCH;
+		}
+		return x;
 	}
 
 	private Map<Node, Node> nodes = new LinkedHashMap<Node, Node>();

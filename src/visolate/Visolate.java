@@ -347,19 +347,22 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myGCodeOptionsBox = Box.createVerticalBox();
 			myGCodeOptionsBox.setBorder(BorderFactory.createTitledBorder("G-Code"));
 			JPanel panel = new JPanel();
-			panel.setLayout(new GridLayout(3, 3));
+			panel.setLayout(new GridLayout(3, 4));
 
 			panel.add(new JLabel("Coordinates"));
 			panel.add(new JLabel("Z-coordinates"));
 			panel.add(new JLabel("left upper coordinates"));
+			panel.add(new JLabel("Metric"));
 
 			panel.add(getRelativeCoordinatesButton());
 			panel.add(getZCuttingHeightPanel());
 			panel.add(getInitialXPanel());
+			panel.add(getMetricButton());
 
 			panel.add(getAbsoluteCoordinatesButton());
 			panel.add(getZDownMovementPanel());
 			panel.add(getInitialYPanel());
+			panel.add(getImperialButton());
 
 			myGCodeOptionsBox.add(panel);
 		}
@@ -544,6 +547,48 @@ public class Visolate extends JPanel implements SimulatorUI {
 		return myRelativeCoordinatesButton;
 	}
 
+	private JRadioButton getMetricButton() {
+		if (myMetricButton == null) {
+			myMetricButton = new JRadioButton("metric");
+			myMetricButton.setSelected(false);
+			myMetricButton.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					if (myMetricButton.isSelected()) {
+						getImperialButton().setSelected(false);
+						if (myAoolpathsProcessor != null) {
+							myAoolpathsProcessor.setOutputMetricCoordinates(true);
+						}
+					}
+					
+				}
+			});
+		}
+		return myMetricButton;
+	}
+
+	private JRadioButton getImperialButton() {
+		if (myImperialButton == null) {
+			myImperialButton = new JRadioButton("imperial");
+			myImperialButton.setSelected(true);
+			myImperialButton.addActionListener(new ActionListener() {
+				
+				@Override
+				public void actionPerformed(final ActionEvent e) {
+					if (myImperialButton.isSelected()) {
+						getMetricButton().setSelected(false);
+						if (myAoolpathsProcessor != null) {
+							myAoolpathsProcessor.setOutputMetricCoordinates(false);
+						}
+					}
+					
+				}
+			});
+		}
+		return myImperialButton;
+	}
+
 	public void saveMosaic() {
 		saveMosaic(new File(mosaicField.getText().trim()));
 	}
@@ -587,7 +632,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		else
 			mode = ToolpathsProcessor.OUTLINE_MODE;
 
-		myAoolpathsProcessor = new ToolpathsProcessor(this, mode, getAbsoluteCoordinatesButton().isSelected(), selectedZClearance );
+		myAoolpathsProcessor = new ToolpathsProcessor(this, mode, getAbsoluteCoordinatesButton().isSelected(), selectedZClearance, getMetricButton().isSelected());
 		myAoolpathsProcessor.setZCuttingHeight(selectedZCuttingHeight);
 		myAoolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
 		myAoolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
@@ -1045,8 +1090,9 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private Box myGcodeBox;
 
 	private JRadioButton myRelativeCoordinatesButton;
-
 	private JRadioButton myAbsoluteCoordinatesButton;
+	private JRadioButton myImperialButton;
+	private JRadioButton myMetricButton;
 	private JPanel myZCuttingHeightPanel;
 	private JPanel myZDownMovementPanel;
 	private JPanel myInitialXPanel;
