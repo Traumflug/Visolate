@@ -17,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  **/
-                                                                                
+
 package visolate.processor;
 
 import java.awt.image.*;
@@ -26,6 +26,7 @@ import javax.media.j3d.*;
 import javax.vecmath.*;
 
 import java.util.*;
+import java.util.Locale;
 import java.text.*;
 import java.io.*;
 
@@ -33,1102 +34,1115 @@ import visolate.*;
 import visolate.model.*;
 import visolate.misc.*;
 
+/**
+ * The ToolpathsProcessor generates the content for a  g-code file.
+ */
 public class ToolpathsProcessor extends MosaicProcessor {
 
-  private static final String cvsid =
-  "$Id: ToolpathsProcessor.java,v 1.8 2004/09/08 19:40:30 vona Exp $";
-
-  public static final int N = 0;
-  public static final int S = 1;
-  public static final int W = 2;
-  public static final int E = 3;
-
-  public static final Color3f ORIGIN_COLOR = new Color3f(1.0f, 0.0f, 1.0f);
-  public static final float ORIGIN_TICK = 0.1f;
-
-  public static final double[] HORIZ_DIR_BIAS = {-1, 1, 1, -1};
-  public static final double[] VERT_DIR_BIAS = {1, 1, -1, -1};
-  
-  public static final int VORONOI_MODE = 0;
-  public static final int OUTLINE_MODE = 1;
-
-  public static final int DEF_MODE = VORONOI_MODE;
-
-  public static final int G_CODE_MAX_FRACTION_DIGITS = 5;
-  private static NumberFormat gCodeFormat = new DecimalFormat() {
-        { setMaximumFractionDigits(G_CODE_MAX_FRACTION_DIGITS); } };
-
-  public static final double CLEARANCE_Z = 0.1;
-
-  public static final String CUTTER_UP =
-  "G1 Z" + gCodeFormat.format(CLEARANCE_Z) + "\n";
-
-  public static final String CUTTER_DOWN =
-  "G1 Z" + gCodeFormat.format(-CLEARANCE_Z) + "\n";
-
-  public static final Color3f G_CODE_COLOR_NORMAL = new Color3f(0.0f,
-                                                                1.0f,
-                                                                0.0f);
+	private static final String cvsid =
+		"$Id: ToolpathsProcessor.java,v 1.8 2004/09/08 19:40:30 vona Exp $";
+
+	public static final int N = 0;
+	public static final int S = 1;
+	public static final int W = 2;
+	public static final int E = 3;
+
+	public static final Color3f ORIGIN_COLOR = new Color3f(1.0f, 0.0f, 1.0f);
+	public static final float ORIGIN_TICK = 0.1f;
+
+	public static final double[] HORIZ_DIR_BIAS = {-1, 1, 1, -1};
+	public static final double[] VERT_DIR_BIAS = {1, 1, -1, -1};
+
+	public static final int VORONOI_MODE = 0;
+	public static final int OUTLINE_MODE = 1;
+
+	public static final int DEF_MODE = VORONOI_MODE;
+
+	/**
+	 * This is the number format used for all numbers in the gcode.
+	 */
+	private static NumberFormat gCodeFormat = new DecimalFormat("###.#####", new DecimalFormatSymbols(Locale.ENGLISH));
+
+	/**
+	 * How much to move the toolhead in z-direction between cutting and moving.
+	 */
+	public static final double CLEARANCE_Z = 0.1;
 
-  public static final Color3f G_CODE_COLOR_RAPID = new Color3f(1.0f,
-                                                               1.0f,
-                                                               0.0f);
+	/**
+	 * Gcode to write to move the cutter up from cutting to moving.
+	 */
+	public static final String CUTTER_UP =
+		"G1 Z" + gCodeFormat.format(CLEARANCE_Z) + "\n";
 
-  public ToolpathsProcessor(Visolate visolate, int mode) {
-    super(visolate);
-    this.mode = mode;
-  }
+	/**
+	 * Gcode to write to move the cutter down from moving to cutting.
+	 */
+	public static final String CUTTER_DOWN =
+		"G1 Z" + gCodeFormat.format(-CLEARANCE_Z) + "\n";
 
-  public void processTile(int r, int c,
-                          int ulx, int uly,
-                          int width, int height,
-                          double left, double bottom,
-                          double right, double top) {
+	public static final Color3f G_CODE_COLOR_NORMAL = new Color3f(0.0f,
+			1.0f,
+			0.0f);
 
-    visolate.resetInnerProgressBar(1);
+	public static final Color3f G_CODE_COLOR_RAPID = new Color3f(1.0f,
+			1.0f,
+			0.0f);
 
-    super.processTile(r, c,
-                      ulx, uly,
-                      width, height,
-                      left, bottom, right, top);
+	public ToolpathsProcessor(Visolate visolate, int mode) {
+		super(visolate);
+		this.mode = mode;
+	}
 
-    visolate.tickInnerProgressBar();
-  }
+	public void processTile(int r, int c,
+			int ulx, int uly,
+			int width, int height,
+			double left, double bottom,
+			double right, double top) {
 
-  protected void processStarted() {
-    super.processStarted();
+		visolate.resetInnerProgressBar(1);
 
-    java.awt.image.Raster raster = mosaic.getRaster();
-    buffer = raster.getDataBuffer();
+		super.processTile(r, c,
+				ulx, uly,
+				width, height,
+				left, bottom, right, top);
 
-    switch (mode) {
-    case VORONOI_MODE:
-      System.out.println("generating voronoi toolpaths");
-      model.enableBorderGeometry(true);
-      model.enableLineGeometry(false);
-      model.enableVoronoiGeometry(true);
-      model.enableFlatGeometry(true);
-      model.enableGCodeGeometry(false);
-      break;
-    case OUTLINE_MODE:
-      System.out.println("generating outline toolpaths");
-      model.enableBorderGeometry(false);
-      model.enableLineGeometry(false);
-      model.enableVoronoiGeometry(false);
-      model.enableFlatGeometry(true);
-      model.enableGCodeGeometry(false);
-      break;
-    }
-    
-    model.setTranslucent2D(false);
+		visolate.tickInnerProgressBar();
+	}
 
-    model.clearPaths();
-    model.clearGCode();
+	protected void processStarted() {
+		super.processStarted();
 
-    straightTol = 0.5/((double) dpi);
-  }
+		java.awt.image.Raster raster = mosaic.getRaster();
+		buffer = raster.getDataBuffer();
 
-  private void restoreModel() {
+		switch (mode) {
+		case VORONOI_MODE:
+			System.out.println("generating voronoi toolpaths");
+			model.enableBorderGeometry(true);
+			model.enableLineGeometry(false);
+			model.enableVoronoiGeometry(true);
+			model.enableFlatGeometry(true);
+			model.enableGCodeGeometry(false);
+			break;
+		case OUTLINE_MODE:
+			System.out.println("generating outline toolpaths");
+			model.enableBorderGeometry(false);
+			model.enableLineGeometry(false);
+			model.enableVoronoiGeometry(false);
+			model.enableFlatGeometry(true);
+			model.enableGCodeGeometry(false);
+			break;
+		}
 
-    model.enableBorderGeometry(borderGeometryWas);
-    model.enableLineGeometry(lineGeometryWas);
-    model.enableVoronoiGeometry(voronoiGeometryWas);
-    model.enableFlatGeometry(flatGeometryWas);
-    model.enableGCodeGeometry(gcodeGeometryWas);
-    
-    model.setTranslucent2D(wasTranslucent);
-  }
+		model.setTranslucent2D(false);
 
-  protected void processInterrupted() {
-    restoreModel();
-  }
+		model.clearPaths();
+		model.clearGCode();
 
-  protected void processCompleted() {
+		straightTol = 0.5/((double) dpi);
+	}
 
-    super.processCompleted();
-   
-    restoreModel();
+	private void restoreModel() {
 
-    tile = null;
+		model.enableBorderGeometry(borderGeometryWas);
+		model.enableLineGeometry(lineGeometryWas);
+		model.enableVoronoiGeometry(voronoiGeometryWas);
+		model.enableFlatGeometry(flatGeometryWas);
+		model.enableGCodeGeometry(gcodeGeometryWas);
 
-    extractNodes();
+		model.setTranslucent2D(wasTranslucent);
+	}
 
-    if (thread.isInterrupted())
-      return;
+	protected void processInterrupted() {
+		restoreModel();
+	}
 
-    makePaths();
+	protected void processCompleted() {
 
-    if (thread.isInterrupted())
-      return;
+		super.processCompleted();
 
-    optimizePaths();
+		restoreModel();
 
-    if (thread.isInterrupted())
-      return;
+		tile = null;
 
-    model.setPaths(getSceneGraph());
-  }
+		extractNodes();
 
-  private void extractNodes() {
+		if (thread.isInterrupted())
+			return;
 
-    System.out.println("extracting nodes...");
+		makePaths();
 
-    visolate.resetInnerProgressBar(mosaicHeight);
+		if (thread.isInterrupted())
+			return;
 
-    for (int y = 0; y < mosaicHeight; y++) {
+		optimizePaths();
 
-      for (int x = 0; x < mosaicWidth; x++) {
+		if (thread.isInterrupted())
+			return;
 
-        int color = getColor(x, y);
-        int lColor = getColor(x-1, y);
-        int uColor = getColor(x, y-1);
+		model.setPaths(getSceneGraph());
+	}
 
-        Node n = null;
+	private void extractNodes() {
 
-        if ((x > 0) && (lColor != color)) {
+		System.out.println("extracting nodes...");
 
-          if (n == null)
-            n = getNode(x, y);
+		visolate.resetInnerProgressBar(mosaicHeight);
 
-          Node o = getNode(x, y+1);
-          
-          n.south = o;
+		for (int y = 0; y < mosaicHeight; y++) {
 
-          if (o != null)
-            o.north = n;
-        }
+			for (int x = 0; x < mosaicWidth; x++) {
 
-        if ((y > 0) && (uColor != color)) {
+				int color = getColor(x, y);
+				int lColor = getColor(x-1, y);
+				int uColor = getColor(x, y-1);
 
-          if (n == null)
-            n = getNode(x, y);
+				Node n = null;
 
-          Node o = getNode(x+1, y);
-          
-          n.east = o;
+				if ((x > 0) && (lColor != color)) {
 
-          if (o != null)
-            o.west = n;
-        }
-      }
+					if (n == null)
+						n = getNode(x, y);
 
-      if (thread.isInterrupted())
-        return;
+					Node o = getNode(x, y+1);
 
-      visolate.tickInnerProgressBar();
-    }
+					n.south = o;
 
-    System.out.println(nodes.size() + " nodes");
+					if (o != null)
+						o.north = n;
+				}
 
-    mosaic = null;
-  }
+				if ((y > 0) && (uColor != color)) {
 
-  private void makePaths() {
+					if (n == null)
+						n = getNode(x, y);
 
-    System.out.println("making paths...");
+					Node o = getNode(x+1, y);
 
-    Set<Node> nodes = this.nodes.keySet();
-    
-    currentTick = 0;
-    visolate.resetInnerProgressBar(100);
+					n.east = o;
 
-    while (!nodes.isEmpty()) {
-      paths.add(new Path(nodes.iterator().next()));
-      
-      if (thread.isInterrupted()) {
-        return;
-      }
-    }
+					if (o != null)
+						o.west = n;
+				}
+			}
 
-    System.out.println(paths.size() + " paths");
+			if (thread.isInterrupted())
+				return;
 
-    reportPathStats();
-  }
+			visolate.tickInnerProgressBar();
+		}
 
-  private void reportPathStats() {
+		System.out.println(nodes.size() + " nodes");
 
-    double length = 0;
-    int segments = 0;
-    for (Path path : paths) {
-      length += path.length();
-      segments += path.numPathNodes();
-    }
+		mosaic = null;
+	}
 
-    System.out.println("total length: " + length);
-    System.out.println("total segments: " + segments);
-  }
+	private void makePaths() {
 
-  private void optimizePaths() {
+		System.out.println("making paths...");
 
-    System.out.println("optimizing paths...");
+		Set<Node> nodes = this.nodes.keySet();
 
-    visolate.resetInnerProgressBar(paths.size());
+		currentTick = 0;
+		visolate.resetInnerProgressBar(100);
 
-    for (Path path : paths) {
-    	path.optimize();
+		while (!nodes.isEmpty()) {
+			paths.add(new Path(nodes.iterator().next()));
 
-      visolate.tickInnerProgressBar();
+			if (thread.isInterrupted()) {
+				return;
+			}
+		}
 
-      if (thread.isInterrupted())
-        return;
-    }
-    
-    reportPathStats();
-  }
+		System.out.println(paths.size() + " paths");
 
-  private class Node {
+		reportPathStats();
+	}
 
-    Node(int x, int y) {
+	private void reportPathStats() {
 
-      this.x = x;
-      this.y = y;
+		double length = 0;
+		int segments = 0;
+		for (Path path : paths) {
+			length += path.length();
+			segments += path.numPathNodes();
+		}
 
-      hashCode = x^(y*31);
-    }
+		System.out.println("total length: " + length);
+		System.out.println("total segments: " + segments);
+	}
 
-    public int hashCode() {
-      return hashCode;
-    }
-    
-    public boolean equals(Object object) {
-      
-      if (!(object instanceof Node))
-        return false;
-      
-      Node other = (Node) object;
-      
-      return (x == other.x) && (y == other.y);
-    }
-    
-    public String toString() {
-      return "(" + x + ", " + y + ")";
-    }
+	private void optimizePaths() {
 
-    public int numNeighbors() {
+		System.out.println("optimizing paths...");
 
-      int n = 0;
+		visolate.resetInnerProgressBar(paths.size());
 
-      if (north != null)
-        n++;
+		for (Path path : paths) {
+			path.optimize();
 
-      if (south != null)
-        n++;
+			visolate.tickInnerProgressBar();
 
-      if (west != null)
-        n++;
+			if (thread.isInterrupted())
+				return;
+		}
 
-      if (east != null)
-        n++;
-      
-      return n;
-    }
+		reportPathStats();
+	}
 
-    public Node getNeighbor(int d) {
-      switch(d) {
-      case N:
-        return north;
-      case S:
-        return south;
-      case W:
-        return west;
-      case E:
-        return east;
-      default:
-        return null;
-      }
-    }
+	private class Node {
 
-    public void setNeighbor(int d, Node n) {
-      switch(d) {
-      case N:
-        north = n;
-        break;
-      case S:
-        south = n;
-        break;
-      case W:
-        west = n;
-        break;
-      case E:
-        east = n;
-        break;
-      }
-    }
+		Node(int x, int y) {
 
-//    public Color3f getColor() {
-//      return getColor(((north != null) ? 1 : 0) |
-//                      ((south != null) ? 1 : 0) << 1 |
-//                      ((west != null) ? 1 : 0) << 2 |
-//                      ((east != null) ? 1 : 0) << 3);
-//    }
+			this.x = x;
+			this.y = y;
 
-//    public Color3f getColor(int i) {
-//
-//      if (nodeColor[i] == null) {
-//        Color3f color = Net.toColor3f(display.getRandomColor());
-//        nodeColor[i] = color;
-//        System.out.println("nodeColor[" + i + "] = " + color);
-//      }
-//
-//      return nodeColor[i];
-//    }
+			hashCode = x^(y*31);
+		}
 
-    int hashCode;
+		public int hashCode() {
+			return hashCode;
+		}
 
-    int x;
-    int y;
+		public boolean equals(Object object) {
 
-    Node north = null;
-    Node south = null;
-    Node west = null;
-    Node east = null;
-  }
+			if (!(object instanceof Node))
+				return false;
 
-//  private Color3f[] nodeColor = new Color3f[16];
+			Node other = (Node) object;
 
-  private int getColor(int x, int y) {
+			return (x == other.x) && (y == other.y);
+		}
 
-    if (x < 0)
-      return 0;
+		public String toString() {
+			return "(" + x + ", " + y + ")";
+		}
 
-    if (y < 0)
-      return 0;
-
-    if (x >= mosaicWidth)
-      return 0;
-
-    if (y >= mosaicHeight)
-      return 0;
-
-    return buffer.getElem(y*mosaicWidth + x) & 0xffffff;
-  }
-
-  private Node getNode(int x, int y) {
-
-    if (x < 0)
-      return null;
-
-    if (y < 0)
-      return null;
-
-    if (x >= mosaicWidth)
-      return null;
-
-    if (y >= mosaicHeight)
-      return null;
-
-    Node key = new Node(x, y);
-
-    Node node = (Node) nodes.get(key);
-
-    if (node == null) {
-      node = key;
-      nodes.put(key, node);
-    }
-    
-    return node;
-  }
+		public int numNeighbors() {
 
-  private int oppositeDir(int d) {
-    switch(d) {
-    case N:
-      return S;
-    case S:
-      return N;
-    case W:
-      return E;
-    case E:
-      return W;
-    default:
-      return -1;
-    }
-  }
+			int n = 0;
 
-  private class Path {
+			if (north != null)
+				n++;
 
-    Path(final Node seed) {
+			if (south != null)
+				n++;
 
-//      this.seed = seed;
+			if (west != null)
+				n++;
 
-      path.add(seed);
+			if (east != null)
+				n++;
 
-      dir[HEAD] = -1;
-      dir[TAIL] = -1;
+			return n;
+		}
 
-      switch (seed.numNeighbors()) {
+		public Node getNeighbor(int d) {
+			switch(d) {
+			case N:
+				return north;
+			case S:
+				return south;
+			case W:
+				return west;
+			case E:
+				return east;
+			default:
+				return null;
+			}
+		}
 
-      case 0: {
-        return;
-      }
+		public void setNeighbor(int d, Node n) {
+			switch(d) {
+			case N:
+				north = n;
+				break;
+			case S:
+				south = n;
+				break;
+			case W:
+				west = n;
+				break;
+			case E:
+				east = n;
+				break;
+			}
+		}
 
-      case 1: {
-        for (int i = 0; i < 4; i++) {
-          if (seed.getNeighbor(i) != null) {
-            dir[TAIL] = i;
-            break;
-          }
-        }
-        break;
-      }
+		//    public Color3f getColor() {
+		//      return getColor(((north != null) ? 1 : 0) |
+		//                      ((south != null) ? 1 : 0) << 1 |
+		//                      ((west != null) ? 1 : 0) << 2 |
+		//                      ((east != null) ? 1 : 0) << 3);
+		//    }
 
-      case 2: {
-        boolean tailSet = false;
-        for (int i = 0; i < 4; i++) {
-          if (seed.getNeighbor(i) != null) {
-            if (!tailSet) {
-              dir[TAIL] = i;
-              tailSet = true;
-            } else {
-              dir[HEAD] = i;
-              break;
-            }
-          }
-        }
-        break;
-      }
+		//    public Color3f getColor(int i) {
+		//
+		//      if (nodeColor[i] == null) {
+		//        Color3f color = Net.toColor3f(display.getRandomColor());
+		//        nodeColor[i] = color;
+		//        System.out.println("nodeColor[" + i + "] = " + color);
+		//      }
+		//
+		//      return nodeColor[i];
+		//    }
 
-      case 3: {
-        for (int i = 0; i < 4; i++) {
-          if ((seed.getNeighbor(i) != null) &&
-              (seed.getNeighbor(oppositeDir(i)) != null)) {
-            dir[TAIL] = i;
-            dir[HEAD] = oppositeDir(i);
-            break;
-          }
-        }
-        break;
-      }
+		int hashCode;
 
-      case 4: {
-        dir[HEAD] = N;
-        dir[TAIL] = S;
-        break;
-      }
-      }
-       
-      while ((dir[TAIL] >= 0) && extendTail())
-        ;
+		int x;
+		int y;
 
-      while ((dir[HEAD] >= 0) && extendHead())
-        ;
+		Node north = null;
+		Node south = null;
+		Node west = null;
+		Node east = null;
+	}
 
-    }
+	//  private Color3f[] nodeColor = new Color3f[16];
 
-    private boolean extendTail() {
+	private int getColor(int x, int y) {
 
-      Node next = getNext((Node) path.getLast(), TAIL);
+		if (x < 0)
+			return 0;
 
-      if (next == null)
-        return false;
+		if (y < 0)
+			return 0;
 
-      path.addLast(next);
+		if (x >= mosaicWidth)
+			return 0;
 
-      return true;
-    }
+		if (y >= mosaicHeight)
+			return 0;
 
-    private boolean extendHead() {
+		return buffer.getElem(y*mosaicWidth + x) & 0xffffff;
+	}
 
-      Node next = getNext((Node) path.getFirst(), HEAD);
+	private Node getNode(int x, int y) {
 
-      if (next == null)
-        return false;
+		if (x < 0)
+			return null;
 
-      path.addFirst(next);
+		if (y < 0)
+			return null;
 
-      return true;
-    }
+		if (x >= mosaicWidth)
+			return null;
 
-    private Node getNext(Node n, int whichDir) {
+		if (y >= mosaicHeight)
+			return null;
 
-      int d = dir[whichDir];
+		Node key = new Node(x, y);
 
-      Node next = n.getNeighbor(d);
+		Node node = (Node) nodes.get(key);
 
-      if (next == null) {
+		if (node == null) {
+			node = key;
+			nodes.put(key, node);
+		}
 
-        for (int i = 0; i < 4; i++) {
+		return node;
+	}
 
-          if (i == d)
-            continue;
+	private int oppositeDir(int d) {
+		switch(d) {
+		case N:
+			return S;
+		case S:
+			return N;
+		case W:
+			return E;
+		case E:
+			return W;
+		default:
+			return -1;
+		}
+	}
 
-          if (i == oppositeDir(d))
-            continue;
+	private class Path {
 
-          Node neighbor = n.getNeighbor(i);
+		Path(final Node seed) {
 
-          if (neighbor != null) {
+			//      this.seed = seed;
 
-            if (next != null)
-              return null;
+			path.add(seed);
 
-            next = neighbor;
-            d = dir[whichDir] = i;
-          }
-        }
-      }
+			dir[HEAD] = -1;
+			dir[TAIL] = -1;
 
-      if (next == null)
-        return null;
+			switch (seed.numNeighbors()) {
 
-      n.setNeighbor(d, null);
-      next.setNeighbor(oppositeDir(d), null);
+			case 0: {
+				return;
+			}
 
-      if (n.numNeighbors() == 0)
-        nodes.remove(n);
+			case 1: {
+				for (int i = 0; i < 4; i++) {
+					if (seed.getNeighbor(i) != null) {
+						dir[TAIL] = i;
+						break;
+					}
+				}
+				break;
+			}
 
-      if (next.numNeighbors() == 0)
-        nodes.remove(next);
+			case 2: {
+				boolean tailSet = false;
+				for (int i = 0; i < 4; i++) {
+					if (seed.getNeighbor(i) != null) {
+						if (!tailSet) {
+							dir[TAIL] = i;
+							tailSet = true;
+						} else {
+							dir[HEAD] = i;
+							break;
+						}
+					}
+				}
+				break;
+			}
 
-      if (Math.floor(((double) nodes.size())/((double) 100)) > currentTick) {
-        currentTick++;
-        visolate.tickInnerProgressBar();
-      }
+			case 3: {
+				for (int i = 0; i < 4; i++) {
+					if ((seed.getNeighbor(i) != null) &&
+							(seed.getNeighbor(oppositeDir(i)) != null)) {
+						dir[TAIL] = i;
+						dir[HEAD] = oppositeDir(i);
+						break;
+					}
+				}
+				break;
+			}
 
-      return next;
-    }
+			case 4: {
+				dir[HEAD] = N;
+				dir[TAIL] = S;
+				break;
+			}
+			}
 
-    public int numPathNodes() {
+			while ((dir[TAIL] >= 0) && extendTail())
+				;
 
-      if (optimalPathEnd == null)
-        return path.size();
+			while ((dir[HEAD] >= 0) && extendHead())
+				;
 
-      int n = 0;
+		}
 
-      for (PathNode node = optimalPathEnd;
-           node != null;
-           node = node.getBestPrev())
-        n++;
+		private boolean extendTail() {
 
-      return n;
-    }
+			Node next = getNext((Node) path.getLast(), TAIL);
 
-    public double length() {
+			if (next == null)
+				return false;
 
-      double length = 0;
+			path.addLast(next);
 
-      if (optimalPathEnd == null) {
+			return true;
+		}
 
-        Node prev = null;
-        
-        for (Node node : path) {
-          
-          if (prev != null) {
-            length += Util.distance(toModelX(prev.x), toModelY(prev.y),
-                                    toModelX(node.x), toModelY(node.y));
-          }
-          prev = node;
-        }
-
-      } else {
-
-        PathNode prev = null;
+		private boolean extendHead() {
 
-        for (PathNode node = optimalPathEnd;
-             node != null;
-             node = node.getBestPrev()) {
-          
-          if (prev != null)
-            length += Util.distance(prev.x, prev.y, node.x, node.y);
-          
-          prev = node;
-        }
-      }
-
-      return length;
-    }
-
-    public Geometry getGeometry() {
-
-      if (geometry == null) {
-
-        Color3f color = Net.toColor3f(display.getRandomColor());
-
-        int vertexCount = path.size()*2;
-
-        float[] coords = new float[vertexCount*6];
-
-        int i = 0;
-
-        if (optimalPathEnd == null) {
-
-          Node prev = null;
-
-          for (Node node : path) {
-            
-            if (prev != null) {
-              
-              coords[i++] = color.x;
-              coords[i++] = color.y;
-              coords[i++] = color.z;
-              
-              coords[i++] = toModelX(prev.x);
-              coords[i++] = toModelY(prev.y);
-              coords[i++] = Net.PATH_Z;
-              
-              coords[i++] = color.x;
-              coords[i++] = color.y;
-              coords[i++] = color.z;
-              
-              coords[i++] = toModelX(node.x);
-              coords[i++] = toModelY(node.y);
-              coords[i++] = Net.PATH_Z;
-            }
-            
-            prev = node;
-          }
-
-        } else {
-
-          PathNode prev = null;
-
-          for (PathNode node = optimalPathEnd;
-               node != null;
-               node = node.getBestPrev()) {
-            
-            if (prev != null) {
-              
-              coords[i++] = color.x;
-              coords[i++] = color.y;
-              coords[i++] = color.z;
-              
-              coords[i++] = prev.x;
-              coords[i++] = prev.y;
-              coords[i++] = Net.PATH_Z;
-              
-              coords[i++] = color.x;
-              coords[i++] = color.y;
-              coords[i++] = color.z;
-              
-              coords[i++] = node.x;
-              coords[i++] = node.y;
-              coords[i++] = Net.PATH_Z;
-            }
-            
-            prev = node;
-          }
-        }
-                                                               
-        geometry = new LineArray(vertexCount,
-                                 GeometryArray.COORDINATES |
-                                 GeometryArray.COLOR_3 |
-                                 GeometryArray.INTERLEAVED |
-                                 GeometryArray.BY_REFERENCE);
-        geometry.setInterleavedVertices(coords);
-      }
-
-      return geometry;
-    }
-
-    public Point2d getStartPoint() {
-
-      if (optimalPathEnd == null) {
-        Node start = (Node) path.getFirst();
-        return new Point2d(start.x, start.y);
-      } else {
-        return new Point2d(optimalPathEnd.x, optimalPathEnd.y);
-      }
-    }
-                                           
-    public void writeGCode(Writer w, Point2d p) throws IOException {
-      
-      gCodeCutterUp(w);
-
-      boolean first = true;
-
-      if (optimalPathEnd == null) {
-        
-        for (Node node : path) {
-          
-          if (first) {
-            gCodeRapid(w, p, node.x, node.y); //rapid to start
-            gCodeCutterDown(w);
-            first = false;
-          } else {
-            gCodeLinear(w, p, node.x, node.y);
-          }
-        }
-
-      } else {
-
-        for (PathNode node = optimalPathEnd;
-             node != null;
-             node = node.getBestPrev()) {
-
-          if (first) {
-            gCodeRapid(w, p, node.x, node.y); //rapid to start
-            gCodeCutterDown(w);
-            first = false;
-          } else {
-            gCodeLinear(w, p, node.x, node.y);
-          }
-        }
-      }
-    }
-
-    public void optimize() {
-//      System.out.println("init optimal");
-      initOptimalPath();
-//      System.out.println("add potential segs");
-      addPotentialSegments();
-//      System.out.println("compute topo");
-      computeTopologicallyOptimalPaths();
-//      System.out.println("compute weights");
-      computeSegmentWeights();
-//      System.out.println("find optimal");
-      findOptimalPath();
-    }
-
-    private void initOptimalPath() {
-
-      PathNode prev = null;
-      int i = 0;
-      for (Iterator<Node> it = path.iterator(); it.hasNext(); ) {
-        PathNode node = new PathNode((Node) it.next(), prev, i++);
-
-        if (optimalPathStart == null) {
-          optimalPathStart = node;
-        }
-
-        prev = node;
-      }
-
-      optimalPathEnd = prev;
-    }
-
-    private void addPotentialSegments() {
-
-//      boolean[] usedDir = new boolean[4];
-
-      PathNode next = null;
-      PathNode nextStart = null;
-      for (PathNode start = optimalPathStart;
-           start != null;
-           start = nextStart) {
-
-        nextStart = next = start.getFirstNext();
-
-        if (next == null)
-          break;
-
-        PathNode prev = null;
-
-        for (Sector sector = new Sector(start, next);
-             (next != null);
-             next = next.getFirstNext()) {
-
-          sector.intersectWithSectorTo(next);
-          
-          if (sector.isEmpty())
-            break;
-
-          if (prev != null)
-            nextStart.addNext(prev);
-          
-          prev = next;
-        }
-      }
-    }
-
-    //CLR 25.4: single-source shortest paths in directed acyclic graphs
-    private void computeTopologicallyOptimalPaths() {
-
-      for (PathNode node = optimalPathStart;
-           node != null;
-           node = node.getFirstNext())
-        node.d = Double.POSITIVE_INFINITY;
-
-      if (optimalPathStart != null)
-        optimalPathStart.d = 0;
-
-      for (PathNode node = optimalPathStart;
-           node != null;
-           node = node.getFirstNext()) {
-        
-        for (PathNode next : node.nexts) {
-
-          double newD = node.d + 1.0;
-
-          if (newD < next.d) {
-            next.clearPrevs();
-            next.addPrev(node);
-            next.d = newD;
-          } else if (newD == next.d) {
-            next.addPrev(node);
-          }
-        }
-      }
-    }
-
-    private void computeSegmentWeights() {
-
-      int n = path.size();
-
-      Sx = new double[n];
-      Sy = new double[n];
-      
-      Sxx = new double[n];
-      Syy = new double[n];
-
-      Sxy = new double[n];
-
-      double x = 0;
-      double y = 0;
-
-      double xx = 0;
-      double yy = 0;
-
-      double xy = 0;
-
-      int i = 0;
-
-      for (PathNode node = optimalPathStart;
-           node != null;
-           node = node.getFirstNext()) {
-        
-        x += node.x;
-        y += node.y;
-
-        xx += node.x*node.x;
-        yy += node.y*node.y;
-
-        xy += node.x*node.y;
-       
-        i = node.index;
-
-        Sx[i] = x;
-        Sy[i] = y;
-
-        Sxx[i] = xx;
-        Syy[i] = yy;
-
-        Sxy[i] = xy;
-      }
-    }
-
-    private double Ex(int i, int j) {
-      return (Sx[j] - Sx[i])/((double) (j-i));
-    }
-
-    private double Ey(int i, int j) {
-      return (Sy[j] - Sy[i])/((double) (j-i));
-    }
-
-    private double Exx(int i, int j) {
-      return (Sxx[j] - Sxx[i])/((double) (j-i));
-    }
-
-    private double Eyy(int i, int j) {
-      return (Syy[j] - Syy[i])/((double) (j-i));
-    }
-
-    private double Exy(int i, int j) {
-      return (Sxy[j] - Sxy[i])/((double) (j-i));
-    }
+			Node next = getNext((Node) path.getFirst(), HEAD);
 
-    private double segmentWeight(PathNode from, PathNode to) {
+			if (next == null)
+				return false;
 
-      double x = to.x - from.x;
-      double y = to.y - from.y;
-      
-      double xAvg = (to.x + from.x)/2.0;
-      double yAvg = (to.y + from.y)/2.0;
-
-      int i = from.index;
-      int j = to.index;
-
-      double a = Exx(i, j) - 2*xAvg*Ex(i, j) + xAvg*xAvg;
-      double b = Exy(i, j) - xAvg*Ex(i, j) - yAvg*Ey(i, j) + xAvg*yAvg;
-      double c = Eyy(i, j) - 2*yAvg*Ey(i, j) + yAvg*yAvg;
-      
-      return Math.sqrt(c*x*x + 2*b*x*y + a*y*y);
-    }
-
-    private void findOptimalPath() {
-
-      for (PathNode node = optimalPathStart;
-           node != null;
-           node = node.getFirstNext())
-        node.d = Double.POSITIVE_INFINITY;
-
-      if (optimalPathStart != null)
-        optimalPathStart.d = 0;
+			path.addFirst(next);
 
-      for (PathNode node = optimalPathStart;
-           node != null;
-           node = node.getFirstNext()) {
-        
-        for (PathNode next : node.nexts) {
+			return true;
+		}
 
-          if (!next.hasPrev(node)) {
-            continue;
-          }
+		private Node getNext(Node n, int whichDir) {
 
-          double newD = node.d + segmentWeight(node, next);
+			int d = dir[whichDir];
 
-          if (newD < next.d) {
-            next.optimalPrev = node;
-            next.d = newD;
-          }
-        }
-      }
-    }
+			Node next = n.getNeighbor(d);
 
-    int[] dir = new int[2];
+			if (next == null) {
 
-    final int HEAD = 0;
-    final int TAIL = 1;
+				for (int i = 0; i < 4; i++) {
 
-    private LinkedList<Node> path = new LinkedList<Node>();
+					if (i == d)
+						continue;
 
-    GeometryArray geometry;
+					if (i == oppositeDir(d))
+						continue;
 
-//    Node seed;
+					Node neighbor = n.getNeighbor(i);
 
-    PathNode optimalPathStart = null;
-    PathNode optimalPathEnd = null;
+					if (neighbor != null) {
 
-    double[] Sx;
-    double[] Sy;
+						if (next != null)
+							return null;
 
-    double[] Sxx;
-    double[] Syy;
+						next = neighbor;
+						d = dir[whichDir] = i;
+					}
+				}
+			}
 
-    double[] Sxy;
-  }
+			if (next == null)
+				return null;
 
-  private class Sector {
+			n.setNeighbor(d, null);
+			next.setNeighbor(oppositeDir(d), null);
 
-    Sector(PathNode apex, PathNode first) {
+			if (n.numNeighbors() == 0)
+				nodes.remove(n);
 
-      apexX = apex.x;
-      apexY = apex.y;
+			if (next.numNeighbors() == 0)
+				nodes.remove(next);
 
-      computeAnglesTo(first);
+			if (Math.floor(((double) nodes.size())/((double) 100)) > currentTick) {
+				currentTick++;
+				visolate.tickInnerProgressBar();
+			}
 
-      startAngle = startAngleTo;
-      endAngle = endAngleTo;
-    }
+			return next;
+		}
 
-    void intersectWithSectorTo(PathNode node) {
+		public int numPathNodes() {
 
-      computeAnglesTo(node);
+			if (optimalPathEnd == null)
+				return path.size();
 
-      startAngle = Math.max(startAngle, startAngleTo);
-      endAngle = Math.min(endAngle, endAngleTo);
-    }
+			int n = 0;
 
-    boolean isEmpty() {
-      return startAngle > endAngle;
-    }
+			for (PathNode node = optimalPathEnd;
+			node != null;
+			node = node.getBestPrev())
+				n++;
 
-    private void computeAnglesTo(PathNode node) {
+			return n;
+		}
 
-      for (int i = 0; i < 4; i++)
-        angle[i] =
-          Util.canonicalAngle(
-            (node.x + HORIZ_DIR_BIAS[i]*straightTol) - apexX,
-            (node.y + VERT_DIR_BIAS[i]*straightTol) - apexY);
+		public double length() {
 
-      startAngleTo = Double.POSITIVE_INFINITY;
-      endAngleTo = Double.NEGATIVE_INFINITY;
-      
-      for (int i = 0; i < 4; i++) {
-        startAngleTo = Math.min(startAngleTo, angle[i]);
-        endAngleTo = Math.max(endAngleTo, angle[i]);
-      }
-    }
+			double length = 0;
 
-    double[] angle = new double[4];
+			if (optimalPathEnd == null) {
 
-    double startAngleTo;
-    double endAngleTo;
+				Node prev = null;
 
-    double startAngle;
-    double endAngle;
+				for (Node node : path) {
 
-    double apexX;
-    double apexY;
-  }
+					if (prev != null) {
+						length += Util.distance(toModelX(prev.x), toModelY(prev.y),
+								toModelX(node.x), toModelY(node.y));
+					}
+					prev = node;
+				}
 
-  private class PathNode {
+			} else {
 
-    PathNode(Node node, PathNode prev, int index) {
+				PathNode prev = null;
 
-      x = toModelX(node.x);
-      y = toModelY(node.y);
+				for (PathNode node = optimalPathEnd;
+				node != null;
+				node = node.getBestPrev()) {
 
-      this.index = index;
+					if (prev != null)
+						length += Util.distance(prev.x, prev.y, node.x, node.y);
 
-      if (prev != null)
-        prev.addNext(this);
+					prev = node;
+				}
+			}
 
-      d = Double.POSITIVE_INFINITY;
-    }
-  
-    void addNext(PathNode node) {
-      nexts.add(node);
-    }
+			return length;
+		}
 
-    PathNode getFirstNext() {
+		public Geometry getGeometry() {
 
-      if (nexts.isEmpty())
-        return null;
+			if (geometry == null) {
 
-//      return (PathNode) nexts.getFirst();
-      return (PathNode) nexts.get(0);
-    }
+				Color3f color = Net.toColor3f(display.getRandomColor());
 
-    void addPrev(PathNode node) {
-      prevs.add(node);
-//      if (prevs.size() > 1)
-//        System.out.println("more than one prev from (" + x + ", " + y + ")");
-    }
+				int vertexCount = path.size()*2;
 
-    boolean hasPrev(PathNode node) {
-      return prevs.contains(node);
-    }
+				float[] coords = new float[vertexCount*6];
 
-    PathNode getBestPrev() {
+				int i = 0;
 
-      if (optimalPrev != null)
-        return optimalPrev;
+				if (optimalPathEnd == null) {
 
-      if (prevs.isEmpty())
-        return null;
+					Node prev = null;
 
-      return (PathNode) prevs.iterator().next();
-    }
+					for (Node node : path) {
 
-    void clearPrevs() {
-      prevs.clear();
-    }
+						if (prev != null) {
 
-    float x;
-    float y;
-    
-    double d;
+							coords[i++] = color.x;
+							coords[i++] = color.y;
+							coords[i++] = color.z;
 
-    ArrayList<PathNode> nexts = new ArrayList<PathNode>();
-    Set<PathNode> prevs = new LinkedHashSet<PathNode>();
+							coords[i++] = toModelX(prev.x);
+							coords[i++] = toModelY(prev.y);
+							coords[i++] = Net.PATH_Z;
 
-    PathNode optimalPrev = null;
-    
-    int index;
-  }
+							coords[i++] = color.x;
+							coords[i++] = color.y;
+							coords[i++] = color.z;
 
-  public BranchGroup getSceneGraph() {
+							coords[i++] = toModelX(node.x);
+							coords[i++] = toModelY(node.y);
+							coords[i++] = Net.PATH_Z;
+						}
 
-    if (sceneBG == null) {
+						prev = node;
+					}
 
-      Shape3D shape = new Shape3D();
-      shape.setPickable(false);
-      
-      for (Iterator<Path> it = paths.iterator(); it.hasNext(); )
-        shape.addGeometry(it.next().getGeometry());
+				} else {
 
-/*
+					PathNode prev = null;
+
+					for (PathNode node = optimalPathEnd;
+					node != null;
+					node = node.getBestPrev()) {
+
+						if (prev != null) {
+
+							coords[i++] = color.x;
+							coords[i++] = color.y;
+							coords[i++] = color.z;
+
+							coords[i++] = prev.x;
+							coords[i++] = prev.y;
+							coords[i++] = Net.PATH_Z;
+
+							coords[i++] = color.x;
+							coords[i++] = color.y;
+							coords[i++] = color.z;
+
+							coords[i++] = node.x;
+							coords[i++] = node.y;
+							coords[i++] = Net.PATH_Z;
+						}
+
+						prev = node;
+					}
+				}
+
+				geometry = new LineArray(vertexCount,
+						GeometryArray.COORDINATES |
+						GeometryArray.COLOR_3 |
+						GeometryArray.INTERLEAVED |
+						GeometryArray.BY_REFERENCE);
+				geometry.setInterleavedVertices(coords);
+			}
+
+			return geometry;
+		}
+
+		public Point2d getStartPoint() {
+
+			if (optimalPathEnd == null) {
+				Node start = (Node) path.getFirst();
+				return new Point2d(start.x, start.y);
+			} else {
+				return new Point2d(optimalPathEnd.x, optimalPathEnd.y);
+			}
+		}
+
+		public void writeGCode(Writer w, Point2d p) throws IOException {
+
+			gCodeCutterUp(w);
+
+			boolean first = true;
+
+			if (optimalPathEnd == null) {
+
+				for (Node node : path) {
+
+					if (first) {
+						gCodeRapidMovement(w, p, node.x, node.y); //rapid to start
+						gCodeCutterDown(w);
+						first = false;
+					} else {
+						gCodeLinear(w, p, node.x, node.y);
+					}
+				}
+
+			} else {
+
+				for (PathNode node = optimalPathEnd;
+				node != null;
+				node = node.getBestPrev()) {
+
+					if (first) {
+						gCodeRapidMovement(w, p, node.x, node.y); //rapid to start
+						gCodeCutterDown(w);
+						first = false;
+					} else {
+						gCodeLinear(w, p, node.x, node.y);
+					}
+				}
+			}
+		}
+
+		public void optimize() {
+			//      System.out.println("init optimal");
+			initOptimalPath();
+			//      System.out.println("add potential segs");
+			addPotentialSegments();
+			//      System.out.println("compute topo");
+			computeTopologicallyOptimalPaths();
+			//      System.out.println("compute weights");
+			computeSegmentWeights();
+			//      System.out.println("find optimal");
+			findOptimalPath();
+		}
+
+		private void initOptimalPath() {
+
+			PathNode prev = null;
+			int i = 0;
+			for (Iterator<Node> it = path.iterator(); it.hasNext(); ) {
+				PathNode node = new PathNode((Node) it.next(), prev, i++);
+
+				if (optimalPathStart == null) {
+					optimalPathStart = node;
+				}
+
+				prev = node;
+			}
+
+			optimalPathEnd = prev;
+		}
+
+		private void addPotentialSegments() {
+
+			//      boolean[] usedDir = new boolean[4];
+
+			PathNode next = null;
+			PathNode nextStart = null;
+			for (PathNode start = optimalPathStart;
+			start != null;
+			start = nextStart) {
+
+				nextStart = next = start.getFirstNext();
+
+				if (next == null)
+					break;
+
+				PathNode prev = null;
+
+				for (Sector sector = new Sector(start, next);
+				(next != null);
+				next = next.getFirstNext()) {
+
+					sector.intersectWithSectorTo(next);
+
+					if (sector.isEmpty())
+						break;
+
+					if (prev != null)
+						nextStart.addNext(prev);
+
+					prev = next;
+				}
+			}
+		}
+
+		//CLR 25.4: single-source shortest paths in directed acyclic graphs
+		private void computeTopologicallyOptimalPaths() {
+
+			for (PathNode node = optimalPathStart;
+			node != null;
+			node = node.getFirstNext())
+				node.d = Double.POSITIVE_INFINITY;
+
+			if (optimalPathStart != null)
+				optimalPathStart.d = 0;
+
+			for (PathNode node = optimalPathStart;
+			node != null;
+			node = node.getFirstNext()) {
+
+				for (PathNode next : node.nexts) {
+
+					double newD = node.d + 1.0;
+
+					if (newD < next.d) {
+						next.clearPrevs();
+						next.addPrev(node);
+						next.d = newD;
+					} else if (newD == next.d) {
+						next.addPrev(node);
+					}
+				}
+			}
+		}
+
+		private void computeSegmentWeights() {
+
+			int n = path.size();
+
+			Sx = new double[n];
+			Sy = new double[n];
+
+			Sxx = new double[n];
+			Syy = new double[n];
+
+			Sxy = new double[n];
+
+			double x = 0;
+			double y = 0;
+
+			double xx = 0;
+			double yy = 0;
+
+			double xy = 0;
+
+			int i = 0;
+
+			for (PathNode node = optimalPathStart;
+			node != null;
+			node = node.getFirstNext()) {
+
+				x += node.x;
+				y += node.y;
+
+				xx += node.x*node.x;
+				yy += node.y*node.y;
+
+				xy += node.x*node.y;
+
+				i = node.index;
+
+				Sx[i] = x;
+				Sy[i] = y;
+
+				Sxx[i] = xx;
+				Syy[i] = yy;
+
+				Sxy[i] = xy;
+			}
+		}
+
+		private double Ex(int i, int j) {
+			return (Sx[j] - Sx[i])/((double) (j-i));
+		}
+
+		private double Ey(int i, int j) {
+			return (Sy[j] - Sy[i])/((double) (j-i));
+		}
+
+		private double Exx(int i, int j) {
+			return (Sxx[j] - Sxx[i])/((double) (j-i));
+		}
+
+		private double Eyy(int i, int j) {
+			return (Syy[j] - Syy[i])/((double) (j-i));
+		}
+
+		private double Exy(int i, int j) {
+			return (Sxy[j] - Sxy[i])/((double) (j-i));
+		}
+
+		private double segmentWeight(PathNode from, PathNode to) {
+
+			double x = to.x - from.x;
+			double y = to.y - from.y;
+
+			double xAvg = (to.x + from.x)/2.0;
+			double yAvg = (to.y + from.y)/2.0;
+
+			int i = from.index;
+			int j = to.index;
+
+			double a = Exx(i, j) - 2*xAvg*Ex(i, j) + xAvg*xAvg;
+			double b = Exy(i, j) - xAvg*Ex(i, j) - yAvg*Ey(i, j) + xAvg*yAvg;
+			double c = Eyy(i, j) - 2*yAvg*Ey(i, j) + yAvg*yAvg;
+
+			return Math.sqrt(c*x*x + 2*b*x*y + a*y*y);
+		}
+
+		private void findOptimalPath() {
+
+			for (PathNode node = optimalPathStart;
+			node != null;
+			node = node.getFirstNext())
+				node.d = Double.POSITIVE_INFINITY;
+
+			if (optimalPathStart != null)
+				optimalPathStart.d = 0;
+
+			for (PathNode node = optimalPathStart;
+			node != null;
+			node = node.getFirstNext()) {
+
+				for (PathNode next : node.nexts) {
+
+					if (!next.hasPrev(node)) {
+						continue;
+					}
+
+					double newD = node.d + segmentWeight(node, next);
+
+					if (newD < next.d) {
+						next.optimalPrev = node;
+						next.d = newD;
+					}
+				}
+			}
+		}
+
+		int[] dir = new int[2];
+
+		final int HEAD = 0;
+		final int TAIL = 1;
+
+		private LinkedList<Node> path = new LinkedList<Node>();
+
+		GeometryArray geometry;
+
+		//    Node seed;
+
+		PathNode optimalPathStart = null;
+		PathNode optimalPathEnd = null;
+
+		double[] Sx;
+		double[] Sy;
+
+		double[] Sxx;
+		double[] Syy;
+
+		double[] Sxy;
+	}
+
+	private class Sector {
+
+		Sector(PathNode apex, PathNode first) {
+
+			apexX = apex.x;
+			apexY = apex.y;
+
+			computeAnglesTo(first);
+
+			startAngle = startAngleTo;
+			endAngle = endAngleTo;
+		}
+
+		void intersectWithSectorTo(PathNode node) {
+
+			computeAnglesTo(node);
+
+			startAngle = Math.max(startAngle, startAngleTo);
+			endAngle = Math.min(endAngle, endAngleTo);
+		}
+
+		boolean isEmpty() {
+			return startAngle > endAngle;
+		}
+
+		private void computeAnglesTo(PathNode node) {
+
+			for (int i = 0; i < 4; i++)
+				angle[i] =
+					Util.canonicalAngle(
+							(node.x + HORIZ_DIR_BIAS[i]*straightTol) - apexX,
+							(node.y + VERT_DIR_BIAS[i]*straightTol) - apexY);
+
+			startAngleTo = Double.POSITIVE_INFINITY;
+			endAngleTo = Double.NEGATIVE_INFINITY;
+
+			for (int i = 0; i < 4; i++) {
+				startAngleTo = Math.min(startAngleTo, angle[i]);
+				endAngleTo = Math.max(endAngleTo, angle[i]);
+			}
+		}
+
+		double[] angle = new double[4];
+
+		double startAngleTo;
+		double endAngleTo;
+
+		double startAngle;
+		double endAngle;
+
+		double apexX;
+		double apexY;
+	}
+
+	private class PathNode {
+
+		PathNode(Node node, PathNode prev, int index) {
+
+			x = toModelX(node.x);
+			y = toModelY(node.y);
+
+			this.index = index;
+
+			if (prev != null)
+				prev.addNext(this);
+
+			d = Double.POSITIVE_INFINITY;
+		}
+
+		void addNext(PathNode node) {
+			nexts.add(node);
+		}
+
+		PathNode getFirstNext() {
+
+			if (nexts.isEmpty())
+				return null;
+
+			//      return (PathNode) nexts.getFirst();
+			return (PathNode) nexts.get(0);
+		}
+
+		void addPrev(PathNode node) {
+			prevs.add(node);
+			//      if (prevs.size() > 1)
+			//        System.out.println("more than one prev from (" + x + ", " + y + ")");
+		}
+
+		boolean hasPrev(PathNode node) {
+			return prevs.contains(node);
+		}
+
+		PathNode getBestPrev() {
+
+			if (optimalPrev != null)
+				return optimalPrev;
+
+			if (prevs.isEmpty())
+				return null;
+
+			return (PathNode) prevs.iterator().next();
+		}
+
+		void clearPrevs() {
+			prevs.clear();
+		}
+
+		float x;
+		float y;
+
+		double d;
+
+		ArrayList<PathNode> nexts = new ArrayList<PathNode>();
+		Set<PathNode> prevs = new LinkedHashSet<PathNode>();
+
+		PathNode optimalPrev = null;
+
+		int index;
+	}
+
+	public BranchGroup getSceneGraph() {
+
+		if (sceneBG == null) {
+
+			Shape3D shape = new Shape3D();
+			shape.setPickable(false);
+
+			for (Iterator<Path> it = paths.iterator(); it.hasNext(); )
+				shape.addGeometry(it.next().getGeometry());
+
+			/*
       int vertexCount = nodes.size();
-  
+
       float[] coords = new float[vertexCount*6];
 
       int i = 0;
@@ -1148,7 +1162,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
         coords[i++] = x;
         coords[i++] = y;
         coords[i++] = Net.PATH_Z;
-        
+
       }
 
       System.out.println("vertexCount = " + vertexCount);
@@ -1161,236 +1175,251 @@ public class ToolpathsProcessor extends MosaicProcessor {
       geometry.setInterleavedVertices(coords);
 
       shape.addGeometry(geometry);
-*/
+			 */
 
-      sceneBG = new BranchGroup();
-      sceneBG.setPickable(false);
-      sceneBG.setCapability(BranchGroup.ALLOW_DETACH);
-      sceneBG.addChild(shape);
-    }
+			sceneBG = new BranchGroup();
+			sceneBG.setPickable(false);
+			sceneBG.setCapability(BranchGroup.ALLOW_DETACH);
+			sceneBG.addChild(shape);
+		}
 
-    return sceneBG;
-  }
+		return sceneBG;
+	}
 
-  private float toModelX(int x) {
-    return (float) (mosaicBounds.x + x/((float) dpi));
-  }
-  
-  private float toModelY(int y) {
-    return (float) (mosaicBounds.y + modelHeight-y/((float) dpi));
-  }
+	private float toModelX(int x) {
+		return (float) (mosaicBounds.x + x/((float) dpi));
+	}
 
-  private Path getClosestPath(Collection<Path> paths, Point2d p) {
+	private float toModelY(int y) {
+		return (float) (mosaicBounds.y + modelHeight-y/((float) dpi));
+	}
 
-    double minDist = Double.POSITIVE_INFINITY;
-    Path closest = null;
+	private Path getClosestPath(Collection<Path> paths, Point2d p) {
 
-    for (Path path : paths) {
+		double minDist = Double.POSITIVE_INFINITY;
+		Path closest = null;
 
-      double dist = p.distance(path.getStartPoint());
+		for (Path path : paths) {
 
-      if (dist < minDist) {
-        minDist = dist;
-        closest = path;
-      }
-    }
+			double dist = p.distance(path.getStartPoint());
 
-    paths.remove(closest);
+			if (dist < minDist) {
+				minDist = dist;
+				closest = path;
+			}
+		}
 
-    return closest;
-  }
+		paths.remove(closest);
 
-  public void writeGCode(Writer w) throws IOException {
+		return closest;
+	}
 
-    model.clearGCode();
-    gCodeStrokes.clear();
+	public void writeGCode(Writer w) throws IOException {
 
-    gCodePreAmble(w);
-    
-    Point2d p = new Point2d(0.0, 0.0);
+		model.clearGCode();
+		gCodeStrokes.clear();
 
-//    for (Iterator it = paths.iterator(); it.hasNext(); )
-//      ((Path) it.next()).writeGCode(w, p);
+		gCodePreAmble(w);
 
-    Collection<Path> paths = new LinkedList<Path>();
-    paths.addAll(this.paths);
+		Point2d p = new Point2d(0.0, 0.0);
 
-    while (!paths.isEmpty())
-      getClosestPath(paths, p).writeGCode(w, p);
+		//    for (Iterator it = paths.iterator(); it.hasNext(); )
+		//      ((Path) it.next()).writeGCode(w, p);
 
-    gCodePostAmble(w, p);
+		Collection<Path> paths = new LinkedList<Path>();
+		paths.addAll(this.paths);
 
-    int vertexCount = 2*gCodeStrokes.size() + 4;
-    float[] coords = new float[6*vertexCount];
+		while (!paths.isEmpty()) {
+			getClosestPath(paths, p).writeGCode(w, p);
+		}
+		gCodePostAmble(w, p);
 
-    Point3f p3f = new Point3f(0.0f, 0.0f, Net.GCODE_Z_MIN);
+		int vertexCount = 2*gCodeStrokes.size() + 4;
+		float[] coords = new float[6*vertexCount];
 
-    int i = 0;
+		Point3f p3f = new Point3f(0.0f, 0.0f, Net.GCODE_Z_MIN);
 
-    for (GCodeStroke stroke : gCodeStrokes) {
-      
-      coords[i++] = stroke.color.x;
-      coords[i++] = stroke.color.y;
-      coords[i++] = stroke.color.z;
+		int i = 0;
 
-      coords[i++] = p3f.x;
-      coords[i++] = p3f.y;
-      coords[i++] = p3f.z;
+		for (GCodeStroke stroke : gCodeStrokes) {
 
-      p3f.add(stroke.d);
+			coords[i++] = stroke.color.x;
+			coords[i++] = stroke.color.y;
+			coords[i++] = stroke.color.z;
 
-      coords[i++] = stroke.color.x;
-      coords[i++] = stroke.color.y;
-      coords[i++] = stroke.color.z;
+			coords[i++] = p3f.x;
+			coords[i++] = p3f.y;
+			coords[i++] = p3f.z;
 
-      coords[i++] = p3f.x;
-      coords[i++] = p3f.y;
-      coords[i++] = p3f.z;
-    }
+			p3f.add(stroke.d);
 
-    gCodeStrokes.clear();
+			coords[i++] = stroke.color.x;
+			coords[i++] = stroke.color.y;
+			coords[i++] = stroke.color.z;
 
-    float[] h = new float[] {-1, 1, 0, 0};
-    float[] v = new float[] {0, 0, -1, 1};
+			coords[i++] = p3f.x;
+			coords[i++] = p3f.y;
+			coords[i++] = p3f.z;
+		}
 
-    for (int j = 0; j < 4; j++) {
-      coords[i++] = ORIGIN_COLOR.x;
-      coords[i++] = ORIGIN_COLOR.y;
-      coords[i++] = ORIGIN_COLOR.z;
+		gCodeStrokes.clear();
 
-      coords[i++] = h[j]*ORIGIN_TICK;
-      coords[i++] = v[j]*ORIGIN_TICK;
-      coords[i++] = Net.GCODE_Z_MIN;
-    }
+		float[] h = new float[] {-1, 1, 0, 0};
+		float[] v = new float[] {0, 0, -1, 1};
 
-    GeometryArray gCodeGeometry = new LineArray(vertexCount,
-                                                GeometryArray.COORDINATES |
-                                                GeometryArray.COLOR_3 |
-                                                GeometryArray.INTERLEAVED |
-                                                GeometryArray.BY_REFERENCE);
-    gCodeGeometry.setInterleavedVertices(coords);
+		for (int j = 0; j < 4; j++) {
+			coords[i++] = ORIGIN_COLOR.x;
+			coords[i++] = ORIGIN_COLOR.y;
+			coords[i++] = ORIGIN_COLOR.z;
 
-    Shape3D gCodeS3D = new Shape3D();
-    gCodeS3D.setGeometry(gCodeGeometry);
+			coords[i++] = h[j]*ORIGIN_TICK;
+			coords[i++] = v[j]*ORIGIN_TICK;
+			coords[i++] = Net.GCODE_Z_MIN;
+		}
+
+		GeometryArray gCodeGeometry = new LineArray(vertexCount,
+				GeometryArray.COORDINATES |
+				GeometryArray.COLOR_3 |
+				GeometryArray.INTERLEAVED |
+				GeometryArray.BY_REFERENCE);
+		gCodeGeometry.setInterleavedVertices(coords);
+
+		Shape3D gCodeS3D = new Shape3D();
+		gCodeS3D.setGeometry(gCodeGeometry);
+
+		BranchGroup gCodeBG = new BranchGroup();
+		gCodeBG.setPickable(false);
+		gCodeBG.setCapability(BranchGroup.ALLOW_DETACH);
+		gCodeBG.addChild(gCodeS3D);
+
+		model.setGCode(gCodeBG);
+	}
+
+	private class GCodeStroke {
+
+		GCodeStroke(Vector3f d, Color3f color) {
+			this.color = color;
+			this.d = d;
+		}
+
+		Color3f color;
+		Vector3f d;
+	}
+
+	private void gCodePreAmble(Writer w) throws IOException {
+
+		if (w == null) {
+			return;
+		}
+
+		w.write("G20\n");    // inches //TODO: allow metric too
+		w.write("G17 ");     // X-Y plane
+		w.write("G40 G49 "); // Cancel tool lengh & cutter dia compensation
+		//    w.write("G53 ");     // Motion in machine co-ordinate system
+		w.write("G80\n");    // Cancel any existing motion cycle
+		w.write("G91\n");    // Relative distance mode //TODO: allow absolute coordinates too
+	}
 
-    BranchGroup gCodeBG = new BranchGroup();
-    gCodeBG.setPickable(false);
-    gCodeBG.setCapability(BranchGroup.ALLOW_DETACH);
-    gCodeBG.addChild(gCodeS3D);
+	private void gCodePostAmble(Writer w, Point2d p) throws IOException {
 
-    model.setGCode(gCodeBG);
-  }
+		gCodeCutterUp(w);
+		gCodeRapidMovement(w, p, 0.0, 0.0); //rapid to origin
 
-  private class GCodeStroke {
+		if (w == null) {
+			return;
+		}
 
-    GCodeStroke(Vector3f d, Color3f color) {
-      this.color = color;
-      this.d = d;
-    }
+		w.write("M5\n"); // Spindle Stop
+		w.write("M2\n"); // End of program
+	}
 
-    Color3f color;
-    Vector3f d;
-  }
+	private void gCodeCutterUp(Writer w) throws IOException {
 
-  private void gCodePreAmble(Writer w) throws IOException {
+		if (w != null) {
+			w.write(CUTTER_UP);
+		}
 
-    if (w == null)
-      return;
+		gCodeStrokes.add(new GCodeStroke(new Vector3f(0.0f,
+				0.0f,
+				(float) CLEARANCE_Z),
+				G_CODE_COLOR_NORMAL));
+	}
 
-    w.write("G20\n");    // inches
-    w.write("G17 ");     // X-Y plane
-    w.write("G40 G49 "); // Cancel tool lengh & cutter dia compensation
-//    w.write("G53 ");     // Motion in machine co-ordinate system
-    w.write("G80\n");    // Cancel any existing motion cycle
-    w.write("G91\n");    // Relative distance mode
-  }
+	private void gCodeCutterDown(final Writer w) throws IOException {
 
-  private void gCodePostAmble(Writer w, Point2d p) throws IOException {
+		if (w != null) {
+			w.write(CUTTER_DOWN);
+		}
 
-    gCodeCutterUp(w);
-    gCodeRapid(w, p, 0.0, 0.0); //rapid to origin
+		gCodeStrokes.add(new GCodeStroke(new Vector3f(0.0f,
+				0.0f,
+				(float) (-CLEARANCE_Z)),
+				G_CODE_COLOR_NORMAL));
+	}
 
-    if (w == null)
-      return;
+	/**
+	 * Add a g-code for a rapid, linear movement.
+     *
+	 * @param w where to write the gcode to
+	 * @param p the current location. SIDEE FFECT: Will be updated to be x,y
+	 * @param x the absolute location to move to
+	 * @param y the absolute location to move to
+	 * @throws IOException
+	 */
+	private void gCodeRapidMovement(final Writer w, final Point2d p, final double x, final double y)
+	throws IOException {
 
-    w.write("M5\n"); // Spindle Stop
-    w.write("M2\n"); // End of program
-  }
+		//TODO: allow absolute coordinates too
+		double dx = x - p.x;
+		double dy = y - p.y;
 
-  private void gCodeCutterUp(Writer w) throws IOException {
+		if (w != null) {
+			w.write("G0 X" +
+					gCodeFormat.format(dx) + " Y" +
+					gCodeFormat.format(dy) + "\n");
+		}
 
-    if (w != null)
-      w.write(CUTTER_UP);
+		p.x += dx;
+		p.y += dy;
 
-    gCodeStrokes.add(new GCodeStroke(new Vector3f(0.0f,
-                                                  0.0f,
-                                                  (float) CLEARANCE_Z),
-                                     G_CODE_COLOR_NORMAL));
-  }
+		gCodeStrokes.add(new GCodeStroke(new Vector3f((float) dx,
+				(float) dy,
+				0.0f),
+				G_CODE_COLOR_RAPID));
+	}
 
-  private void gCodeCutterDown(Writer w) throws IOException {
+	private void gCodeLinear(Writer w, Point2d p, double x, double y)
+	throws IOException {
 
-    if (w != null)
-      w.write(CUTTER_DOWN);
+		double dx = x - p.x;
+		double dy = y - p.y;
 
-    gCodeStrokes.add(new GCodeStroke(new Vector3f(0.0f,
-                                                  0.0f,
-                                                  (float) (-CLEARANCE_Z)),
-                                     G_CODE_COLOR_NORMAL));
-  }
+		if (w != null)
+			w.write("G1 X" +
+					gCodeFormat.format(dx) + " Y" +
+					gCodeFormat.format(dy) + "\n");
 
-  private void gCodeRapid(Writer w, Point2d p, double x, double y)
-    throws IOException {
+		p.x += dx;
+		p.y += dy;
 
-    double dx = x - p.x;
-    double dy = y - p.y;
+		gCodeStrokes.add(new GCodeStroke(new Vector3f((float) dx,
+				(float) dy,
+				0.0f),
+				G_CODE_COLOR_NORMAL));
+	}
 
-    if (w != null)
-      w.write("G0 X" +
-              gCodeFormat.format(dx) + " Y" +
-              gCodeFormat.format(dy) + "\n");
+	private Map<Node, Node> nodes = new LinkedHashMap<Node, Node>();
+	private List<Path> paths = new LinkedList<Path>();
 
-    p.x += dx;
-    p.y += dy;
+	private DataBuffer buffer;
 
-    gCodeStrokes.add(new GCodeStroke(new Vector3f((float) dx,
-                                                  (float) dy,
-                                                  0.0f),
-                                     G_CODE_COLOR_RAPID));
-  }
+	private BranchGroup sceneBG = null;
 
-  private void gCodeLinear(Writer w, Point2d p, double x, double y)
-    throws IOException {
+	private int mode;
 
-    double dx = x - p.x;
-    double dy = y - p.y;
+	private int currentTick = 0;
 
-    if (w != null)
-      w.write("G1 X" +
-              gCodeFormat.format(dx) + " Y" +
-              gCodeFormat.format(dy) + "\n");
-    
-    p.x += dx;
-    p.y += dy;
+	private double straightTol;
 
-    gCodeStrokes.add(new GCodeStroke(new Vector3f((float) dx,
-                                                  (float) dy,
-                                                  0.0f),
-                                     G_CODE_COLOR_NORMAL));
-  }
-
-  private Map<Node, Node> nodes = new LinkedHashMap<Node, Node>();
-  private List<Path> paths = new LinkedList<Path>();
-
-  private DataBuffer buffer;
-
-  private BranchGroup sceneBG = null;
-
-  private int mode;
-  
-  private int currentTick = 0;
-
-  private double straightTol;
-
-  private List<GCodeStroke> gCodeStrokes = new LinkedList<GCodeStroke>();
+	private List<GCodeStroke> gCodeStrokes = new LinkedList<GCodeStroke>();
 }

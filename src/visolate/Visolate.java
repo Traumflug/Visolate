@@ -438,23 +438,26 @@ public class Visolate extends JPanel implements SimulatorUI {
 		saveGCode(new File(gcodeField.getText().trim()));
 	}
 
-	public void saveGCode(File file) {
+	public void saveGCode(final File file) {
 
 		gcodeField.setText(file.toString());
 
-		if (toolpathsProcessor == null)
+		if (toolpathsProcessor == null) {
 			return;
+		}
 
 		try {
 
-			if (file.exists() &&
-					!(JOptionPane.
+			if (file.exists()) {
+				int yesno = JOptionPane.
 							showConfirmDialog(this,
 									"Overwrite existing G-Code file " + file + "?",
 									"Overwrite?",
-									JOptionPane.YES_NO_OPTION) ==
-										JOptionPane.YES_OPTION))
-				return;
+									JOptionPane.YES_NO_OPTION);
+				if (yesno != JOptionPane.YES_OPTION) {					
+					return;
+				}
+			}
 
 			try {
 				FileWriter w = new FileWriter(file);
@@ -766,6 +769,9 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private JTextField gcodeField;
 	private JButton gcodeBrowseButton;
 
+	/**
+	 * The ToolpathsProcessor generates the g-code that we write to a file.
+	 */
 	private ToolpathsProcessor toolpathsProcessor = null;
 
 	private Set<Net> selectedNets = new LinkedHashSet<Net>();
