@@ -1469,8 +1469,8 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		if (w != null) {
 			if (isOutputAbsoluteCoordinates()) {
 				w.write("G1 X" +
-						gCodeFormat.format(p.x + getAbsoluteXStart()) + " Y" +
-						gCodeFormat.format(p.y + getAbsoluteYStart()) + "Z" + 
+						gCodeFormat.format(convertUnits(p.x) + getAbsoluteXStart()) + " Y" +
+						gCodeFormat.format(convertUnits(p.y) + getAbsoluteYStart()) + " Z" + 
 						gCodeFormat.format(getZCuttingHeight() + getZClearance()) + "\n");
 				p.z = getZClearance();
 			} else {
@@ -1489,8 +1489,8 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		if (w != null) {
 			if (isOutputAbsoluteCoordinates()) {
 				w.write("G1 X" +
-						gCodeFormat.format(p.x + getAbsoluteXStart()) + " Y" +
-						gCodeFormat.format(p.y + getAbsoluteYStart()) + "Z" +
+						gCodeFormat.format(convertUnits(p.x) + getAbsoluteXStart()) + " Y" +
+						gCodeFormat.format(convertUnits(p.y) + getAbsoluteYStart()) + " Z" +
 						gCodeFormat.format(getZCuttingHeight()) + "\n");
 				p.z = 0.0;
 			} else {

@@ -376,6 +376,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myInitialXPanel.add(new JLabel("X"), BorderLayout.WEST);
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
 			myInitialXPanel.add(field, BorderLayout.CENTER);
+			myInitialYPanel.setToolTipText("Left side is at this coordinate (mm or inch)");
 			myInitialXPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
 				
 				@Override
@@ -410,6 +411,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myInitialYPanel.add(new JLabel("Y"), BorderLayout.WEST);
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
 			myInitialYPanel.add(field, BorderLayout.CENTER);
+			myInitialYPanel.setToolTipText("Upper side is at this coordinates (mm or inch)");
 			myInitialYPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
 				
 				@Override
@@ -443,6 +445,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myZDownMovementPanel = new JPanel();
 			myZDownMovementPanel.setLayout(new BorderLayout());
 			myZDownMovementPanel.add(new JLabel("travel clearance"), BorderLayout.WEST);
+			myZDownMovementPanel.setToolTipText("When not cutting, lift the head this much (mm or inch)");
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(ToolpathsProcessor.CLEARANCE_Z));
 			myZDownMovementPanel.add(field, BorderLayout.CENTER);
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
@@ -469,6 +472,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myZCuttingHeightPanel = new JPanel();
 			myZCuttingHeightPanel.setLayout(new BorderLayout());
 			myZCuttingHeightPanel.add(new JLabel("cutting height"), BorderLayout.WEST);
+			myZCuttingHeightPanel.setToolTipText("When cutting the head should have this z-coordinate (mm or inch)");
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
 			myZCuttingHeightPanel.add(field, BorderLayout.CENTER);
 			myZCuttingHeightPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
@@ -551,6 +555,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		if (myMetricButton == null) {
 			myMetricButton = new JRadioButton("metric");
 			myMetricButton.setSelected(false);
+			myMetricButton.setToolTipText("output gcode in mm. coordinates entered here must be in mm too");
 			myMetricButton.addActionListener(new ActionListener() {
 				
 				@Override
@@ -572,6 +577,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		if (myImperialButton == null) {
 			myImperialButton = new JRadioButton("imperial");
 			myImperialButton.setSelected(true);
+			myImperialButton.setToolTipText("output gcode in inch. coordinates entered here must be in inch too");
 			myImperialButton.addActionListener(new ActionListener() {
 				
 				@Override
