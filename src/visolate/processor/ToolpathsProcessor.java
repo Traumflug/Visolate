@@ -1413,7 +1413,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		}
 
 		w.write("G20\n");    // inches //TODO: allow metric too
-		w.write("G17\n ");     // X-Y plane
+		w.write("G17\n");     // X-Y plane
 		w.write("G40\nG49\n"); // Cancel tool lengh & cutter dia compensation
 		//    w.write("G53\n");     // Motion in machine co-ordinate system
 		w.write("G80\n");    // Cancel any existing motion cycle
