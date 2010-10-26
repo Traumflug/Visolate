@@ -154,6 +154,24 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		this.myAbsoluteYStart = setAbsoluteYStart;
 	}
 
+	private double myMovementSpeed = 2;
+	private double myMillingSpeed = 2;
+	public double getMovementSpeed() {
+		return myMovementSpeed;
+	}
+
+	public void setMovementSpeed(double myMovementSpeed) {
+		this.myMovementSpeed = myMovementSpeed;
+	}
+
+	public double getMillingSpeed() {
+		return myMillingSpeed;
+	}
+
+	public void setMillingSpeed(double myMillingSpeed) {
+		this.myMillingSpeed = myMillingSpeed;
+	}
+
 	/**
 	 * If we use absolute coordinates,
 	 * then this is the X-value for the left upper corner.
@@ -251,6 +269,9 @@ public class ToolpathsProcessor extends MosaicProcessor {
 			model.enableFlatGeometry(true);
 			model.enableGCodeGeometry(false);
 			break;
+		default:
+			 System.out.println("no mode!");
+			 return;
 		}
 
 		model.setTranslucent2D(false);
@@ -1471,7 +1492,8 @@ public class ToolpathsProcessor extends MosaicProcessor {
 				w.write("G1 X" +
 						gCodeFormat.format(convertUnits(p.x) + getAbsoluteXStart()) + " Y" +
 						gCodeFormat.format(convertUnits(p.y) + getAbsoluteYStart()) + " Z" + 
-						gCodeFormat.format(getZCuttingHeight() + getZClearance()) + "\n");
+						gCodeFormat.format(getZCuttingHeight() + getZClearance()) + " F"+
+						gCodeFormat.format(60 * getMovementSpeed()) + "\n");
 				p.z = getZClearance();
 			} else {
 				w.write("G1 Z" + gCodeFormat.format(getZClearance()) + "\n");
@@ -1491,7 +1513,8 @@ public class ToolpathsProcessor extends MosaicProcessor {
 				w.write("G1 X" +
 						gCodeFormat.format(convertUnits(p.x) + getAbsoluteXStart()) + " Y" +
 						gCodeFormat.format(convertUnits(p.y) + getAbsoluteYStart()) + " Z" +
-						gCodeFormat.format(getZCuttingHeight()) + "\n");
+						gCodeFormat.format(getZCuttingHeight()) + " F"+
+						gCodeFormat.format(60 * getMovementSpeed()) + "\n");
 				p.z = 0.0;
 			} else {
 				w.write("G1 Z" + gCodeFormat.format(-1 * getZClearance()) + "\n");
@@ -1524,11 +1547,13 @@ public class ToolpathsProcessor extends MosaicProcessor {
 				w.write("G0 X" +
 						gCodeFormat.format(convertUnits(x) + getAbsoluteXStart()) + " Y" +
 						gCodeFormat.format(convertUnits(y) + getAbsoluteYStart()) + " Z"+
-						gCodeFormat.format(p.z + getZCuttingHeight()) + "\n");
+						gCodeFormat.format(p.z + getZCuttingHeight()) + " F"+
+						gCodeFormat.format(60 * getMovementSpeed()) + "\n");
 			} else {
 				w.write("G0 X" +
 						gCodeFormat.format(convertUnits(dx)) + " Y" +
-						gCodeFormat.format(convertUnits(dy)) + "\n");
+						gCodeFormat.format(convertUnits(dy)) + " F"+
+						gCodeFormat.format(60 * getMovementSpeed()) + "\n");
 			}
 		}
 
@@ -1552,11 +1577,13 @@ public class ToolpathsProcessor extends MosaicProcessor {
 				w.write("G1 X" +
 						gCodeFormat.format(convertUnits(x) + getAbsoluteXStart()) + " Y" +
 						gCodeFormat.format(convertUnits(y) + getAbsoluteYStart()) + " Z" +
-						gCodeFormat.format(p.z + getZCuttingHeight()) + "\n");
+						gCodeFormat.format(p.z + getZCuttingHeight()) + " F"+
+						gCodeFormat.format(60 * getMillingSpeed()) + "\n");
 			} else {
 				w.write("G1 X" +
 						gCodeFormat.format(convertUnits(dx)) + " Y" +
-						gCodeFormat.format(convertUnits(dy)) + "\n");
+						gCodeFormat.format(convertUnits(dy)) + " F"+
+						gCodeFormat.format(60 * getMillingSpeed()) + "\n");
 			}
 		}
 

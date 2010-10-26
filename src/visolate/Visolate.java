@@ -44,9 +44,17 @@ import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
 import java.security.*;
 
+import org.apache.commons.cli.CommandLine;
+
 public class Visolate extends JPanel implements SimulatorUI {
 
 	public static final String DEMO_FILE = "example.grb";
+	/**
+	 * kept here so it is available in the invokeLater Runnable in Main
+	 */
+	public CommandLine commandline;
+	public int processstatus;
+	public boolean auto_mode;
 
 	private static final String cvsid =
 		"$Id: Visolate.java,v 1.11 2006/09/15 19:48:24 vona Exp $";
@@ -63,6 +71,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 	public Visolate(File file) {
 
+		processstatus=0;
 		display = new Display(this);
 		simulator = new Simulator(this);
 		model = new Model(this);
@@ -353,16 +362,19 @@ public class Visolate extends JPanel implements SimulatorUI {
 			panel.add(new JLabel("Z-coordinates"));
 			panel.add(new JLabel("left upper coordinates"));
 			panel.add(new JLabel("Metric"));
+			panel.add(new JLabel("Speed"));
 
 			panel.add(getRelativeCoordinatesButton());
 			panel.add(getZCuttingHeightPanel());
 			panel.add(getInitialXPanel());
 			panel.add(getMetricButton());
+			panel.add(getMillingSpeedPanel());
 
 			panel.add(getAbsoluteCoordinatesButton());
 			panel.add(getZDownMovementPanel());
 			panel.add(getInitialYPanel());
 			panel.add(getImperialButton());
+			panel.add(getMovementSpeedPanel());
 
 			myGCodeOptionsBox.add(panel);
 		}
@@ -376,7 +388,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myInitialXPanel.add(new JLabel("X"), BorderLayout.WEST);
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
 			myInitialXPanel.add(field, BorderLayout.CENTER);
-			myInitialYPanel.setToolTipText("Left side is at this coordinate (mm or inch)");
+			myInitialXPanel.setToolTipText("Left side is at this coordinate (mm or inch)");
 			myInitialXPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
 				
 				@Override
@@ -439,7 +451,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 		}
 		return myInitialYPanel;
 	}
-
 	private Component getZDownMovementPanel() {
 		if (myZDownMovementPanel == null) {
 			myZDownMovementPanel = new JPanel();
@@ -465,6 +476,64 @@ public class Visolate extends JPanel implements SimulatorUI {
 			});
 		}
 		return myZDownMovementPanel;
+	}
+
+	private JPanel getMillingSpeedPanel() {
+		if (myMillingSpeedPanel == null) {
+			myMillingSpeedPanel = new JPanel();
+			myMillingSpeedPanel.setLayout(new BorderLayout());
+			myMillingSpeedPanel.add(new JLabel("milling speed"), BorderLayout.WEST);
+			myMillingSpeedPanel.setToolTipText("speed of head-movement during milling (mm or inch per second)");
+			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
+			myMillingSpeedPanel.add(field, BorderLayout.CENTER);
+
+			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
+				
+
+
+				@Override
+				public void undoableEditHappened(UndoableEditEvent evt) {
+					try {
+						myMillingSpeed = NumberFormat.getInstance().parse(field.getText()).doubleValue();
+						if (myAoolpathsProcessor != null) {
+							myAoolpathsProcessor.setMillingSpeed(myMillingSpeed);
+						}
+					} catch (ParseException e) {
+						evt.getEdit().undo();
+					}
+					
+				}
+			});
+		}
+		return myMillingSpeedPanel;
+	}
+
+	private JPanel getMovementSpeedPanel() {
+		if (myMovementSpeedPanel == null) {
+			myMovementSpeedPanel = new JPanel();
+			myMovementSpeedPanel.setLayout(new BorderLayout());
+			myMovementSpeedPanel.add(new JLabel("Movement speed"), BorderLayout.WEST);
+			myMovementSpeedPanel.setToolTipText("speed of head-movement during Movement (mm or inch per second)");
+			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
+			myMovementSpeedPanel.add(field, BorderLayout.CENTER);
+
+			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
+				
+				@Override
+				public void undoableEditHappened(UndoableEditEvent evt) {
+					try {
+						myMovementSpeed = NumberFormat.getInstance().parse(field.getText()).doubleValue();
+						if (myAoolpathsProcessor != null) {
+							myAoolpathsProcessor.setMovementSpeed(myMovementSpeed);
+						}
+					} catch (ParseException e) {
+						evt.getEdit().undo();
+					}
+					
+				}
+			});
+		}
+		return myMovementSpeedPanel;
 	}
 
 	private JPanel getZCuttingHeightPanel() {
@@ -511,16 +580,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 				
 				@Override
 				public void actionPerformed(final ActionEvent e) {
-					if (myAbsoluteCoordinatesButton.isSelected()) {
-						getRelativeCoordinatesButton().setSelected(false);
-						getZCuttingHeightPanel().setEnabled(true);
-						getInitialXPanel().setEnabled(true);
-						getInitialYPanel().setEnabled(true);
-						if (myAoolpathsProcessor != null) {
-							myAoolpathsProcessor.setOutputAbsoluteCoordinates(true);
-						}
-					}
-					
+					setAbsoluteCoordinates(myAbsoluteCoordinatesButton.isSelected());
 				}
 			});
 		}
@@ -535,20 +595,22 @@ public class Visolate extends JPanel implements SimulatorUI {
 				
 				@Override
 				public void actionPerformed(final ActionEvent e) {
-					if (myRelativeCoordinatesButton.isSelected()) {
-						getAbsoluteCoordinatesButton().setSelected(false);
-						getZCuttingHeightPanel().setEnabled(false);
-						getInitialXPanel().setEnabled(false);
-						getInitialYPanel().setEnabled(false);
-						if (myAoolpathsProcessor != null) {
-							myAoolpathsProcessor.setOutputAbsoluteCoordinates(false);
-						}
-					}
-					
+					setAbsoluteCoordinates(!myRelativeCoordinatesButton.isSelected());
 				}
 			});
 		}
 		return myRelativeCoordinatesButton;
+	}
+
+	public void setAbsoluteCoordinates(final boolean newValue) {
+		getAbsoluteCoordinatesButton().setSelected(newValue);
+		getRelativeCoordinatesButton().setSelected(!newValue);
+		getZCuttingHeightPanel().setEnabled(newValue);
+		getInitialXPanel().setEnabled(newValue);
+		getInitialYPanel().setEnabled(newValue);
+		if (myAoolpathsProcessor != null) {
+			myAoolpathsProcessor.setOutputAbsoluteCoordinates(newValue);
+		}
 	}
 
 	private JRadioButton getMetricButton() {
@@ -625,7 +687,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		}
 	}
 
-	private void fixTopology() {
+	public void fixTopology() {
 		startProcess(new TopologyProcessor(this));
 	}
 
@@ -642,6 +704,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 		myAoolpathsProcessor.setZCuttingHeight(selectedZCuttingHeight);
 		myAoolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
 		myAoolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
+		myAoolpathsProcessor.setMillingSpeed(myMillingSpeed);
+		myAoolpathsProcessor.setMovementSpeed(myMovementSpeed);
 
 		startProcess(myAoolpathsProcessor);
 	}
@@ -708,6 +772,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 		currentFile = file;
 		loadField.setText(file.toString());
+		setGcodeFile(file.toString()+".ngc");
 
 		try {
 			load(new FileInputStream(file));
@@ -741,6 +806,10 @@ public class Visolate extends JPanel implements SimulatorUI {
 		model.rebuild();
 	}
 
+	public void setGcodeFile(String filename) {
+		gcodeField.setText(filename);
+	}
+
 	public void saveGCode() {
 		saveGCode(new File(gcodeField.getText().trim()));
 	}
@@ -755,7 +824,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 		try {
 
-			if (file.exists()) {
+			if (file.exists()&& (!auto_mode)) {
 				int yesno = JOptionPane.
 				showConfirmDialog(this,
 						"Overwrite existing G-Code file " + file + "?",
@@ -1004,6 +1073,17 @@ public class Visolate extends JPanel implements SimulatorUI {
 		stopButton.setEnabled(false);
 
 		processor = null;
+
+		if (processstatus == 1) {  //returning from automated topology fixing
+		  processstatus=2;
+		  computeToolpaths();
+		} else if (processstatus==2) { //returning from automated toolpath creation
+		  System.out.println("Writing to gcode file: "+gcodeField.getText().trim());
+		  saveGCode(new File(gcodeField.getText().trim()));
+		  System.out.println("Exiting, all work done");
+		  System.exit(0);
+		}
+
 	}
 
 	public void addFrameTask(Runnable task) {
@@ -1045,7 +1125,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 
 	private Simulator simulator;
-	private Model model;
+	public Model model;
 	private Display display;
 
 	private JTextField loadField;
@@ -1101,6 +1181,10 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private JRadioButton myMetricButton;
 	private JPanel myZCuttingHeightPanel;
 	private JPanel myZDownMovementPanel;
+	private JPanel myMillingSpeedPanel;
+	private JPanel myMovementSpeedPanel;
 	private JPanel myInitialXPanel;
 	private JPanel myInitialYPanel;
+	private double myMillingSpeed = 2;
+	private double myMovementSpeed = 2;
 }

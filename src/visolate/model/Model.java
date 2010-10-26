@@ -955,7 +955,7 @@ public class Model extends JPanel {
 		System.out.println(n + " collected nets (" + numSup + " supernets)");
 	}
 
-	private void setFlipX(boolean flipX) {
+	public void setFlipX(boolean flipX) {
 		if (flipX) {
 			if (flipXScale > 0.0) {
 				flipXScale = -1.0;
@@ -970,9 +970,10 @@ public class Model extends JPanel {
 				updateFlipT3D();
 			}
 		}
+		flipXButton.setSelected(flipX);
 	}
 
-	private void setFlipY(boolean flipY) {
+	public void setFlipY(boolean flipY) {
 		if (flipY) {
 			if (flipYScale > 0.0) {
 				flipYScale = -1.0;
@@ -987,6 +988,7 @@ public class Model extends JPanel {
 				updateFlipT3D();
 			}
 		}
+		flipYButton.setSelected(flipY);
 	}
 
 	private void updateFlipT3D() {

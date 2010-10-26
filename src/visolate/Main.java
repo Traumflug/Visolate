@@ -24,12 +24,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.*;
 
+import org.apache.commons.cli.*;
+
 public class Main extends JApplet {
 
   private static final String cvsid =
   "$Id: Main.java,v 1.5 2006/08/29 00:13:02 vona Exp $";
 
-  public static final String APPNAME = "Visolate 2.1.4";
+  public static final String APPNAME = "Visolate 2.1.6";
   public static final int DEF_LOC_X = 100;
   public static final int DEF_LOC_Y = 100;
 
@@ -56,6 +58,43 @@ public class Main extends JApplet {
   }
 
   public static void main(final String[] argv) {
+
+    CommandLineParser parser = new PosixParser();
+    Options options = new Options();
+    options.addOption( "x", "flip-x", false, "flip around x axis" );
+    options.addOption( "y", "flip-y", false, "flip around y axis" );
+    options.addOption( "absolute", false, "use absolute cooridnates" );
+    options.addOption( "d", "dpi", true, "dpi to use for rastering");
+    options.addOption( "a", "auto", false, "auto-mode (run, save and exit)");
+    options.addOption( "o", "outfile", true, "name of output file");
+
+    options.addOption( "h", "help", false, "display this help and exit" );
+    options.addOption( "version", false, "output version information and exit" );
+
+    CommandLine commandline;
+    try {
+            commandline = parser.parse(options, argv);
+    } catch (ParseException e) {
+            System.err.println(e.getLocalizedMessage());
+            System.exit(1);
+            return; // make it clear to the compiler that the following code is not run
+    }
+
+    if (commandline.hasOption("version")) {
+        System.out.println(APPNAME);
+        return;
+    }
+
+    if (commandline.hasOption("help")) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("visolate [options] [filename]", options );
+        return;
+    }
+
+    if (commandline.getArgs().length >= 2) {
+            System.err.println("Error: Too many arguments.");
+            System.exit(1);
+    }
   
     final JFrame frame = new JFrame(APPNAME);
 
@@ -63,6 +102,7 @@ public class Main extends JApplet {
     frame.setLocation(DEF_LOC_X, DEF_LOC_Y);
 
     final Visolate visolate = new Visolate();
+    visolate.commandline = commandline;
 
     Container contentPane = frame.getContentPane();
     contentPane.setLayout(new BorderLayout());
@@ -76,11 +116,47 @@ public class Main extends JApplet {
             frame.pack();
             frame.setVisible(true);
 
-            if (argv.length > 0)
-              visolate.loadFile(new File(argv[0]));
-            else
-              visolate.loadDemo();
-          }
+            if (visolate.commandline.getArgs().length == 1) {
+                visolate.loadFile(new File(visolate.commandline.getArgs()[0]));
+            } else {
+                visolate.loadDemo();
+            }
+
+            visolate.model.rebuild();
+
+            if (visolate.commandline.hasOption("auto")) {
+                     System.out.println("Automatic processing enabled! Files will be overwritten without asking!");
+                     visolate.auto_mode=true;
+            }
+
+            if (visolate.commandline.hasOption("dpi")) {
+                    visolate.getDisplay().setDPI(Integer.parseInt(visolate.commandline.getOptionValue("dpi")));
+            }
+
+            if (visolate.commandline.hasOption("flip-x")) {
+                    visolate.model.setFlipX(true);
+            }
+            if (visolate.commandline.hasOption("flip-y")) {
+                    visolate.model.setFlipY(true);
+            }
+
+            if (visolate.commandline.hasOption("absolute")) {
+                    visolate.setAbsoluteCoordinates(true);
+            }
+
+            if (visolate.commandline.hasOption("outfile")) {
+                    visolate.setGcodeFile(visolate.commandline.getOptionValue("outfile"));
+            }
+
+            if (visolate.commandline.hasOption("auto")) {
+                     System.out.println("now starting fixing topology due to automatic mode");
+                     visolate.processstatus=1;
+
+                     visolate.fixTopology();
+                     // fix.Topology() calls visolate.processFinished after its done. Also, the Toolpathprocessor does so. processstatus discriminates this.
+            }
+        }
+
       });
   }
 

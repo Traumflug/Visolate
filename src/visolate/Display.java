@@ -322,7 +322,7 @@ public class Display extends JPanel {
     locationBox.add(locationLabelX);
     locationBox.add(new JLabel(", "));
     locationBox.add(locationLabelY);
-    locationBox.add(new JLabel(" [in]"));
+    locationBox.add(new JLabel(" mm (in)"));
 
     locationBox.add(Box.createHorizontalGlue());
 
@@ -860,14 +860,20 @@ public class Display extends JPanel {
 //    return bufferedImage;
 //  }
 
-  private double mouseX(MouseEvent e) {
-    return e.getX()/((double) dpi) + viewCenter.x-getVirtualCanvasWidth()/2;
+  /**
+   * @return coordinate under the mouse in Inch.
+   */
+  private double mouseX(final MouseEvent e) {
+    return e.getX() / ((double) dpi) + viewCenter.x - getVirtualCanvasWidth()/2;
   }
 
-  private double mouseY(MouseEvent e) {
+  /**
+   * @return coordinate under the mouse in Inch.
+   */
+  private double mouseY(final MouseEvent e) {
     return
-      (canvas3D.getHeight()-e.getY())/((double) dpi) +
-      viewCenter.y-getVirtualCanvasHeight()/2;
+      (canvas3D.getHeight() - e.getY()) / ((double) dpi) +
+      viewCenter.y - getVirtualCanvasHeight()/2;
   }
 
   private class MyCanvas3D extends Canvas3D {
@@ -931,8 +937,9 @@ public class Display extends JPanel {
           }
           
           public void mouseMoved(MouseEvent e) {
-            locationLabelX.setText(locFormat.format(mouseX(e)));
-            locationLabelY.setText(locFormat.format(mouseY(e)));
+            locationLabelX.setText(locFormat.format(25.4 * mouseX(e)) + "(" + locFormat.format(mouseX(e)) + ")");
+            locationLabelY.setText(locFormat.format(25.4 * mouseY(e)) + "(" + locFormat.format(mouseY(e)) + ")");
+            
           } });
       
       addMouseWheelListener(new MouseWheelListener() {
