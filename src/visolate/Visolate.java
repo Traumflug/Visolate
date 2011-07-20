@@ -369,7 +369,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			panel.add(getZDownMovementPanel());
 			panel.add(getInitialYPanel());
 			panel.add(getImperialButton());
-			panel.add(getMovementSpeedPanel());
+			panel.add(getPlungeSpeedPanel());
 
 			myGCodeOptionsBox.add(panel);
 		}
@@ -503,23 +503,23 @@ public class Visolate extends JPanel implements SimulatorUI {
 		return myMillingSpeedPanel;
 	}
 
-	private JPanel getMovementSpeedPanel() {
-		if (myMovementSpeedPanel == null) {
-			myMovementSpeedPanel = new JPanel();
-			myMovementSpeedPanel.setLayout(new BorderLayout());
-			myMovementSpeedPanel.add(new JLabel("Movement speed"), BorderLayout.WEST);
-			myMovementSpeedPanel.setToolTipText("speed of head-movement during Movement (mm or inch per second)");
+	private JPanel getPlungeSpeedPanel() {
+		if (myPlungeSpeedPanel == null) {
+			myPlungeSpeedPanel = new JPanel();
+			myPlungeSpeedPanel.setLayout(new BorderLayout());
+			myPlungeSpeedPanel.add(new JLabel("plunge speed"), BorderLayout.WEST);
+			myPlungeSpeedPanel.setToolTipText("speed of head-movement when moving vertically into workpiece (mm or inch per second)");
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
-			myMovementSpeedPanel.add(field, BorderLayout.CENTER);
+			myPlungeSpeedPanel.add(field, BorderLayout.CENTER);
 
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
 				
 				@Override
 				public void undoableEditHappened(UndoableEditEvent evt) {
 					try {
-						myMovementSpeed = NumberFormat.getInstance().parse(field.getText()).doubleValue();
+						myPlungeSpeed = NumberFormat.getInstance().parse(field.getText()).doubleValue();
 						if (myAoolpathsProcessor != null) {
-							myAoolpathsProcessor.setMovementSpeed(myMovementSpeed);
+							myAoolpathsProcessor.setPlungeSpeed(myPlungeSpeed);
 						}
 					} catch (ParseException e) {
 						evt.getEdit().undo();
@@ -528,7 +528,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 				}
 			});
 		}
-		return myMovementSpeedPanel;
+		return myPlungeSpeedPanel;
 	}
 
 	private JPanel getZCuttingHeightPanel() {
@@ -700,7 +700,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		myAoolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
 		myAoolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
 		myAoolpathsProcessor.setMillingSpeed(myMillingSpeed);
-		myAoolpathsProcessor.setMovementSpeed(myMovementSpeed);
+		myAoolpathsProcessor.setPlungeSpeed(myPlungeSpeed);
 
 		startProcess(myAoolpathsProcessor);
 	}
@@ -1177,9 +1177,9 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private JPanel myZCuttingHeightPanel;
 	private JPanel myZDownMovementPanel;
 	private JPanel myMillingSpeedPanel;
-	private JPanel myMovementSpeedPanel;
+	private JPanel myPlungeSpeedPanel;
 	private JPanel myInitialXPanel;
 	private JPanel myInitialYPanel;
 	private double myMillingSpeed = 2;
-	private double myMovementSpeed = 2;
+	private double myPlungeSpeed = 2;
 }

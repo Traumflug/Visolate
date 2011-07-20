@@ -157,14 +157,14 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		this.myAbsoluteYStart = setAbsoluteYStart;
 	}
 
-	private double myMovementSpeed = 2;
+	private double myPlungeSpeed = 2;
 	private double myMillingSpeed = 2;
-	public double getMovementSpeed() {
-		return myMovementSpeed;
+	public double getPlungeSpeed() {
+		return myPlungeSpeed;
 	}
 
-	public void setMovementSpeed(double myMovementSpeed) {
-		this.myMovementSpeed = myMovementSpeed;
+	public void setPlungeSpeed(double myPlungeSpeed) {
+		this.myPlungeSpeed = myPlungeSpeed;
 	}
 
 	public double getMillingSpeed() {
@@ -1511,7 +1511,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		if (w != null) {
 			if (isOutputAbsoluteCoordinates()) {
-				currentFeedrate = getMovementSpeed();
+				currentFeedrate = getPlungeSpeed();
 				w.write("G1 Z" +
 						gCodeFormat.format(getZCuttingHeight()) + " F"+
 						gCodeFormat.format(60 * currentFeedrate) + "\n");
