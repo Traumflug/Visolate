@@ -118,6 +118,12 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	 * @see #isOutputAbsoluteCoordinates()
 	 */
 	private double myAbsoluteXStart = 0.0;
+	
+	/**
+	 * Our current work feedrate.
+	 * @see #gcodeLinear()
+	 */
+	private double currentFeedrate = 0.0;
 
 	/**
 	 * @return If we use absolute coordinates, then this is the X-value for the left upper corner.
@@ -1505,9 +1511,10 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		if (w != null) {
 			if (isOutputAbsoluteCoordinates()) {
+				currentFeedrate = getMovementSpeed();
 				w.write("G1 Z" +
 						gCodeFormat.format(getZCuttingHeight()) + " F"+
-						gCodeFormat.format(60 * getMovementSpeed()) + "\n");
+						gCodeFormat.format(60 * currentFeedrate) + "\n");
 				p.z = 0.0;
 			} else {
 				w.write("G1 Z" + gCodeFormat.format(-1 * getZClearance()) + "\n");
@@ -1566,15 +1573,17 @@ public class ToolpathsProcessor extends MosaicProcessor {
 			if (isOutputAbsoluteCoordinates()) {
 				w.write("G1 X" +
 						gCodeFormat.format(convertUnits(x) + getAbsoluteXStart()) + " Y" +
-						gCodeFormat.format(convertUnits(y) + getAbsoluteYStart()) + " Z" +
-						gCodeFormat.format(p.z + getZCuttingHeight()) + " F"+
-						gCodeFormat.format(60 * getMillingSpeed()) + "\n");
+						gCodeFormat.format(convertUnits(y) + getAbsoluteYStart()));
 			} else {
 				w.write("G1 X" +
 						gCodeFormat.format(convertUnits(dx)) + " Y" +
-						gCodeFormat.format(convertUnits(dy)) + " F"+
-						gCodeFormat.format(60 * getMillingSpeed()) + "\n");
+						gCodeFormat.format(convertUnits(dy)));
 			}
+			if (currentFeedrate != getMillingSpeed()) {
+				currentFeedrate = getMillingSpeed();
+				w.write(" F" + gCodeFormat.format(60 * currentFeedrate));
+			}
+			w.write("\n");
 		}
 
 		p.x += dx;
