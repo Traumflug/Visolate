@@ -101,7 +101,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	}
 
 	/**
-	 * We move this much upward from cutting to traveling.
+	 * We move this much above origin for traveling.
 	 */
 	private double myzClearance;
 
@@ -1486,14 +1486,12 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		if (w != null) {
 			if (isOutputAbsoluteCoordinates()) {
-				w.write("G1 X" +
-						gCodeFormat.format(convertUnits(p.x) + getAbsoluteXStart()) + " Y" +
-						gCodeFormat.format(convertUnits(p.y) + getAbsoluteYStart()) + " Z" + 
-						gCodeFormat.format(getZCuttingHeight() + getZClearance()) + " F"+
-						gCodeFormat.format(60 * getMovementSpeed()) + "\n");
+				w.write("G0 Z" + 
+						gCodeFormat.format(getZClearance()) + "\n");
 				p.z = getZClearance();
 			} else {
-				w.write("G1 Z" + gCodeFormat.format(getZClearance()) + "\n");
+				w.write("G0 Z" +
+						gCodeFormat.format(getZCuttingHeight() + getZClearance()) + "\n");
 			}
 		}
 
@@ -1507,9 +1505,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		if (w != null) {
 			if (isOutputAbsoluteCoordinates()) {
-				w.write("G1 X" +
-						gCodeFormat.format(convertUnits(p.x) + getAbsoluteXStart()) + " Y" +
-						gCodeFormat.format(convertUnits(p.y) + getAbsoluteYStart()) + " Z" +
+				w.write("G1 Z" +
 						gCodeFormat.format(getZCuttingHeight()) + " F"+
 						gCodeFormat.format(60 * getMovementSpeed()) + "\n");
 				p.z = 0.0;
@@ -1528,7 +1524,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	 * Add a g-code for a rapid, linear movement.
      *
 	 * @param w where to write the gcode to
-	 * @param p the current location. SIDEE FFECT: Will be updated to be x,y
+	 * @param p the current location. SIDE EFFECT: Will be updated to be x,y
 	 * @param x the absolute location to move to
 	 * @param y the absolute location to move to
 	 * @throws IOException
@@ -1543,14 +1539,11 @@ public class ToolpathsProcessor extends MosaicProcessor {
 			if (isOutputAbsoluteCoordinates()) {
 				w.write("G0 X" +
 						gCodeFormat.format(convertUnits(x) + getAbsoluteXStart()) + " Y" +
-						gCodeFormat.format(convertUnits(y) + getAbsoluteYStart()) + " Z"+
-						gCodeFormat.format(p.z + getZCuttingHeight()) + " F"+
-						gCodeFormat.format(60 * getMovementSpeed()) + "\n");
+						gCodeFormat.format(convertUnits(y) + getAbsoluteYStart()) + "\n");
 			} else {
 				w.write("G0 X" +
 						gCodeFormat.format(convertUnits(dx)) + " Y" +
-						gCodeFormat.format(convertUnits(dy)) + " F"+
-						gCodeFormat.format(60 * getMovementSpeed()) + "\n");
+						gCodeFormat.format(convertUnits(dy)) + "\n");
 			}
 		}
 
