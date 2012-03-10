@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@
 package visolate.simulator;
 
 import java.util.*;
+
 import visolate.misc.*;
 import com.sun.j3d.utils.geometry.*;
 import javax.media.j3d.*;
@@ -29,6 +31,9 @@ public class ObroundAperture extends StandardAperture {
   private static final String cvsid =
   "$Id: ObroundAperture.java,v 1.2 2004/06/30 17:26:29 vona Exp $";
 
+  
+  public static final int SEGMENTS = 16; // Must be a multiple of four.
+  public static final double SECTOR = 2.0*Math.PI/SEGMENTS;
 
   public ObroundAperture(int number,
                          double diameterX,
@@ -96,58 +101,74 @@ public class ObroundAperture extends StandardAperture {
   }
 
   protected void makeGeometries() {
-    
-    geometries = new LinkedList<GeometryArray>();
-   
-    double a = getA();
-    double b = getB();
-
-    int segments = CircleAperture.SEGMENTS/2;
-
-    double segment = Math.PI/segments;
-    
-    float[] coords = new float[2*3*(segments + 1)];
-    
-    double rad = Math.min(a, b);
-    double length = Math.max(2*a, 2*b)-2*rad;
-    
-    boolean flip = b > a;
-    
-    double xc = length/2;
-    
-    double x, y;
-    
-    int i = 0;
-    
-    double angle = -Math.PI/2;
-    
-    for (int k = 0; k < 2; k++) {
-      for (int j = 0; j <= segments; j++) {
-        
-        x = rad*Math.cos(angle);
-        y = rad*Math.sin(angle);
-        
-        if (!flip) {
-          coords[i++] = (float) (x+xc);
-          coords[i++] = (float) y;
-        } else {
-          coords[i++] = (float) y;
-          coords[i++] = (float) (x+xc);
-        }
-        coords[i++] = 0.0f;
-        
-        angle += segment;
-      }
-
-      xc = -length/2;
-      angle = Math.PI/2;
-    }
-
-    GeometryInfo gi = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
-    gi.setCoordinates(coords);
-    gi.setStripCounts(new int[] {2*(segments + 1)});
-    
-    geometries.add(gi.getGeometryArray(true, false, false));
+	// This is pretty similar to the counterpart of CircleAperture,
+	// just stretched in the direction of the bigger radius.
+	// Also, the center is fixed at 0.0, 0.0.
+	
+	geometries = new LinkedList<GeometryArray>();
+		
+	float[] coords = new float[3*(SEGMENTS + 4)];
+	
+	int i = 0;
+	    
+	// center
+	coords[i++] = 0.0f;
+	coords[i++] = 0.0f;
+	coords[i++] = 0.0f;
+	    
+	double x, y;
+	double angle = 0.0;
+	double rx = getA();
+	double ry = getB();
+	double radius = Math.min(rx, ry);
+	    
+	for (int j = 0; j <= SEGMENTS; j++) {
+		      
+	  x = radius*Math.cos(angle);
+	  y = radius*Math.sin(angle);
+	  
+	  // vertical stretch
+	  if (ry > rx) {
+		if (j <= SEGMENTS / 2) {
+		  coords[i++] = (float) (x);
+		  coords[i++] = (float) (y+ry-rx);
+		  coords[i++] = 0.0f;
+		}
+		// Yes, j == SEGMENTS / 2 gives two points!
+		if (j >= SEGMENTS / 2) {
+		  coords[i++] = (float) (x);
+		  coords[i++] = (float) (y-ry+rx);
+		  coords[i++] = 0.0f;
+		}
+		// Close the oval, it's a double-point again.
+		if (j == SEGMENTS) {
+		  coords[i++] = (float) (x);
+		  coords[i++] = (float) (y+ry-rx);
+		  coords[i++] = 0.0f;
+		}
+	  }
+	  else { // horizontal stretch
+		if (j <= SEGMENTS / 4) {
+		  coords[i++] = (float) (x+rx-ry);
+		  coords[i++] = (float) (y);
+		  coords[i++] = 0.0f;
+		}
+		if (j >= SEGMENTS / 4 && j <= SEGMENTS * 3 / 4) {
+		  coords[i++] = (float) (x-rx+ry);
+		  coords[i++] = (float) (y);
+		  coords[i++] = 0.0f;
+		}
+		if (j >= SEGMENTS * 3 / 4) {
+		  coords[i++] = (float) (x+rx-ry);
+		  coords[i++] = (float) (y);
+		  coords[i++] = 0.0f;
+		}
+	  }
+		      
+	  angle += SECTOR;
+	}
+	    
+	geometries.add(makeTFA(coords));
   }
 
   private double diameterX;
