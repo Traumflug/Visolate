@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -733,63 +734,92 @@ public class Net implements Comparable<Net> {
     if (pads.isEmpty())
       return;
 
-    List<Vertex> vertices = new LinkedList<Vertex>();
-    Set<Vertex> strokeEnds = new LinkedHashSet<Vertex>();
+    // The order of this must be the same over multiple loops.
+    List<TriangleFanArray> parts = new ArrayList<TriangleFanArray>();
 
-    for (Iterator<Stroke> it = strokes.iterator(); it.hasNext(); ) {
-      Stroke stroke = it.next();
-      strokeEnds.add(stroke.getStart());
-      strokeEnds.add(stroke.getEnd());
-    }
+    for (Flash flash : pads) {
 
-    for (Iterator<Flash> it = pads.iterator(); it.hasNext(); ) {
-    	Vertex v = it.next().getLocation();
-    	if (!strokeEnds.contains(v)) {
-    		vertices.add(v);
-    	}
-    }
+      Collection<GeometryArray> geometries = flash.getGeometries();
 
-    if (vertices.isEmpty()) {
-      return;
-    }
+      if (geometries == null) {
+        continue;
+      }
 
-    int vertexCount = (CIRCLE_SEGMENTS + 2)*vertices.size();
-    
-    int[] vertexCounts = new int[vertices.size()];
+      for (GeometryArray geometry : geometries) {
 
-    for (int i = 0; i < vertexCounts.length; i++)
-      vertexCounts[i] = CIRCLE_SEGMENTS + 2;
+        if (geometry == null) {
+          continue;
+        }
 
-    float[] coords = new float[3*vertexCount];
-
-    Transform3D t3d = new Transform3D();
-    t3d.rotZ(CIRCLE_SECTOR);
-
-    int i = 0;
-    for (Iterator<Vertex> it = vertices.iterator(); it.hasNext(); ) {
-
-      Point2f v = it.next().getInchCoordinates();
-      
-      coords[i++] = v.x;
-      coords[i++] = v.y;
-      coords[i++] = CONE_Z_MAX;
-
-      Point3f p = new Point3f(zCeiling(), 0.0f, CONE_Z_MAX-zCeiling());
-
-      for (int j = 0; j < (CIRCLE_SEGMENTS + 1); j++) {
-
-        t3d.transform(p);
-
-        coords[i++] = v.x + p.x;
-        coords[i++] = v.y + p.y;
-        coords[i++] = p.z;
+        if (geometry instanceof TriangleFanArray) {
+          //System.out.println("Supported: " + flash.toString());
+          parts.add((TriangleFanArray) geometry);
+        } else {
+          System.out.println("Not supported for voronoi: " + flash.toString());
+        }
       }
     }
 
-    coneGeometry = new TriangleFanArray(vertexCount,
-                                        GeometryArray.COORDINATES,
-                                        vertexCounts);
-    coneGeometry.setCoordinates(0, coords);
+    if (parts.size() != 0) {
+      int vertexCount = 0;
+      int[] vertexCounts = new int[parts.size()];
+      int i = 0;
+
+      for (TriangleFanArray part : parts) {
+
+        // This gives us 1 for the center + the number of segments, ...
+        int partVertexCount = part.getVertexCount();
+        // ... but cones have no center and two vertices per segment:
+        partVertexCount--;
+        partVertexCount *= 2;
+        vertexCount += partVertexCount;
+        vertexCounts[i++] = partVertexCount;
+      }
+
+      float[] coords = new float[vertexCount*3];
+
+      i = 0;
+      for (int j = 0; j < parts.size(); j++) {
+
+        TriangleFanArray part = parts.get(j);
+        // This gives us all the coordinates for a
+        // flat fan, sized to draw the pad properly.
+        float[] partCoords = part.getCoordRefFloat();
+
+        float[] center = new float[2];
+        center[0] = partCoords[0];
+        center[1] = partCoords[1];
+        for (int k = 3; k < part.getVertexCount() * 3; k += 3) {
+          // To get a proper cone, we don't take over the center, take over the
+          // outer fan vertices as is for the top and offset the same vertices
+          // by zCeiling() for the bottom.
+          //
+          // Additionally, the top vertices get projected to CONE_Z_MAX,
+          // the bottom ones to CONE_Z_MAX-zCeiling().
+
+          coords[i++] = partCoords[k];
+          coords[i++] = partCoords[k+1];
+          coords[i++] = CONE_Z_MAX;
+
+          // TODO: *sigh* After coding this I suddenly recognized this
+          // isn't an offset, but sort of a scaling.
+          // For a circle or a square, this scaling is identical to the
+          // wanted offset, though. For obounds, the shorter extents is too small.
+          float dx = partCoords[k] - center[0];
+          float dy = partCoords[k+1] - center[1];
+          float l = (float)Math.sqrt(dx * dx + dy * dy);
+          dx *= (zCeiling() + l) / l;
+          dy *= (zCeiling() + l) / l;
+          coords[i++] = center[0] + dx;
+          coords[i++] = center[1] + dy;
+          coords[i++] = CONE_Z_MAX - zCeiling();
+        }
+      }
+      coneGeometry = new TriangleStripArray(vertexCount,
+                                            GeometryArray.COORDINATES,
+                                            vertexCounts);
+      coneGeometry.setCoordinates(0, coords);
+    }
   }
 
   private void makeLoopGeometry() {
