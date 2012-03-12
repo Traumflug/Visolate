@@ -827,52 +827,58 @@ public class Net implements Comparable<Net> {
     List<float[]> parts = new LinkedList<float[]>();
 
     //half edge loops
-    for (HalfEdge start : loopStarts) {
+    for (HalfEdge startEdge : loopStarts) {
 
-      HalfEdge he = start;
+      HalfEdge he = startEdge;
 
-      Point2f s, e;
-      Vector3f d = new Vector3f();
-      Vector3f n = new Vector3f();
-
+      Point2f startPoint, endPoint;
+      Vector3f dir = new Vector3f();
+      Vector3f offTop = new Vector3f();
+      Vector3f offBottom = new Vector3f();
+      
+// TODO: the edge between cone and flat part isn't entirely tight.
+//       They should overlap a bit.
       do {
         
         Stroke stroke = he.getStroke();
 
-        s = (he.getStart()).getInchCoordinates();
-        e = (he.getEnd()).getInchCoordinates();
+        startPoint = (he.getStart()).getInchCoordinates();
+        endPoint = (he.getEnd()).getInchCoordinates();
 
         if (stroke instanceof Segment) {
 
           float[] part = new float[4*3];
 
-          d.x = e.x - s.x;
-          d.y = e.y - s.y;
-          d.z = 0.0f;
+          dir.x = endPoint.x - startPoint.x;
+          dir.y = endPoint.y - startPoint.y;
+          dir.z = 0.0f;
 
-          d.normalize();
+          dir.normalize();
           
-          n.cross(d, Z);
+          offTop.cross(dir, Z); // offTop = normal to dir
+          offBottom.set(offTop);
           
-          n.scale(zCeiling());
+          float width = (float) (((Segment) stroke).getWidth() / 2);
+          offTop.scale(width);
+          offBottom.scale(width + zCeiling());
 
           int i = 0;
-          part[i++] = s.x;
-          part[i++] = s.y;
+          part[i++] = startPoint.x + offTop.x;
+          part[i++] = startPoint.y + offTop.y;
           part[i++] = LOOP_Z_MAX;
-          
-          part[i++] = e.x;
-          part[i++] = e.y;
-          part[i++] = LOOP_Z_MAX;
-          
-          part[i++] = e.x + n.x;
-          part[i++] = e.y + n.y;
-          part[i++] = LOOP_Z_MAX-zCeiling();
-          
-          part[i++] = s.x + n.x;
-          part[i++] = s.y + n.y;
+
+          part[i++] = startPoint.x + offBottom.x;
+          part[i++] = startPoint.y + offBottom.y;
           part[i++] = LOOP_Z_MAX-zCeiling();
 
+          part[i++] = endPoint.x + offTop.x;
+          part[i++] = endPoint.y + offTop.y;
+          part[i++] = LOOP_Z_MAX;
+          
+          part[i++] = endPoint.x + offBottom.x;
+          part[i++] = endPoint.y + offBottom.y;
+          part[i++] = LOOP_Z_MAX-zCeiling();
+          
           parts.add(part);
 
         } else {
@@ -883,22 +889,27 @@ public class Net implements Comparable<Net> {
 
         if (next.getStroke() == stroke) {
 
-          parts.add(makeFan(e.x, e.y, e.x + n.x, e.y + n.y, (float) Math.PI));
+          parts.add(makeCircleCone(endPoint.x, endPoint.y,
+                                   endPoint.x + offTop.x, endPoint.y + offTop.y,
+                                   endPoint.x + offBottom.x, endPoint.y + offBottom.y,
+                                   (float) Math.PI));
 
-        } else {
+        }
+        else {
 
           double angle = he.angleTo(next);
-          
+
           if (angle > Math.PI) {
-            parts.add(makeFan(e.x, e.y,
-                              e.x + n.x, e.y + n.y,
-                              (float) (angle - Math.PI)));
+            parts.add(makeCircleCone(endPoint.x, endPoint.y,
+                                     endPoint.x + offTop.x, endPoint.y + offTop.y,
+                                     endPoint.x + offBottom.x, endPoint.y + offBottom.y,
+                                     (float) (angle - Math.PI)));
           }
         }
 
         he = next;
         
-      } while (he != start);
+      } while (he != startEdge);
     }
       
     if (parts.isEmpty())
@@ -930,9 +941,9 @@ public class Net implements Comparable<Net> {
       i += len;
     }
     
-    loopGeometry = new TriangleFanArray(vertexCount,
-                                        GeometryArray.COORDINATES,
-                                        vertexCounts);
+    loopGeometry = new TriangleStripArray(vertexCount,
+                                          GeometryArray.COORDINATES,
+                                          vertexCounts);
     loopGeometry.setCoordinates(0, coords);
   }
 
@@ -941,38 +952,45 @@ public class Net implements Comparable<Net> {
     makeLoopGeometry();
   }
 
-  private float[] makeFan(float bx, float by,
-                          float sx, float sy,
-                          float angle) {
-    
+  private float[] makeCircleCone(float centerX, float centerY,
+                                 float topX, float topY,
+                                 float bottomX, float bottomY,
+                                 float angle) {
+ 
     int n = (int) Math.ceil(angle/CIRCLE_SECTOR);
 
     double sector = angle/n;
 
-    float[] coord = new float[3*(2 + n)];
+    float[] coord = new float[3*2*(n+1)];
 
     int i = 0;
     
-    coord[i++] = bx;
-    coord[i++] = by;
-    coord[i++] = LOOP_Z_MAX;
-
-    coord[i++] = sx;
-    coord[i++] = sy;
-    coord[i++] = LOOP_Z_MAX-zCeiling();
-
     Transform3D t3d = new Transform3D();
     t3d.rotZ(sector);
 
-    Point3f p = new Point3f(sx - bx, sy - by, LOOP_Z_MAX-zCeiling());
+    Point3f pt = new Point3f(topX - centerX, topY - centerY, LOOP_Z_MAX);
+    Point3f pb = new Point3f(bottomX - centerX, bottomY - centerY, LOOP_Z_MAX-zCeiling());
 
+    coord[i++] = topX;
+    coord[i++] = topY;
+    coord[i++] = LOOP_Z_MAX;
+    
+    coord[i++] = bottomX;
+    coord[i++] = bottomY;
+    coord[i++] = LOOP_Z_MAX-zCeiling();
+    
     for (int j = 0; j < n; j++) {
 
-      t3d.transform(p);
+      t3d.transform(pt);
+      t3d.transform(pb);
       
-      coord[i++] = p.x + bx;
-      coord[i++] = p.y + by;
-      coord[i++] = p.z;
+      coord[i++] = pt.x + centerX;
+      coord[i++] = pt.y + centerY;
+      coord[i++] = LOOP_Z_MAX;
+      
+      coord[i++] = pb.x + centerX;
+      coord[i++] = pb.y + centerY;
+      coord[i++] = LOOP_Z_MAX-zCeiling();
     }
 
     return coord;

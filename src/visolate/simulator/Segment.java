@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,6 +73,10 @@ public class Segment extends Stroke {
 
     return lengthInches;
   }
+  
+  public double getWidth() {
+    return aperture.getWidth(forwardDirection);
+  }
 
   public double getStartForwardDirection() {
     return forwardDirection;
@@ -126,7 +131,7 @@ public class Segment extends Stroke {
 
       bodyRect = new Point2d[4];
 
-      double width = aperture.getWidth(forwardDirection);
+      double width = getWidth();
 
       Point2f s = start.getInchCoordinates();
       Point2f e = end.getInchCoordinates();
