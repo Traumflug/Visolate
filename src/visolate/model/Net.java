@@ -824,8 +824,6 @@ public class Net implements Comparable<Net> {
           // Additionally, the top vertices get projected to CONE_Z_MAX - offsetIn,
           // the bottom ones to CONE_Z_MAX - offsetOut.
 
-          // Start with the three points making up a vertex and it's
-          // adjectant lines. 2D is sufficient.
           if (k == 1) {
             p1.x = fanCoords[stripCoordsPtr + (fanVertexCounts[j] - 2) * 3];
             p1.y = fanCoords[stripCoordsPtr + (fanVertexCounts[j] - 2) * 3 + 1];
@@ -1014,9 +1012,7 @@ public class Net implements Comparable<Net> {
       vertexCount += part.length/3;
       vertexCounts[i++] = part.length/3;
     }
-    
-//    System.out.println(vertexCount + " vertices");
-    
+        
     float[] coords = new float[vertexCount*3];
     
     i = 0;
@@ -1089,16 +1085,10 @@ public class Net implements Comparable<Net> {
     if (Float.isNaN(flatZ))
       flatZ = (float) (FLAT_Z_MAX + Math.random()*(FLAT_Z_MIN-FLAT_Z_MAX));
 
-//    System.out.println("flatZ = " + flatZ);
-
     Collection<TriangleFanArray> fanParts = new LinkedHashSet<TriangleFanArray>();
     Collection<GeometryArray> nonFanParts = new LinkedHashSet<GeometryArray>();
     
-//    System.out.println(strokes.size() + " strokes");
-
     for (Stroke stroke : strokes) {
-
-//      System.out.println(stroke.toString());
 
       Collection<GeometryArray> geometries = stroke.getGeometries();
 
@@ -1120,14 +1110,7 @@ public class Net implements Comparable<Net> {
       }
     }
 
-//    System.out.println(fanParts.size() + " fan; " +
-//                       nonFanParts.size() + " nonfan");
-
-//    System.out.println(pads.size() + " pads");
-
     for (Flash flash : pads) {
-
-//      System.out.println(flash.toString());
 
       Collection<GeometryArray> geometries = flash.getGeometries();
       
@@ -1149,9 +1132,6 @@ public class Net implements Comparable<Net> {
       }
     }
     
-//    System.out.println(fanParts.size() + " fan; " +
-//                       nonFanParts.size() + " nonfan");
-
     if (fanParts.size() != 0) {
 
       int numFans = fanParts.size();
@@ -1172,16 +1152,9 @@ public class Net implements Comparable<Net> {
       for (Iterator<GeometryArray> it = nonFanParts.iterator(); it.hasNext(); ) {
         vertexCount += ((GeometryArray) it.next()).getVertexCount();
       }
- 
 
       float[] coords = new float[vertexCount*3];
       populateCoords(nonFanParts, coords);
-
-//      System.out.println(vertexCount + " non-fan verts:");
-//      for (int i = 0; i < vertexCount; i++)
-//        System.out.println("  (" + coords[3*i] +
-//                           ", " + coords[3*i+1] +
-//                           ", " + coords[3*i+2] + ")");
 
       flatNonFanGeometry = new TriangleArray(vertexCount,
                                              GeometryArray.COORDINATES);
@@ -1231,16 +1204,12 @@ public class Net implements Comparable<Net> {
 
         Rect strokeBounds = (it.next()).getBounds();
         
-//        System.out.println("adding stroke bounds: " + strokeBounds);
-//        System.out.println("to net bounds: " + bounds);
         bounds.add(strokeBounds);
-//        System.out.println("result: " + bounds);
       }
 
       for (Iterator<Flash> it = pads.iterator(); it.hasNext(); )
         bounds.add(it.next().getBounds());
 
-//      System.out.println("net bounds: " + bounds);
     }
 
     return bounds;
@@ -1265,9 +1234,6 @@ public class Net implements Comparable<Net> {
   }
 
   public int compareTo(final Net o) {
-
-//    if (!(o instanceof Net))
-//      return 0;
 
     float otherFlatZ = ((Net) o).flatZ;
 
