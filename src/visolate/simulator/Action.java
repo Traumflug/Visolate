@@ -42,7 +42,9 @@ public abstract class Action extends SimObject {
     Vector2f p = new Vector2f(v.getInchCoordinates());
 
     for (Iterator<GeometryArray> it = apGeoms.iterator(); it.hasNext(); ) {
-      geometries.add(translateGeometry((GeometryArray) it.next(), p));
+      GeometryArray ga = dupGeometry(it.next());
+      translateGeometry(ga, p);
+      geometries.add(ga);
     }
   }
 }

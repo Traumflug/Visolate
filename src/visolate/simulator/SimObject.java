@@ -173,7 +173,11 @@ public abstract class SimObject {
     }
   }
 
-  protected static GeometryArray translateGeometry(final GeometryArray geometry,
+  protected static GeometryArray dupGeometry(final GeometryArray geometry) {
+    return dupGeometry(geometry, null);
+  }
+
+  protected static void translateGeometry(final GeometryArray geometry,
                                                    final Vector2f t) {
 
     float[] coords = geometry.getCoordRefFloat();
@@ -186,11 +190,11 @@ public abstract class SimObject {
       newCoords[3*i+2] = coords[3*i+2];
     }
     
-    return dupGeometry(geometry, newCoords);
+    geometry.setCoordRefFloat(newCoords);
   }
   
   // This rotates a geometry around (0.0, 0.0).
-  protected static GeometryArray rotateGeometry(final GeometryArray geometry,
+  protected static void rotateGeometry(final GeometryArray geometry,
       final double angle) {
 
     float[] coords = geometry.getCoordRefFloat();
@@ -214,7 +218,7 @@ public abstract class SimObject {
       newCoords[i+2] = p.z;
     }
 
-    return dupGeometry(geometry, newCoords);
+    geometry.setCoordRefFloat(newCoords);
   }
 
   public static int hashCode(final int[] a) {

@@ -33,7 +33,7 @@ public class ObroundAperture extends StandardAperture {
   "$Id: ObroundAperture.java,v 1.2 2004/06/30 17:26:29 vona Exp $";
 
   
-  public static final int SEGMENTS = 16; // Must be a multiple of four.
+  public static final int SEGMENTS = 16; // Must be a multiple of two.
   public static final double SECTOR = 2.0*Math.PI/SEGMENTS;
 
   public ObroundAperture(int number,
@@ -153,7 +153,7 @@ public class ObroundAperture extends StandardAperture {
 
     TriangleFanArray tfa = makeTFA(coords);
     if (rx > ry) {
-      tfa = (TriangleFanArray) rotateGeometry(tfa, Math.PI / 2);
+      rotateGeometry(tfa, Math.PI / 2);
     }
     
     geometries.add(tfa);
