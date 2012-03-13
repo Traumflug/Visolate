@@ -835,35 +835,8 @@ public class Net implements Comparable<Net> {
             p3.y = fanCoords[stripCoordsPtr + (k + 1) * 3 + 1];
           }
 
-          // Normal to V = (x, y) is N = (-y, x).
-          Vector2f n1 = new Vector2f(p2.y - p1.y, -(p2.x - p1.x));
-          Vector2f n2 = new Vector2f(p3.y - p2.y, -(p3.x - p2.x));
-          n1.normalize();
-          n2.normalize();
-          n1.scale(zCeiling());
-          n2.scale(zCeiling());
-
-          // These four points make the offsetted lines.
-          Point2f off11 = new Point2f(p1.x + n1.x, p1.y + n1.y);
-          Point2f off12 = new Point2f(p2.x + n1.x, p2.y + n1.y);
-          Point2f off21 = new Point2f(p2.x + n2.x, p2.y + n2.y);
-          Point2f off22 = new Point2f(p3.x + n2.x, p3.y + n2.y);
-
-          // Calculate the intersection point of these offseted lines.
-          float a1 = off12.x - off11.x;
-          float b1 = off21.x - off22.x;
-          float c1 = off21.x - off11.x;
-
-          float a2 = off12.y - off11.y;
-          float b2 = off21.y - off22.y;
-          float c2 = off21.y - off11.y;
-
-          float t = (b1*c2 - b2*c1) / (a2*b1 - a1*b2);
-
-          Point2f intersection = new Point2f(off11.x + t * (off12.x - off11.x),
-                                             off11.y + t * (off12.y - off11.y));
-          // Geometry calculations done.
-
+          Point2f intersection = offsetCorner(p1, p2, p3, zCeiling());
+          
           coords[i++] = p2.x;
           coords[i++] = p2.y;
           coords[i++] = CONE_Z_MAX;
@@ -886,6 +859,43 @@ public class Net implements Comparable<Net> {
     cones.setCoordinates(0, coords);
     
     return cones;
+  }
+  
+  // This offsets a corner defined by the previous point p1, the
+  // corner point p2 and the next point p3 by offsetting the lines (p1, p2)
+  // and (p2, p3) and returning the intersection of both offsets.
+  // All is done on the X-Y plane.
+  private Point2f offsetCorner(Point2f p1, Point2f p2, Point2f p3, float offset) {
+    
+    // Normal to V = (x, y) is N = (-y, x).
+    Vector2f n1 = new Vector2f(p2.y - p1.y, -(p2.x - p1.x));
+    Vector2f n2 = new Vector2f(p3.y - p2.y, -(p3.x - p2.x));
+    n1.normalize();
+    n2.normalize();
+    n1.scale(offset);
+    n2.scale(offset);
+
+    // These four points make the offsetted lines.
+    Point2f off11 = new Point2f(p1.x + n1.x, p1.y + n1.y);
+    Point2f off12 = new Point2f(p2.x + n1.x, p2.y + n1.y);
+    Point2f off21 = new Point2f(p2.x + n2.x, p2.y + n2.y);
+    Point2f off22 = new Point2f(p3.x + n2.x, p3.y + n2.y);
+
+    // Calculate the intersection point of these offseted lines.
+    float a1 = off12.x - off11.x;
+    float b1 = off21.x - off22.x;
+    float c1 = off21.x - off11.x;
+
+    float a2 = off12.y - off11.y;
+    float b2 = off21.y - off22.y;
+    float c2 = off21.y - off11.y;
+
+    float t = (b1*c2 - b2*c1) / (a2*b1 - a1*b2);
+
+    Point2f intersection = new Point2f(off11.x + t * (off12.x - off11.x),
+                                       off11.y + t * (off12.y - off11.y));
+    
+    return intersection;
   }
   
   private void makeLoopGeometry() {
