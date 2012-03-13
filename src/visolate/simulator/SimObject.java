@@ -188,6 +188,34 @@ public abstract class SimObject {
     
     return dupGeometry(geometry, newCoords);
   }
+  
+  // This rotates a geometry around (0.0, 0.0).
+  protected static GeometryArray rotateGeometry(final GeometryArray geometry,
+      final double angle) {
+
+    float[] coords = geometry.getCoordRefFloat();
+
+    float[] newCoords = new float[coords.length];
+
+    Transform3D t = new Transform3D();
+    t.rotZ(angle);
+
+    Point3f p = new Point3f();
+    
+    for (int i = 0; i < coords.length; i += 3) {
+      p.x = coords[i];
+      p.y = coords[i+1];
+      p.z = coords[i+2];
+      
+      t.transform(p);
+      
+      newCoords[i] = p.x;
+      newCoords[i+1] = p.y;
+      newCoords[i+2] = p.z;
+    }
+
+    return dupGeometry(geometry, newCoords);
+  }
 
   public static int hashCode(final int[] a) {
     int c = 0;

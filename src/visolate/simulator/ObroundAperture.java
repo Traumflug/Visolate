@@ -25,6 +25,7 @@ import java.util.*;
 import visolate.misc.*;
 import com.sun.j3d.utils.geometry.*;
 import javax.media.j3d.*;
+import javax.vecmath.Point3f;
 
 public class ObroundAperture extends StandardAperture {
 
@@ -101,74 +102,61 @@ public class ObroundAperture extends StandardAperture {
   }
 
   protected void makeGeometries() {
-	// This is pretty similar to the counterpart of CircleAperture,
-	// just stretched in the direction of the bigger radius.
-	// Also, the center is fixed at 0.0, 0.0.
-	
-	geometries = new LinkedList<GeometryArray>();
-		
-	float[] coords = new float[3*(SEGMENTS + 4)];
-	
-	int i = 0;
-	    
-	// center
-	coords[i++] = 0.0f;
-	coords[i++] = 0.0f;
-	coords[i++] = 0.0f;
-	    
-	double x, y;
-	double angle = 0.0;
-	double rx = getA();
-	double ry = getB();
-	double radius = Math.min(rx, ry);
-	    
-	for (int j = 0; j <= SEGMENTS; j++) {
-		      
-	  x = radius*Math.cos(angle);
-	  y = radius*Math.sin(angle);
-	  
-	  // vertical stretch
-	  if (ry > rx) {
-		if (j <= SEGMENTS / 2) {
-		  coords[i++] = (float) (x);
-		  coords[i++] = (float) (y+ry-rx);
-		  coords[i++] = 0.0f;
-		}
-		// Yes, j == SEGMENTS / 2 gives two points!
-		if (j >= SEGMENTS / 2) {
-		  coords[i++] = (float) (x);
-		  coords[i++] = (float) (y-ry+rx);
-		  coords[i++] = 0.0f;
-		}
-		// Close the oval, it's a double-point again.
-		if (j == SEGMENTS) {
-		  coords[i++] = (float) (x);
-		  coords[i++] = (float) (y+ry-rx);
-		  coords[i++] = 0.0f;
-		}
-	  }
-	  else { // horizontal stretch
-		if (j <= SEGMENTS / 4) {
-		  coords[i++] = (float) (x+rx-ry);
-		  coords[i++] = (float) (y);
-		  coords[i++] = 0.0f;
-		}
-		if (j >= SEGMENTS / 4 && j <= SEGMENTS * 3 / 4) {
-		  coords[i++] = (float) (x-rx+ry);
-		  coords[i++] = (float) (y);
-		  coords[i++] = 0.0f;
-		}
-		if (j >= SEGMENTS * 3 / 4) {
-		  coords[i++] = (float) (x+rx-ry);
-		  coords[i++] = (float) (y);
-		  coords[i++] = 0.0f;
-		}
-	  }
-		      
-	  angle += SECTOR;
-	}
-	    
-	geometries.add(makeTFA(coords));
+    // This is pretty similar to the counterpart of CircleAperture,
+    // just stretched in the direction of the bigger radius.
+    // Also, the center is fixed at 0.0, 0.0.
+
+    geometries = new LinkedList<GeometryArray>();
+
+    float[] coords = new float[3*(SEGMENTS + 4)];
+
+    int i = 0;
+
+    // center
+    coords[i++] = 0.0f;
+    coords[i++] = 0.0f;
+    coords[i++] = 0.0f;
+
+    double x, y;
+    double angle = 0.0;
+    double rx = getA();
+    double ry = getB();
+    double radius = Math.min(rx, ry);
+    double halfLength = Math.abs(ry - rx);
+
+    for (int j = 0; j <= SEGMENTS; j++) {
+
+      x = radius*Math.cos(angle);
+      y = radius*Math.sin(angle);
+
+      // vertical stretch
+      if (j <= SEGMENTS / 2) {
+        coords[i++] = (float) (x);
+        coords[i++] = (float) (y+halfLength);
+        coords[i++] = 0.0f;
+      }
+      // Yes, j == SEGMENTS / 2 gives two points!
+      if (j >= SEGMENTS / 2) {
+        coords[i++] = (float) (x);
+        coords[i++] = (float) (y-halfLength);
+        coords[i++] = 0.0f;
+      }
+      // Close the oval, it's a double-point again.
+      if (j == SEGMENTS) {
+        coords[i++] = (float) (x);
+        coords[i++] = (float) (y+halfLength);
+        coords[i++] = 0.0f;
+      }
+
+      angle += SECTOR;
+    }
+
+    TriangleFanArray tfa = makeTFA(coords);
+    if (rx > ry) {
+      tfa = (TriangleFanArray) rotateGeometry(tfa, Math.PI / 2);
+    }
+    
+    geometries.add(tfa);
   }
 
   private double diameterX;
