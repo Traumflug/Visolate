@@ -172,10 +172,10 @@ public class Segment extends Stroke {
       
       geometries.add(makeTFA(coords));
       
-      addXlatedAperture(geometries, aperture, start);
+      addTranslatedAperture(geometries, aperture, start);
     }
     
-    addXlatedAperture(geometries, aperture, end);
+    addTranslatedAperture(geometries, aperture, end);
   }
 
   public String toString() {

@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -172,8 +173,8 @@ public abstract class SimObject {
     }
   }
 
-  protected static GeometryArray xlateGeometry(final GeometryArray geometry,
-                                               final Point2f t) {
+  protected static GeometryArray translateGeometry(final GeometryArray geometry,
+                                                   final Vector2f t) {
 
     float[] coords = geometry.getCoordRefFloat();
     

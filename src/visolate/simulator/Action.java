@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,9 +29,9 @@ public abstract class Action extends SimObject {
   private static final String cvsid =
   "$Id: Action.java,v 1.2 2004/06/30 17:26:29 vona Exp $";
 
-  protected static void addXlatedAperture(Collection<GeometryArray> geometries,
-                                          Aperture aperture,
-                                          Vertex v) {
+  protected static void addTranslatedAperture(Collection<GeometryArray> geometries,
+                                              Aperture aperture,
+                                              Vertex v) {
 
     Collection<GeometryArray> apGeoms = aperture.getGeometries();
 
@@ -38,10 +39,10 @@ public abstract class Action extends SimObject {
       return;
     }
 
-    Point2f p = v.getInchCoordinates();
+    Vector2f p = new Vector2f(v.getInchCoordinates());
 
     for (Iterator<GeometryArray> it = apGeoms.iterator(); it.hasNext(); ) {
-      geometries.add(xlateGeometry((GeometryArray) it.next(), p));
+      geometries.add(translateGeometry((GeometryArray) it.next(), p));
     }
   }
 }

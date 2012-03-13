@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +57,7 @@ public class Flash extends Action {
 
   protected void makeGeometries() {
     geometries = new LinkedList<GeometryArray>();
-    addXlatedAperture(geometries, aperture, location);
+    addTranslatedAperture(geometries, aperture, location);
   }
 
   public String toString() {
