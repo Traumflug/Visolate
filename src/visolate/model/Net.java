@@ -800,6 +800,16 @@ public class Net implements Comparable<Net> {
 
       for (int j = 0; j < numStrips; j++) {
         
+        // This is a bit a hack. To avoid drawing artefacts, we need to
+        // overlap the cone a bit into the pad. To simplify things,
+        // the distance of the first two points is taken as the magnitude
+        // of this offset.
+        float dx = fanCoords[stripCoordsPtr + 6] - fanCoords[stripCoordsPtr + 3];
+        float dy = fanCoords[stripCoordsPtr + 7] - fanCoords[stripCoordsPtr + 4];
+        float offsetIn = -1.0f * (float) Math.sqrt(dx * dx + dy * dy);
+        
+        float offsetOut = zCeiling();
+
         // On how to properly offset a bunch of lines:
         // http://stackoverflow.com/questions/3749678/expand-fill-of-convex-polygon
         Point2f p1 = new Point2f();
@@ -811,8 +821,8 @@ public class Net implements Comparable<Net> {
           // outer fan vertices as is for the top and offset the same vertices
           // by zCeiling() for the bottom.
           //
-          // Additionally, the top vertices get projected to CONE_Z_MAX,
-          // the bottom ones to CONE_Z_MAX-zCeiling().
+          // Additionally, the top vertices get projected to CONE_Z_MAX - offsetIn,
+          // the bottom ones to CONE_Z_MAX - offsetOut.
 
           // Start with the three points making up a vertex and it's
           // adjectant lines. 2D is sufficient.
@@ -835,15 +845,17 @@ public class Net implements Comparable<Net> {
             p3.y = fanCoords[stripCoordsPtr + (k + 1) * 3 + 1];
           }
 
-          Point2f intersection = offsetCorner(p1, p2, p3, zCeiling());
-          
-          coords[i++] = p2.x;
-          coords[i++] = p2.y;
-          coords[i++] = CONE_Z_MAX;
+          Point2f intersection = offsetCorner(p1, p2, p3, offsetIn);
 
           coords[i++] = intersection.x;
           coords[i++] = intersection.y;
-          coords[i++] = CONE_Z_MAX - zCeiling();
+          coords[i++] = CONE_Z_MAX - offsetIn;
+          
+          intersection = offsetCorner(p1, p2, p3, offsetOut);
+
+          coords[i++] = intersection.x;
+          coords[i++] = intersection.y;
+          coords[i++] = CONE_Z_MAX - offsetOut;
         }
         vertexCounts[stripCount++] = (fanVertexCounts[j] - 1) * 2;
         vertexCount += (fanVertexCounts[j] - 1) * 2;
