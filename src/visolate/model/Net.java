@@ -376,21 +376,19 @@ public class Net implements Comparable<Net> {
     
     enableFlatGeometry(false);
 
-    flatFanGeometry = null;
-    flatNonFanGeometry = null;
+    flatGeometry = null;
 
     enableFlatGeometry(flatGeometryWas);
   }
 
   public void enableFlatGeometry(boolean enable) {
     
-    if (enable && (flatFanGeometry == null))
+    if (enable && (flatGeometry == null))
       makeFlatGeometry();
 
     showFlatGeometry = enable;
     
-    enableGeometry(flatFanS3D, flatFanGeometry, enable);
-    enableGeometry(flatNonFanS3D, flatNonFanGeometry, enable);
+    enableGeometry(flatS3D, flatGeometry, enable);
   }
 
   public void setTranslucent2D(boolean enable) {
@@ -527,8 +525,7 @@ public class Net implements Comparable<Net> {
 //      coneEdgesS3D = new Shape3D();
       loopS3D = new Shape3D();
 //      loopEdgesS3D = new Shape3D();
-      flatFanS3D = new Shape3D();
-      flatNonFanS3D = new Shape3D();
+      flatS3D = new Shape3D();
       
       lineS3D.setPickable(false);
       pointS3D.setPickable(false);
@@ -536,8 +533,7 @@ public class Net implements Comparable<Net> {
 //      coneEdgesS3D.setPickable(false);
       loopS3D.setPickable(false);
 //      loopEdgesS3D.setPickable(false);
-      flatFanS3D.setPickable(true);
-      flatNonFanS3D.setPickable(true);
+      flatS3D.setPickable(true);
 
       lineS3D.setUserData(this);
       pointS3D.setUserData(this);
@@ -545,8 +541,7 @@ public class Net implements Comparable<Net> {
 //      coneEdgesS3D.setUserData(this);
       loopS3D.setUserData(this);
 //      loopEdgesS3D.setUserData(this);
-      flatFanS3D.setUserData(this);
-      flatNonFanS3D.setUserData(this);
+      flatS3D.setUserData(this);
 
       lineS3D.setAppearance(appearance1D);
       pointS3D.setAppearance(appearance1D);
@@ -554,8 +549,7 @@ public class Net implements Comparable<Net> {
 //      coneEdgesS3D.setAppearance(appearanceEdges);
       loopS3D.setAppearance(appearance);
 //      loopEdgesS3D.setAppearance(appearanceEdges);
-      flatFanS3D.setAppearance(appearance2D);
-      flatNonFanS3D.setAppearance(appearance2D);
+      flatS3D.setAppearance(appearance2D);
       
       lineS3D.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
       lineS3D.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
@@ -573,11 +567,8 @@ public class Net implements Comparable<Net> {
 //      loopEdgesS3D.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 //      loopEdgesS3D.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
 
-      flatFanS3D.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-      flatFanS3D.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
-
-      flatNonFanS3D.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
-      flatNonFanS3D.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
+      flatS3D.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
+      flatS3D.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
 
       sceneBG = new BranchGroup();
       sceneBG.setCapability(BranchGroup.ALLOW_DETACH);
@@ -588,8 +579,7 @@ public class Net implements Comparable<Net> {
 //      sceneBG.addChild(coneEdgesS3D);
       sceneBG.addChild(loopS3D);
 //      sceneBG.addChild(loopEdgesS3D);
-      sceneBG.addChild(flatFanS3D);
-      sceneBG.addChild(flatNonFanS3D);
+      sceneBG.addChild(flatS3D);
 
       enableLineGeometry(showLineGeometry);
       enableVoronoiGeometry(showVoronoiGeometry);
@@ -1086,7 +1076,6 @@ public class Net implements Comparable<Net> {
       flatZ = (float) (FLAT_Z_MAX + Math.random()*(FLAT_Z_MIN-FLAT_Z_MAX));
 
     Collection<TriangleFanArray> fanParts = new LinkedHashSet<TriangleFanArray>();
-    Collection<GeometryArray> nonFanParts = new LinkedHashSet<GeometryArray>();
     
     for (Stroke stroke : strokes) {
 
@@ -1105,7 +1094,7 @@ public class Net implements Comparable<Net> {
         if (geometry instanceof TriangleFanArray) {
           fanParts.add((TriangleFanArray) geometry);
         } else {
-          nonFanParts.add(geometry);
+          System.out.println("Not supported for flat geometry: " + geometry.toString());
         }
       }
     }
@@ -1127,7 +1116,7 @@ public class Net implements Comparable<Net> {
         if (geometry instanceof TriangleFanArray) {
           fanParts.add((TriangleFanArray) geometry);
         } else {
-          nonFanParts.add(geometry);
+          System.out.println("Not supported for flat geometry: " + geometry.toString());
         }
       }
     }
@@ -1140,26 +1129,12 @@ public class Net implements Comparable<Net> {
       float[] coords = new float[vertexCount*3];
       populateCoords(fanParts, coords);
       
-      flatFanGeometry = new TriangleFanArray(vertexCount,
+      flatGeometry = new TriangleFanArray(vertexCount,
                                              GeometryArray.COORDINATES,
                                              vertexCounts);
-      flatFanGeometry.setCoordinates(0, coords);
+      flatGeometry.setCoordinates(0, coords);
     }
 
-    if (nonFanParts.size() != 0) {
-      
-      int vertexCount = 0;
-      for (Iterator<GeometryArray> it = nonFanParts.iterator(); it.hasNext(); ) {
-        vertexCount += ((GeometryArray) it.next()).getVertexCount();
-      }
-
-      float[] coords = new float[vertexCount*3];
-      populateCoords(nonFanParts, coords);
-
-      flatNonFanGeometry = new TriangleArray(vertexCount,
-                                             GeometryArray.COORDINATES);
-      flatNonFanGeometry.setCoordinates(0, coords);
-    }
   }
 
   private int computeVertexCounts(Collection<? extends GeometryArray> parts, int[] vertexCounts) {
@@ -1262,8 +1237,7 @@ public class Net implements Comparable<Net> {
   private GeometryArray pointGeometry = null;
   private GeometryArray coneGeometry = null;
   private GeometryArray loopGeometry = null;
-  private GeometryArray flatFanGeometry = null;
-  private GeometryArray flatNonFanGeometry = null;
+  private GeometryArray flatGeometry = null;
 
   private boolean showLineGeometry = false;
   private boolean showVoronoiGeometry = false;
@@ -1275,8 +1249,7 @@ public class Net implements Comparable<Net> {
 //  private Shape3D coneEdgesS3D = null;
   private Shape3D loopS3D = null;
 //  private Shape3D loopEdgesS3D = null;
-  private Shape3D flatFanS3D = null;
-  private Shape3D flatNonFanS3D = null;
+  private Shape3D flatS3D = null;
 
   private BranchGroup sceneBG = null;
 
