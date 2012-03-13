@@ -900,174 +900,51 @@ public class Net implements Comparable<Net> {
   
   private void makeLoopGeometry() {
 
-    List<float[]> parts = new LinkedList<float[]>();
+    List<TriangleFanArray> parts = new ArrayList<TriangleFanArray>();
 
     //half edge loops
     for (HalfEdge startEdge : loopStarts) {
 
       HalfEdge he = startEdge;
-
-      Point2f startPoint, endPoint;
-      Vector3f dir = new Vector3f();
-      Vector3f offTop = new Vector3f();
-      Vector3f offBottom = new Vector3f();
       
-// TODO: the edge between cone and flat part isn't entirely tight.
-//       They should overlap a bit.
       do {
         
         Stroke stroke = he.getStroke();
 
-        startPoint = (he.getStart()).getInchCoordinates();
-        endPoint = (he.getEnd()).getInchCoordinates();
-
         if (stroke instanceof Segment) {
 
-          float[] part = new float[4*3];
-
-          dir.x = endPoint.x - startPoint.x;
-          dir.y = endPoint.y - startPoint.y;
-          dir.z = 0.0f;
-
-          dir.normalize();
+          Collection<GeometryArray> geometries = stroke.getGeometries();
           
-          offTop.cross(dir, Z); // offTop = normal to dir
-          offBottom.set(offTop);
-          
-          float width = (float) (((Segment) stroke).getWidth() / 2);
-          offTop.scale(width);
-          offBottom.scale(width + zCeiling());
+          if (geometries == null)
+            continue;
 
-          int i = 0;
-          part[i++] = startPoint.x + offTop.x;
-          part[i++] = startPoint.y + offTop.y;
-          part[i++] = LOOP_Z_MAX;
-
-          part[i++] = startPoint.x + offBottom.x;
-          part[i++] = startPoint.y + offBottom.y;
-          part[i++] = LOOP_Z_MAX-zCeiling();
-
-          part[i++] = endPoint.x + offTop.x;
-          part[i++] = endPoint.y + offTop.y;
-          part[i++] = LOOP_Z_MAX;
-          
-          part[i++] = endPoint.x + offBottom.x;
-          part[i++] = endPoint.y + offBottom.y;
-          part[i++] = LOOP_Z_MAX-zCeiling();
-          
-          parts.add(part);
-
+          for (GeometryArray geometry : geometries) {
+            
+            if (geometry instanceof TriangleFanArray) {
+              parts.add((TriangleFanArray) geometry);
+            }
+            else {
+              System.out.println("unsupported stroke geometry: " + stroke);
+            }
+          }
         } else {
           System.out.println("WARNING: unsupported stroke: " + stroke);
         }
         
-        HalfEdge next = he.getNext(); 
-
-        if (next.getStroke() == stroke) {
-
-          parts.add(makeCircleCone(endPoint.x, endPoint.y,
-                                   endPoint.x + offTop.x, endPoint.y + offTop.y,
-                                   endPoint.x + offBottom.x, endPoint.y + offBottom.y,
-                                   (float) Math.PI));
-
-        }
-        else {
-
-          double angle = he.angleTo(next);
-
-          if (angle > Math.PI) {
-            parts.add(makeCircleCone(endPoint.x, endPoint.y,
-                                     endPoint.x + offTop.x, endPoint.y + offTop.y,
-                                     endPoint.x + offBottom.x, endPoint.y + offBottom.y,
-                                     (float) (angle - Math.PI)));
-          }
-        }
-
+        HalfEdge next = he.getNext();
         he = next;
         
       } while (he != startEdge);
     }
       
-    if (parts.isEmpty())
-      return;
-    
-    //collect parts
-    
-    int vertexCount = 0;
-    int numFans = parts.size();
-    int[] vertexCounts = new int[numFans];
-    
-    int i = 0;
-    for (float[] part : parts) {      
-      vertexCount += part.length/3;
-      vertexCounts[i++] = part.length/3;
+    if (parts.size() != 0) {
+      loopGeometry = makeConesFromFanList(parts);
     }
-        
-    float[] coords = new float[vertexCount*3];
-    
-    i = 0;
-    for (float[] part : parts) {
-      
-      int len = part.length;
-      
-      System.arraycopy(part, 0, coords, i, len);
-      
-      i += len;
-    }
-    
-    loopGeometry = new TriangleStripArray(vertexCount,
-                                          GeometryArray.COORDINATES,
-                                          vertexCounts);
-    loopGeometry.setCoordinates(0, coords);
   }
 
   private void makeVoronoiGeometry() {
     makeConeGeometry();
     makeLoopGeometry();
-  }
-
-  private float[] makeCircleCone(float centerX, float centerY,
-                                 float topX, float topY,
-                                 float bottomX, float bottomY,
-                                 float angle) {
- 
-    int n = (int) Math.ceil(angle/CIRCLE_SECTOR);
-
-    double sector = angle/n;
-
-    float[] coord = new float[3*2*(n+1)];
-
-    int i = 0;
-    
-    Transform3D t3d = new Transform3D();
-    t3d.rotZ(sector);
-
-    Point3f pt = new Point3f(topX - centerX, topY - centerY, LOOP_Z_MAX);
-    Point3f pb = new Point3f(bottomX - centerX, bottomY - centerY, LOOP_Z_MAX-zCeiling());
-
-    coord[i++] = topX;
-    coord[i++] = topY;
-    coord[i++] = LOOP_Z_MAX;
-    
-    coord[i++] = bottomX;
-    coord[i++] = bottomY;
-    coord[i++] = LOOP_Z_MAX-zCeiling();
-    
-    for (int j = 0; j < n; j++) {
-
-      t3d.transform(pt);
-      t3d.transform(pb);
-      
-      coord[i++] = pt.x + centerX;
-      coord[i++] = pt.y + centerY;
-      coord[i++] = LOOP_Z_MAX;
-      
-      coord[i++] = pb.x + centerX;
-      coord[i++] = pb.y + centerY;
-      coord[i++] = LOOP_Z_MAX-zCeiling();
-    }
-
-    return coord;
   }
 
   private void makeFlatGeometry() {
