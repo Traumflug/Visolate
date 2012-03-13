@@ -752,7 +752,6 @@ public class Net implements Comparable<Net> {
         }
 
         if (geometry instanceof TriangleFanArray) {
-          //System.out.println("Supported: " + flash.toString());
           parts.add((TriangleFanArray) geometry);
         } else {
           System.out.println("Not supported for voronoi: " + flash.toString());
@@ -761,35 +760,53 @@ public class Net implements Comparable<Net> {
     }
 
     if (parts.size() != 0) {
-      int vertexCount = 0;
-      int[] vertexCounts = new int[parts.size()];
-      int i = 0;
+      coneGeometry = makeConesFromFanList(parts);
+    }
+  }
 
-      for (TriangleFanArray part : parts) {
+  private TriangleStripArray makeConesFromFanList(List<TriangleFanArray> fanList) {
 
-        // This gives us 1 for the center + the number of segments, ...
-        int partVertexCount = part.getVertexCount();
-        // ... but cones have no center and two vertices per segment:
-        partVertexCount--;
-        partVertexCount *= 2;
-        vertexCount += partVertexCount;
-        vertexCounts[i++] = partVertexCount;
-      }
+    int fanListStripCount = 0;
+    int fanListVertexCount = 0;
+    for (TriangleFanArray fan : fanList) {
 
-      float[] coords = new float[vertexCount*3];
+      // For each strip, this gives us 1 for the center + 
+      // the number of segments, ...
+      int partVertexCount = fan.getVertexCount();
+      // ... but cones have no center and two vertices per segment:
+      int numStrips = ((GeometryStripArray) fan).getNumStrips();
+      partVertexCount -= numStrips;
+      partVertexCount *= 2;
+      fanListVertexCount += partVertexCount;
+      fanListStripCount += numStrips;
+    }
 
-      i = 0;
-      for (int j = 0; j < parts.size(); j++) {
+    float[] coords = new float[fanListVertexCount*3];
+    int[] vertexCounts = new int[fanListStripCount];
+    int vertexCount = 0;
+    int stripCount = 0;
+    int i = 0;
+    
+    for (TriangleFanArray fan : fanList) {
 
-        TriangleFanArray part = parts.get(j);
-        // This gives us all the coordinates for a
-        // flat fan, sized to draw the pad properly.
-        float[] partCoords = part.getCoordRefFloat();
+      int numStrips = ((GeometryStripArray) fan).getNumStrips();
+      int[] fanVertexCounts = new int [numStrips];
+      ((GeometryStripArray) fan).getStripVertexCounts(fanVertexCounts);
 
-        float[] center = new float[2];
-        center[0] = partCoords[0];
-        center[1] = partCoords[1];
-        for (int k = 3; k < part.getVertexCount() * 3; k += 3) {
+      // This gives us all the coordinates for one or more
+      // flat fan strips, sized to draw the pad(s) properly.
+      float[] fanCoords = fan.getCoordRefFloat();
+      int stripCoordsPtr = 0;
+
+      for (int j = 0; j < numStrips; j++) {
+        
+        // On how to properly offset a bunch of lines:
+        // http://stackoverflow.com/questions/3749678/expand-fill-of-convex-polygon
+        Point2f p1 = new Point2f();
+        Point2f p2 = new Point2f();
+        Point2f p3 = new Point2f();
+
+        for (int k = 1; k < fanVertexCounts[j]; k++) {
           // To get a proper cone, we don't take over the center, take over the
           // outer fan vertices as is for the top and offset the same vertices
           // by zCeiling() for the bottom.
@@ -797,31 +814,80 @@ public class Net implements Comparable<Net> {
           // Additionally, the top vertices get projected to CONE_Z_MAX,
           // the bottom ones to CONE_Z_MAX-zCeiling().
 
-          coords[i++] = partCoords[k];
-          coords[i++] = partCoords[k+1];
+          // Start with the three points making up a vertex and it's
+          // adjectant lines. 2D is sufficient.
+          if (k == 1) {
+            p1.x = fanCoords[stripCoordsPtr + (fanVertexCounts[j] - 2) * 3];
+            p1.y = fanCoords[stripCoordsPtr + (fanVertexCounts[j] - 2) * 3 + 1];
+          }
+          else {
+            p1.x = fanCoords[stripCoordsPtr + (k - 1) * 3];
+            p1.y = fanCoords[stripCoordsPtr + (k - 1) * 3 + 1];
+          }
+          p2.x = fanCoords[stripCoordsPtr + k * 3];
+          p2.y = fanCoords[stripCoordsPtr + k * 3 + 1];
+          if (k == fanVertexCounts[j] - 1) {
+            p3.x = fanCoords[stripCoordsPtr + 2 * 3];
+            p3.y = fanCoords[stripCoordsPtr + 2 * 3 + 1];
+          }
+          else {
+            p3.x = fanCoords[stripCoordsPtr + (k + 1) * 3];
+            p3.y = fanCoords[stripCoordsPtr + (k + 1) * 3 + 1];
+          }
+
+          // Normal to V = (x, y) is N = (-y, x).
+          Vector2f n1 = new Vector2f(p2.y - p1.y, -(p2.x - p1.x));
+          Vector2f n2 = new Vector2f(p3.y - p2.y, -(p3.x - p2.x));
+          n1.normalize();
+          n2.normalize();
+          n1.scale(zCeiling());
+          n2.scale(zCeiling());
+
+          // These four points make the offsetted lines.
+          Point2f off11 = new Point2f(p1.x + n1.x, p1.y + n1.y);
+          Point2f off12 = new Point2f(p2.x + n1.x, p2.y + n1.y);
+          Point2f off21 = new Point2f(p2.x + n2.x, p2.y + n2.y);
+          Point2f off22 = new Point2f(p3.x + n2.x, p3.y + n2.y);
+
+          // Calculate the intersection point of these offseted lines.
+          float a1 = off12.x - off11.x;
+          float b1 = off21.x - off22.x;
+          float c1 = off21.x - off11.x;
+
+          float a2 = off12.y - off11.y;
+          float b2 = off21.y - off22.y;
+          float c2 = off21.y - off11.y;
+
+          float t = (b1*c2 - b2*c1) / (a2*b1 - a1*b2);
+
+          Point2f intersection = new Point2f(off11.x + t * (off12.x - off11.x),
+                                             off11.y + t * (off12.y - off11.y));
+          // Geometry calculations done.
+
+          coords[i++] = p2.x;
+          coords[i++] = p2.y;
           coords[i++] = CONE_Z_MAX;
 
-          // TODO: *sigh* After coding this I suddenly recognized this
-          // isn't an offset, but sort of a scaling.
-          // For a circle or a square, this scaling is identical to the
-          // wanted offset, though. For obounds, the shorter extents is too small.
-          float dx = partCoords[k] - center[0];
-          float dy = partCoords[k+1] - center[1];
-          float l = (float)Math.sqrt(dx * dx + dy * dy);
-          dx *= (zCeiling() + l) / l;
-          dy *= (zCeiling() + l) / l;
-          coords[i++] = center[0] + dx;
-          coords[i++] = center[1] + dy;
+          coords[i++] = intersection.x;
+          coords[i++] = intersection.y;
           coords[i++] = CONE_Z_MAX - zCeiling();
         }
+        vertexCounts[stripCount++] = (fanVertexCounts[j] - 1) * 2;
+        vertexCount += (fanVertexCounts[j] - 1) * 2;
+        
+        stripCoordsPtr += fanVertexCounts[j];
       }
-      coneGeometry = new TriangleStripArray(vertexCount,
-                                            GeometryArray.COORDINATES,
-                                            vertexCounts);
-      coneGeometry.setCoordinates(0, coords);
     }
-  }
 
+    TriangleStripArray cones = null;
+    cones = new TriangleStripArray(vertexCount,
+                                   GeometryArray.COORDINATES,
+                                   vertexCounts);
+    cones.setCoordinates(0, coords);
+    
+    return cones;
+  }
+  
   private void makeLoopGeometry() {
 
     List<float[]> parts = new LinkedList<float[]>();
