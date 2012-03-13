@@ -25,6 +25,7 @@ import java.util.*;
 import visolate.misc.*;
 
 import javax.media.j3d.GeometryArray;
+import javax.media.j3d.TriangleFanArray;
 import javax.vecmath.*;
 
 public class Segment extends Stroke {
@@ -32,6 +33,8 @@ public class Segment extends Stroke {
   private static final String cvsid =
   "$Id: Segment.java,v 1.3 2004/08/05 02:57:53 vona Exp $";
 
+  public static final int SEGMENTS = 16; // Must be a multiple of two.
+  public static final double SECTOR = 2.0*Math.PI/SEGMENTS;
 
   public static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
@@ -155,27 +158,67 @@ public class Segment extends Stroke {
 
   protected void makeGeometries() {
 
-    geometries = new LinkedList<GeometryArray>();
+    // This code is copied from OboundAperture
+
+    double x, y;
+    double angle = 0.0;
+    double rx = getWidth() / 2;
+    double ry = getLength() / 2 + rx;
+    double radius = Math.min(rx, ry);
+    double halfLength = Math.abs(ry - rx);
     
-    getBodyRect();
-    
-    //body rect is null if segment is 0 length
-    if (bodyRect != null) {
-      
-      float[] coords = new float[3*4];
-      
-      for (int i = 0; i < 4; i++) {
-        coords[3*i+0] = (float) bodyRect[i].x;
-        coords[3*i+1] = (float) bodyRect[i].y;
-        coords[3*i+2] = 0.0f;
-      }
-      
-      geometries.add(makeTFA(coords));
-      
-      addTranslatedAperture(geometries, aperture, start);
+    if (rx == 0.0 || ry == 0.0) {
+      return;
     }
     
-    addTranslatedAperture(geometries, aperture, end);
+    geometries = new LinkedList<GeometryArray>();
+    int i = 0;
+    float[] coords = new float[3*(SEGMENTS + 4)];
+    
+    // center
+    coords[i++] = 0.0f;
+    coords[i++] = 0.0f;
+    coords[i++] = 0.0f;
+
+    for (int j = 0; j <= SEGMENTS; j++) {
+
+      x = radius*Math.cos(angle);
+      y = radius*Math.sin(angle);
+
+      // vertical stretch
+      if (j <= SEGMENTS / 2) {
+        coords[i++] = (float) (x);
+        coords[i++] = (float) (y+halfLength);
+        coords[i++] = 0.0f;
+      }
+      // Yes, j == SEGMENTS / 2 gives two points!
+      if (j >= SEGMENTS / 2) {
+        coords[i++] = (float) (x);
+        coords[i++] = (float) (y-halfLength);
+        coords[i++] = 0.0f;
+      }
+      // Close the oval, it's a double-point again.
+      if (j == SEGMENTS) {
+        coords[i++] = (float) (x);
+        coords[i++] = (float) (y+halfLength);
+        coords[i++] = 0.0f;
+      }
+
+      angle += SECTOR;
+    }
+
+    TriangleFanArray tfa = makeTFA(coords);
+    
+    // Please don't ask why this PI thing is needed!
+    rotateGeometry(tfa, forwardDirection - Math.PI / 2);
+
+    Point2f s = start.getInchCoordinates();
+    Point2f e = end.getInchCoordinates();
+    Vector2f center = new Vector2f((s.x + e.x) / 2, (s.y + e.y) / 2);
+    translateGeometry(tfa, center);
+    
+    geometries.add(tfa);
+
   }
 
   public String toString() {
