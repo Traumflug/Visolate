@@ -875,6 +875,42 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 			return geometry;
 		}
+		
+  // Used for debugging only. This draws a white point for each Node.
+  // Swap it against getGeometry() in PathNode.getSceneGraph().
+  @SuppressWarnings("unused")
+  private Geometry getPointGeometry() {
+
+    int vertexCount = path.size()*2;
+    float[] coords = new float[vertexCount*3];
+
+    int i = 0;
+
+    Node prev = null;
+    for (Node node : path) {
+
+      if (prev != null) {
+
+        coords[i++] = toModelX(prev.x);
+        coords[i++] = toModelY(prev.y);
+        coords[i++] = Net.PATH_Z;
+
+        coords[i++] = toModelX(node.x);
+        coords[i++] = toModelY(node.y);
+        coords[i++] = Net.PATH_Z;
+      }
+
+      prev = node;
+    }
+
+    GeometryArray pointGeometry = new PointArray(vertexCount,
+                                                 GeometryArray.COORDINATES |
+                                                 GeometryArray.INTERLEAVED |
+                                                 GeometryArray.BY_REFERENCE);
+    pointGeometry.setInterleavedVertices(coords);
+
+    return pointGeometry;
+  }
 
 		public Point2d getStartPoint() {
 
@@ -1283,45 +1319,10 @@ public class ToolpathsProcessor extends MosaicProcessor {
 			Shape3D shape = new Shape3D();
 			shape.setPickable(false);
 
-			for (Iterator<Path> it = paths.iterator(); it.hasNext(); )
+			for (Iterator<Path> it = paths.iterator(); it.hasNext(); ) {
 				shape.addGeometry(it.next().getGeometry());
-
-			/*
-      int vertexCount = nodes.size();
-
-      float[] coords = new float[vertexCount*6];
-
-      int i = 0;
-      for (Iterator it = nodes.keySet().iterator(); it.hasNext(); ) {
-
-        Node node = (Node) it.next();
-
-        Color3f color = node.getColor();
-
-        coords[i++] = color.x;
-        coords[i++] = color.y;
-        coords[i++] = color.z;
-
-        float x = (float) (mosaicBounds.x + node.x/((float) dpi));
-        float y = (float) (mosaicBounds.y + modelHeight-node.y/((float) dpi));
-
-        coords[i++] = x;
-        coords[i++] = y;
-        coords[i++] = Net.PATH_Z;
-
-      }
-
-      System.out.println("vertexCount = " + vertexCount);
-
-      GeometryArray geometry = new PointArray(vertexCount,
-                                              GeometryArray.COORDINATES |
-                                              GeometryArray.COLOR_3 |
-                                              GeometryArray.INTERLEAVED |
-                                              GeometryArray.BY_REFERENCE);
-      geometry.setInterleavedVertices(coords);
-
-      shape.addGeometry(geometry);
-			 */
+//				shape.addGeometry(it.next().getPointGeometry()); // nomally commented out
+			}
 
 			sceneBG = new BranchGroup();
 			sceneBG.setPickable(false);
