@@ -113,12 +113,7 @@ public class Simulator {
 
     arc360 = DEF_ARC360;
     
-    xBefore = DEF_X_BEFORE;
-    xAfter = DEF_X_AFTER;
     xWidth = DEF_X_BEFORE + DEF_X_AFTER;
-
-    yBefore = DEF_Y_BEFORE;
-    yAfter = DEF_Y_AFTER;
     yWidth = DEF_Y_BEFORE + DEF_Y_AFTER;
   }
 
@@ -143,8 +138,6 @@ public class Simulator {
     if (!checkFormat(before) || !checkFormat(after))
       throw new SimulatorException("bad X format: " + before + "." + after);
 
-    xBefore = before;
-    xAfter = after;
     xWidth = before + after;
 
     xScale = (int) Math.pow(10.0, after);
@@ -162,8 +155,6 @@ public class Simulator {
     if (!checkFormat(before) || !checkFormat(after))
       throw new SimulatorException("bad Y format: " + before + "." + after);
 
-    yBefore = before;
-    yAfter = after;
     yWidth = before + after;
 
     yScale = (int) Math.pow(10.0, after);
@@ -503,12 +494,7 @@ public class Simulator {
 
   private boolean arc360 = DEF_ARC360;
 
-  private int xBefore = DEF_X_BEFORE;
-  private int xAfter = DEF_X_AFTER;
   private int xWidth = DEF_X_BEFORE + DEF_X_AFTER;
-
-  private int yBefore = DEF_Y_BEFORE;
-  private int yAfter = DEF_Y_AFTER;
   private int yWidth = DEF_Y_BEFORE + DEF_Y_AFTER;
 
   private SimulatorUI ui;

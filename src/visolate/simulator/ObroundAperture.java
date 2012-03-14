@@ -23,9 +23,7 @@ package visolate.simulator;
 import java.util.*;
 
 import visolate.misc.*;
-import com.sun.j3d.utils.geometry.*;
 import javax.media.j3d.*;
-import javax.vecmath.Point3f;
 
 public class ObroundAperture extends StandardAperture {
   

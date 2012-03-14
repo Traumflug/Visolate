@@ -96,7 +96,7 @@ public class Parser implements ParserConstants {
 				case 44:
 				case 45:
 					stop = Code();
-					if (stop) {if (true) return;}
+					if (stop) return;
 					break;
 				default:
 					jj_la1[1] = jj_gen;
@@ -234,12 +234,11 @@ public class Parser implements ParserConstants {
 			;
 		}
 		t = jj_consume_token(CODE_DELIM);
-		{if (true) return (stop == HALT) ||
-			((stop == OPTSTOP) &&
-					!simulator.askContinue(t.beginLine,
-							((seq != null) ? Integer.parseInt(seq.image)
-									: -1)));}
-		throw new Error("Missing return statement in function");
+		
+		return (stop == HALT) ||
+		       ((stop == OPTSTOP) &&
+		        !simulator.askContinue(t.beginLine, ((seq != null) ?
+		                                             Integer.parseInt(seq.image) : -1)));
 	}
 
 	final public void GCode() throws ParseException {
@@ -370,8 +369,8 @@ public class Parser implements ParserConstants {
 			else
 				simulator.setAperture(Integer.parseInt("1" + aperture.image));
 
-			{if (true) return false;}
-			break;
+			return false;
+
 		case 35:
 			jj_consume_token(35);
 			switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -387,8 +386,8 @@ public class Parser implements ParserConstants {
 			else
 				simulator.setAperture(Integer.parseInt("2" + aperture.image));
 
-			{if (true) return false;}
-			break;
+			return false;
+
 		case 36:
 			jj_consume_token(36);
 			switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -404,20 +403,20 @@ public class Parser implements ParserConstants {
 			else
 				simulator.setAperture(Integer.parseInt("3" + aperture.image));
 
-			{if (true) return true;}
-			break;
+			return true;
+
 		case 37:
 			jj_consume_token(37);
 			aperture = jj_consume_token(DIGITS);
 			simulator.setAperture(Integer.parseInt(aperture.image));
-			{if (true) return false;}
-			break;
+			return false;
+
 		default:
 			jj_la1[13] = jj_gen;
 			jj_consume_token(-1);
 			throw new ParseException();
 		}
-		throw new Error("Missing return statement in function");
+	  // never reached
 	}
 
 	final public void Coordinates(String[] c) throws ParseException {
@@ -486,8 +485,8 @@ public class Parser implements ParserConstants {
 			;
 		}
 		digits = jj_consume_token(DIGITS);
-		{if (true) return ((sign != null) ? sign.image : "") + digits.image;}
-		throw new Error("Missing return statement in function");
+		
+		return ((sign != null) ? sign.image : "") + digits.image;
 	}
 
 	final public double Double() throws ParseException {
@@ -537,30 +536,32 @@ public class Parser implements ParserConstants {
 		if ((sign != null) && ("-".equals(sign.image)))
 			value = -value;
 
-		{if (true) return value;}
-		throw new Error("Missing return statement in function");
+		return value;
 	}
 
 	final public int MCode() throws ParseException {
 		switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
 		case 43:
 			jj_consume_token(43);
-			{if (true) return HALT;}
-			break;
+			
+			return HALT;
+
 		case 44:
 			jj_consume_token(44);
-			{if (true) return OPTSTOP;}
-			break;
+			
+			return OPTSTOP;
+
 		case 45:
 			jj_consume_token(45);
-			{if (true) return HALT;}
-			break;
+			
+			return HALT;
+
 		default:
 			jj_la1[21] = jj_gen;
 			jj_consume_token(-1);
 			throw new ParseException();
 		}
-		throw new Error("Missing return statement in function");
+		// never reached
 	}
 
 	final public void ParameterCode() throws ParseException {
@@ -1217,8 +1218,9 @@ public class Parser implements ParserConstants {
 		switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
 		case CODE_DELIM:
 			jj_consume_token(CODE_DELIM);
-			{if (true) return null;}
-			break;
+			
+			return null;
+
 		case DIGITS:
 			numberToken = jj_consume_token(DIGITS);
 			switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1233,28 +1235,28 @@ public class Parser implements ParserConstants {
 			jj_consume_token(CODE_DELIM);
 			int primitiveNumber = Integer.parseInt(numberToken.image);
 			switch (primitiveNumber) {
-			case 1: {if (true) return new CirclePrimitive(exprs);}
-			case 2: {if (true) return new LineVectorPrimitive(exprs);}
-			case 20: {if (true) return new LineVectorPrimitive(exprs);}
-			case 21: {if (true) return new LineCenterPrimitive(exprs);}
-			case 22: {if (true) return new LineLLPrimitive(exprs);}
-			case 3: {if (true) return null;}
-			case 4: {if (true) return new OutlinePrimitive(exprs);}
-			case 5: {if (true) return new PolygonPrimitive(exprs);}
-			case 6: {if (true) return new MoirePrimitive(exprs);}
-			case 7: {if (true) return new ThermalPrimitive(exprs);}
+			case 1: return new CirclePrimitive(exprs);
+			case 2: return new LineVectorPrimitive(exprs);
+			case 20: return new LineVectorPrimitive(exprs);
+			case 21: return new LineCenterPrimitive(exprs);
+			case 22: return new LineLLPrimitive(exprs);
+			case 3: return null;
+			case 4: return new OutlinePrimitive(exprs);
+			case 5: return new PolygonPrimitive(exprs);
+			case 6: return new MoirePrimitive(exprs);
+			case 7: return new ThermalPrimitive(exprs);
 			default:
 				System.err.println("WARNING: ignoring unknown macro primitive type " +
 						primitiveNumber);
-				{if (true) return null;}
+				return null;
 			}
-			break;
+
 		default:
 			jj_la1[52] = jj_gen;
 			jj_consume_token(-1);
 			throw new ParseException();
 		}
-		throw new Error("Missing return statement in function");
+		// never reached
 	}
 
 	final public void ExprList(final List<MacroExpression> exprs) throws ParseException {
@@ -1288,12 +1290,10 @@ public class Parser implements ParserConstants {
 			;
 		}
 		if (rhs == null)
-		{if (true) return lhs;}
+		  return lhs;
 
-		{if (true) return new MacroBinOp((("+".equals(op.image)) ?
-				MacroBinOp.ADD : MacroBinOp.SUBTRACT),
-				lhs, rhs);}
-		throw new Error("Missing return statement in function");
+		return new MacroBinOp((("+".equals(op.image)) ?
+			                     MacroBinOp.ADD : MacroBinOp.SUBTRACT), lhs, rhs);
 	}
 
 	final public MacroExpression MulExpr() throws ParseException {
@@ -1327,15 +1327,14 @@ public class Parser implements ParserConstants {
 			;
 		}
 		if (op == null)
-		{if (true) return lhs;}
+		  return lhs;
 
 		int operator = MacroBinOp.MULTIPLY;
 
 		if ("-".equals(op.image))
 			operator = MacroBinOp.DIVIDE;
 
-		{if (true) return new MacroBinOp(operator, lhs, rhs);}
-		throw new Error("Missing return statement in function");
+		return new MacroBinOp(operator, lhs, rhs);
 	}
 
 	final public MacroExpression UnaryExpr() throws ParseException {
@@ -1346,19 +1345,21 @@ public class Parser implements ParserConstants {
 		case DIGITS:
 		case 42:
 			value = Double();
-			{if (true) return new MacroConstant(value);}
-			break;
+			
+			return new MacroConstant(value);
+
 		case 73:
 			jj_consume_token(73);
 			index = jj_consume_token(DIGITS);
-			{if (true) return new MacroVariable(Integer.parseInt(index.image));}
-			break;
+			
+			return new MacroVariable(Integer.parseInt(index.image));
+
 		default:
 			jj_la1[57] = jj_gen;
 			jj_consume_token(-1);
 			throw new ParseException();
 		}
-		throw new Error("Missing return statement in function");
+		// never reached
 	}
 
 	public ParserTokenManager token_source;
