@@ -33,16 +33,12 @@ import java.io.*;
 import visolate.*;
 import visolate.model.*;
 import visolate.misc.*;
+import visolate.processor.ToolpathNode;
 
 /**
  * The ToolpathsProcessor generates the content for a  g-code file.
  */
 public class ToolpathsProcessor extends MosaicProcessor {
-
-	public static final int N = 0;
-	public static final int S = 1;
-	public static final int W = 2;
-	public static final int E = 3;
 
 	public static final Color3f ORIGIN_COLOR = new Color3f(1.0f, 0.0f, 1.0f);
 	public static final float ORIGIN_TICK = 0.1f;
@@ -340,14 +336,14 @@ public class ToolpathsProcessor extends MosaicProcessor {
 				int lColor = getColor(x-1, y);
 				int uColor = getColor(x, y-1);
 
-				Node n = null;
+				ToolpathNode n = null;
 
 				if ((x > 0) && (lColor != color)) {
 
 					if (n == null)
 						n = getNode(x, y);
 
-					Node o = getNode(x, y+1);
+					ToolpathNode o = getNode(x, y+1);
 
 					n.south = o;
 
@@ -360,7 +356,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 					if (n == null)
 						n = getNode(x, y);
 
-					Node o = getNode(x+1, y);
+					ToolpathNode o = getNode(x+1, y);
 
 					n.east = o;
 
@@ -384,7 +380,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		System.out.println("making paths...");
 
-		Set<Node> nodes = this.nodes.keySet();
+		Set<ToolpathNode> nodes = this.nodes.keySet();
 
 		currentTick = 0;
 		visolate.resetInnerProgressBar(100);
@@ -433,116 +429,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		reportPathStats();
 	}
 
-	private class Node {
-
-		Node(int x, int y) {
-
-			this.x = x;
-			this.y = y;
-
-			hashCode = x^(y*31);
-		}
-
-		public int hashCode() {
-			return hashCode;
-		}
-
-		public boolean equals(Object object) {
-
-			if (!(object instanceof Node))
-				return false;
-
-			Node other = (Node) object;
-
-			return (x == other.x) && (y == other.y);
-		}
-
-		public String toString() {
-			return "(" + x + ", " + y + ")";
-		}
-
-		public int numNeighbors() {
-
-			int n = 0;
-
-			if (north != null)
-				n++;
-
-			if (south != null)
-				n++;
-
-			if (west != null)
-				n++;
-
-			if (east != null)
-				n++;
-
-			return n;
-		}
-
-		public Node getNeighbor(int d) {
-			switch(d) {
-			case N:
-				return north;
-			case S:
-				return south;
-			case W:
-				return west;
-			case E:
-				return east;
-			default:
-				return null;
-			}
-		}
-
-		public void setNeighbor(int d, Node n) {
-			switch(d) {
-			case N:
-				north = n;
-				break;
-			case S:
-				south = n;
-				break;
-			case W:
-				west = n;
-				break;
-			case E:
-				east = n;
-				break;
-			}
-		}
-
-		//    public Color3f getColor() {
-		//      return getColor(((north != null) ? 1 : 0) |
-		//                      ((south != null) ? 1 : 0) << 1 |
-		//                      ((west != null) ? 1 : 0) << 2 |
-		//                      ((east != null) ? 1 : 0) << 3);
-		//    }
-
-		//    public Color3f getColor(int i) {
-		//
-		//      if (nodeColor[i] == null) {
-		//        Color3f color = Net.toColor3f(display.getRandomColor());
-		//        nodeColor[i] = color;
-		//        System.out.println("nodeColor[" + i + "] = " + color);
-		//      }
-		//
-		//      return nodeColor[i];
-		//    }
-
-		int hashCode;
-
-		int x;
-		int y;
-
-		Node north = null;
-		Node south = null;
-		Node west = null;
-		Node east = null;
-	}
-
-	//  private Color3f[] nodeColor = new Color3f[16];
-
 	private int getColor(int x, int y) {
 
 		if (x < 0)
@@ -560,7 +446,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		return buffer.getElem(y*mosaicWidth + x) & 0xffffff;
 	}
 
-	private Node getNode(int x, int y) {
+	private ToolpathNode getNode(int x, int y) {
 
 		if (x < 0)
 			return null;
@@ -574,9 +460,9 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		if (y >= mosaicHeight)
 			return null;
 
-		Node key = new Node(x, y);
+		ToolpathNode key = new ToolpathNode(x, y);
 
-		Node node = (Node) nodes.get(key);
+		ToolpathNode node = (ToolpathNode) nodes.get(key);
 
 		if (node == null) {
 			node = key;
@@ -588,14 +474,14 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 	private int oppositeDir(int d) {
 		switch(d) {
-		case N:
-			return S;
-		case S:
-			return N;
-		case W:
-			return E;
-		case E:
-			return W;
+		case ToolpathNode.N:
+			return ToolpathNode.S;
+		case ToolpathNode.S:
+			return ToolpathNode.N;
+		case ToolpathNode.W:
+			return ToolpathNode.E;
+		case ToolpathNode.E:
+			return ToolpathNode.W;
 		default:
 			return -1;
 		}
@@ -603,7 +489,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 	private class Path {
 
-		Path(final Node seed) {
+		Path(final ToolpathNode seed) {
 
 			//      this.seed = seed;
 
@@ -657,8 +543,8 @@ public class ToolpathsProcessor extends MosaicProcessor {
 			}
 
 			case 4: {
-				dir[HEAD] = N;
-				dir[TAIL] = S;
+				dir[HEAD] = ToolpathNode.N;
+				dir[TAIL] = ToolpathNode.S;
 				break;
 			}
 			}
@@ -673,7 +559,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		private boolean extendTail() {
 
-			Node next = getNext((Node) path.getLast(), TAIL);
+			ToolpathNode next = getNext((ToolpathNode) path.getLast(), TAIL);
 
 			if (next == null)
 				return false;
@@ -685,7 +571,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		private boolean extendHead() {
 
-			Node next = getNext((Node) path.getFirst(), HEAD);
+			ToolpathNode next = getNext((ToolpathNode) path.getFirst(), HEAD);
 
 			if (next == null)
 				return false;
@@ -695,11 +581,11 @@ public class ToolpathsProcessor extends MosaicProcessor {
 			return true;
 		}
 
-		private Node getNext(Node n, int whichDir) {
+		private ToolpathNode getNext(ToolpathNode n, int whichDir) {
 
 			int d = dir[whichDir];
 
-			Node next = n.getNeighbor(d);
+			ToolpathNode next = n.getNeighbor(d);
 
 			if (next == null) {
 
@@ -711,7 +597,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 					if (i == oppositeDir(d))
 						continue;
 
-					Node neighbor = n.getNeighbor(i);
+					ToolpathNode neighbor = n.getNeighbor(i);
 
 					if (neighbor != null) {
 
@@ -765,9 +651,9 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 			if (optimalPathEnd == null) {
 
-				Node prev = null;
+				ToolpathNode prev = null;
 
-				for (Node node : path) {
+				for (ToolpathNode node : path) {
 
 					if (prev != null) {
 						length += Util.distance(toModelX(prev.x), toModelY(prev.y),
@@ -808,9 +694,9 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 				if (optimalPathEnd == null) {
 
-					Node prev = null;
+					ToolpathNode prev = null;
 
-					for (Node node : path) {
+					for (ToolpathNode node : path) {
 
 						if (prev != null) {
 
@@ -886,8 +772,8 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
     int i = 0;
 
-    Node prev = null;
-    for (Node node : path) {
+    ToolpathNode prev = null;
+    for (ToolpathNode node : path) {
 
       if (prev != null) {
 
@@ -915,7 +801,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		public Point2d getStartPoint() {
 
 			if (optimalPathEnd == null) {
-				Node start = (Node) path.getFirst();
+				ToolpathNode start = (ToolpathNode) path.getFirst();
 				return new Point2d(start.x, start.y);
 			} else {
 				return new Point2d(optimalPathEnd.x, optimalPathEnd.y);
@@ -930,7 +816,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 			if (optimalPathEnd == null) {
 
-				for (Node node : path) {
+				for (ToolpathNode node : path) {
 
 					if (first) {
 						gCodeRapidMovement(w, p, node.x, node.y); //rapid to start
@@ -975,8 +861,8 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 			PathNode prev = null;
 			int i = 0;
-			for (Iterator<Node> it = path.iterator(); it.hasNext(); ) {
-				PathNode node = new PathNode((Node) it.next(), prev, i++);
+			for (Iterator<ToolpathNode> it = path.iterator(); it.hasNext(); ) {
+				PathNode node = new PathNode((ToolpathNode) it.next(), prev, i++);
 
 				if (optimalPathStart == null) {
 					optimalPathStart = node;
@@ -1171,7 +1057,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		final int HEAD = 0;
 		final int TAIL = 1;
 
-		private LinkedList<Node> path = new LinkedList<Node>();
+		private LinkedList<ToolpathNode> path = new LinkedList<ToolpathNode>();
 
 		GeometryArray geometry;
 
@@ -1245,7 +1131,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 	private class PathNode {
 
-		PathNode(Node node, PathNode prev, int index) {
+		PathNode(ToolpathNode node, PathNode prev, int index) {
 
 			x = toModelX(node.x);
 			y = toModelY(node.y);
@@ -1603,7 +1489,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		return x;
 	}
 
-	private Map<Node, Node> nodes = new LinkedHashMap<Node, Node>();
+	private Map<ToolpathNode, ToolpathNode> nodes = new LinkedHashMap<ToolpathNode, ToolpathNode>();
 	private List<Path> paths = new LinkedList<Path>();
 
 	private DataBuffer buffer;
