@@ -28,10 +28,6 @@ import javax.media.j3d.*;
 import javax.vecmath.Point3f;
 
 public class ObroundAperture extends StandardAperture {
-
-  private static final String cvsid =
-  "$Id: ObroundAperture.java,v 1.2 2004/06/30 17:26:29 vona Exp $";
-
   
   public static final int SEGMENTS = 16; // Must be a multiple of two.
   public static final double SECTOR = 2.0*Math.PI/SEGMENTS;

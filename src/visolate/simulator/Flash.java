@@ -29,10 +29,6 @@ import visolate.misc.*;
 
 public class Flash extends Action {
 
-  private static final String cvsid =
-  "$Id: Flash.java,v 1.2 2004/06/30 17:26:29 vona Exp $";
-
-
   public Flash(Aperture aperture, Vertex location) {
 
     this.aperture = aperture;

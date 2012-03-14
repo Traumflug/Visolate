@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,10 +25,6 @@ import java.util.*;
 import javax.vecmath.*;
 
 public class OutlinePrimitive extends MacroPrimitive {
-
-  private static final String cvsid =
-  "$Id: OutlinePrimitive.java,v 1.1.1.1 2004/06/24 05:46:01 vona Exp $";
-
 
   public OutlinePrimitive(List<MacroExpression> exprs) {
     super(exprs);

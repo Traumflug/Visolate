@@ -6,9 +6,6 @@ import java.util.*;
 
 public class Parser implements ParserConstants {
 
-	private static final String cvsid =
-		"$Id: Parser.jj,v 1.3 2006/08/26 20:17:30 vona Exp $";
-
 	public static final int HALT = 0;
 	public static final int OPTSTOP = 1;
 

@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,8 +40,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.PropertyVetoException;
-import java.beans.VetoableChangeListener;
 import java.security.*;
 
 import org.apache.commons.cli.CommandLine;
@@ -54,9 +53,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 	public CommandLine commandline;
 	public int processstatus;
 	public boolean auto_mode;
-
-	private static final String cvsid =
-		"$Id: Visolate.java,v 1.11 2006/09/15 19:48:24 vona Exp $";
 
 	private double selectedZClearance = ToolpathsProcessor.CLEARANCE_Z;
 	private double selectedZCuttingHeight = 0;

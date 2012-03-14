@@ -31,9 +31,6 @@ import java.util.*;
 
 public class Net implements Comparable<Net> {
 
-  private static final String cvsid =
-  "$Id: Net.java,v 1.10 2006/08/29 04:02:32 vona Exp $";
-
   public static final int CIRCLE_SEGMENTS = 16;
   public static final double CIRCLE_SECTOR = 2.0*Math.PI/CIRCLE_SEGMENTS;
 

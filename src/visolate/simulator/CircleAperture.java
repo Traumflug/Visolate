@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,10 +25,6 @@ import javax.media.j3d.GeometryArray;
 import visolate.misc.*;
 
 public class CircleAperture extends StandardAperture {
-
-  private static final String cvsid =
-  "$Id: CircleAperture.java,v 1.2 2004/06/30 17:26:29 vona Exp $";
-
 
   public static final int SEGMENTS = 16;
   public static final double SECTOR = 2.0*Math.PI/SEGMENTS;

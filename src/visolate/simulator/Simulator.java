@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,10 +24,6 @@ import java.util.*;
 import visolate.misc.*;
 
 public class Simulator {
-
-  private static final String cvsid =
-  "$Id: Simulator.java,v 1.5 2006/08/29 00:13:03 vona Exp $";
-
 
   public static final double ARC_RESOLUTION = Math.PI/128.0;
 

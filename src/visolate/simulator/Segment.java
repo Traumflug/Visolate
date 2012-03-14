@@ -30,9 +30,6 @@ import javax.vecmath.*;
 
 public class Segment extends Stroke {
 
-  private static final String cvsid =
-  "$Id: Segment.java,v 1.3 2004/08/05 02:57:53 vona Exp $";
-
   public static final int SEGMENTS = 16; // Must be a multiple of two.
   public static final double SECTOR = 2.0*Math.PI/SEGMENTS;
 

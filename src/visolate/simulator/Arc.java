@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +21,6 @@
 package visolate.simulator;
 
 public class Arc extends Stroke {
-
-  private static final String cvsid =
-  "$Id: Arc.java,v 1.2 2004/06/30 17:26:29 vona Exp $";
 
   public Arc(Aperture aperture, Vertex start, Vertex end, Vertex center) {
     super(aperture, start, end);

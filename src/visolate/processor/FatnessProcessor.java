@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +26,6 @@ import visolate.*;
 import visolate.model.*;
 
 public class FatnessProcessor extends Processor {
-
-  private static final String cvsid =
-  "$Id: FatnessProcessor.java,v 1.1 2004/08/05 20:06:52 vona Exp $";
 
   public FatnessProcessor(Visolate visolate) {
     super(visolate);

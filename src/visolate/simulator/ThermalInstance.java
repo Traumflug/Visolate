@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +28,6 @@ import com.sun.j3d.utils.geometry.*;
 import javax.media.j3d.*;
 
 public class ThermalInstance extends PrimitiveInstance {
-
-  private static final String cvsid =
-  "$Id: ThermalInstance.java,v 1.3 2004/07/06 23:32:51 vona Exp $";
-
 
   public ThermalInstance(double x, double y,
                          double od, double id,

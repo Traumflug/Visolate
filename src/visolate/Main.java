@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +27,6 @@ import java.io.*;
 import org.apache.commons.cli.*;
 
 public class Main extends JApplet {
-
-  private static final String cvsid =
-  "$Id: Main.java,v 1.5 2006/08/29 00:13:02 vona Exp $";
 
   public static final String APPNAME = "Visolate 2.1.6";
   public static final int DEF_LOC_X = 100;

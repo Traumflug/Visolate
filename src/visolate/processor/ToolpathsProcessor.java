@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,9 +38,6 @@ import visolate.misc.*;
  * The ToolpathsProcessor generates the content for a  g-code file.
  */
 public class ToolpathsProcessor extends MosaicProcessor {
-
-	private static final String cvsid =
-		"$Id: ToolpathsProcessor.java,v 1.8 2004/09/08 19:40:30 vona Exp $";
 
 	public static final int N = 0;
 	public static final int S = 1;

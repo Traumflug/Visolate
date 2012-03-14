@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +23,6 @@ package visolate.simulator;
 import java.util.*;
 
 public class MacroBinOp extends MacroExpression {
-
-  private static final String cvsid =
-  "$Id: MacroBinOp.java,v 1.1.1.1 2004/06/24 05:46:01 vona Exp $";
-
 
   public static final int ADD = 0;
   public static final int SUBTRACT = 1;

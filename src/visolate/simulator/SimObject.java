@@ -29,9 +29,6 @@ import visolate.misc.*;
 
 public abstract class SimObject {
 
-  private static final String cvsid =
-  "$Id: SimObject.java,v 1.2 2004/07/16 20:30:52 vona Exp $";
-
   public Rect getBounds() {
 
     if (bounds == null)

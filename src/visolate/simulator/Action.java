@@ -26,9 +26,6 @@ import javax.vecmath.*;
 
 public abstract class Action extends SimObject {
 
-  private static final String cvsid =
-  "$Id: Action.java,v 1.2 2004/06/30 17:26:29 vona Exp $";
-
   protected static void addTranslatedAperture(Collection<GeometryArray> geometries,
                                               Aperture aperture,
                                               Vertex v) {

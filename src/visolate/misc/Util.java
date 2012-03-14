@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,9 +25,6 @@ import javax.vecmath.*;
 import java.util.*;
 
 public class Util {
-
-  private static final String cvsid =
-  "$Id: Util.java,v 1.4 2005/04/11 15:16:21 vona Exp $";
 
   public static final double MIN_DY = 1e-6;
 

@@ -2,6 +2,7 @@
  * "Visolate" -- compute (Voronoi) PCB isolation routing toolpaths
  *
  * Copyright (C) 2004 Marsette A. Vona, III
+ *               2012 Markus Hitter <mah@jump-ing.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,9 +45,6 @@ public class Model extends JPanel {
 	 * 
 	 */
 	private static final long serialVersionUID = 214293510166172826L;
-
-	private static final String cvsid =
-		"$Id: Model.java,v 1.12 2006/08/29 04:02:32 vona Exp $";
 
 	public static final int NUM_CIRCLE_SEGMENTS = 256;
 
