@@ -689,8 +689,9 @@ public class Net implements Comparable<Net> {
 //      System.out.println("(" + coords[6*i] + ", " + coords[6*i+1] + ") -> (" +
 //                         coords[6*i+3] + ", " + coords[6*i+4] + ")");
 
-    lineGeometry = new LineArray(vertexCount, GeometryArray.COORDINATES);
-    lineGeometry.setCoordinates(0, coords);
+    lineGeometry = new LineArray(vertexCount, GeometryArray.COORDINATES |
+                                              GeometryArray.BY_REFERENCE);
+    lineGeometry.setCoordRefFloat(coords);
   }
 
   private void makePointGeometry() {
@@ -712,8 +713,9 @@ public class Net implements Comparable<Net> {
 
     }
 
-    pointGeometry = new PointArray(vertexCount, GeometryArray.COORDINATES);
-    pointGeometry.setCoordinates(0, coords);
+    pointGeometry = new PointArray(vertexCount, GeometryArray.COORDINATES |
+                                                GeometryArray.BY_REFERENCE);
+    pointGeometry.setCoordRefFloat(coords);
   }
 
   private void makeConeGeometry() {
@@ -851,9 +853,10 @@ public class Net implements Comparable<Net> {
 
     TriangleStripArray cones = null;
     cones = new TriangleStripArray(vertexCount,
-                                   GeometryArray.COORDINATES,
+                                   GeometryArray.COORDINATES |
+                                   GeometryArray.BY_REFERENCE,
                                    vertexCounts);
-    cones.setCoordinates(0, coords);
+    cones.setCoordRefFloat(coords);
     
     return cones;
   }
@@ -1004,9 +1007,10 @@ public class Net implements Comparable<Net> {
       populateCoords(fanParts, coords);
       
       flatGeometry = new TriangleFanArray(vertexCount,
-                                             GeometryArray.COORDINATES,
-                                             vertexCounts);
-      flatGeometry.setCoordinates(0, coords);
+                                          GeometryArray.COORDINATES |
+                                          GeometryArray.BY_REFERENCE,
+                                          vertexCounts);
+      flatGeometry.setCoordRefFloat(coords);
     }
 
   }
