@@ -751,6 +751,36 @@ public class Net implements Comparable<Net> {
     if (parts.size() != 0) {
       coneGeometry = makeConesFromFanList(parts);
     }
+    
+//    // This is for debugging.
+//    // Draw upper and lower edge of all cones. Useful if offsetOut in
+//    // makeConesFromFanList() is set to something like zCeiling()/10.
+//    int coneStripCount = ((GeometryStripArray) coneGeometry).getNumStrips();
+//    int lineVertexCount = (coneGeometry.getVertexCount() - coneStripCount * 2) * 2;
+//    float[] coneCoords = coneGeometry.getCoordRefFloat();
+//    float[] lineCoords = new float[lineVertexCount * 3];
+//    int[] coneVertexCounts = new int[coneStripCount];
+//    ((GeometryStripArray) coneGeometry).getStripVertexCounts(coneVertexCounts);
+//    
+//    int i = 0;
+//    int coneCoordPtr = 0;
+//    
+//    for (int j = 0; j < coneStripCount; j++) {
+//      for (int k = 0; k < coneVertexCounts[j] - 2; k++) {
+//        lineCoords[i++] = coneCoords[coneCoordPtr + k * 3];
+//        lineCoords[i++] = coneCoords[coneCoordPtr + k * 3 + 1];
+//        lineCoords[i++] = FLAT_Z_MAX;
+//        lineCoords[i++] = coneCoords[coneCoordPtr + k * 3 + 6];
+//        lineCoords[i++] = coneCoords[coneCoordPtr + k * 3 + 7];
+//        lineCoords[i++] = FLAT_Z_MAX;
+//      }
+//      coneCoordPtr += coneVertexCounts[j] * 3;
+//    }
+//    lineGeometry = new LineArray(lineVertexCount, GeometryArray.COORDINATES |
+//                                                  GeometryArray.BY_REFERENCE);
+//    lineGeometry.setCoordRefFloat(lineCoords);
+//    // End of debugging part.
+    
   }
 
   private TriangleStripArray makeConesFromFanList(List<TriangleFanArray> fanList) {
