@@ -399,8 +399,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 				public void undoableEditHappened(UndoableEditEvent evt) {
 					try {
 						selectedInitialXCoordinate = NumberFormat.getInstance().parse(field.getText()).doubleValue();
-						if (myAoolpathsProcessor != null) {
-							myAoolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
+						if (myToolpathsProcessor != null) {
+							myToolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
 						}
 					} catch (ParseException e) {
 						evt.getEdit().undo();
@@ -434,8 +434,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 				public void undoableEditHappened(UndoableEditEvent evt) {
 					try {
 						selectedInitialYCoordinate = NumberFormat.getInstance().parse(field.getText()).doubleValue();
-						if (myAoolpathsProcessor != null) {
-							myAoolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
+						if (myToolpathsProcessor != null) {
+							myToolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
 						}
 					} catch (ParseException e) {
 						evt.getEdit().undo();
@@ -460,8 +460,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 				public void undoableEditHappened(UndoableEditEvent evt) {
 					try {
 						selectedZClearance = NumberFormat.getInstance().parse(field.getText()).doubleValue();
-						if (myAoolpathsProcessor != null) {
-							myAoolpathsProcessor.setZClearance(selectedZClearance);
+						if (myToolpathsProcessor != null) {
+							myToolpathsProcessor.setZClearance(selectedZClearance);
 						}
 					} catch (ParseException e) {
 						evt.getEdit().undo();
@@ -490,8 +490,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 				public void undoableEditHappened(UndoableEditEvent evt) {
 					try {
 						myMillingSpeed = NumberFormat.getInstance().parse(field.getText()).doubleValue();
-						if (myAoolpathsProcessor != null) {
-							myAoolpathsProcessor.setMillingSpeed(myMillingSpeed);
+						if (myToolpathsProcessor != null) {
+							myToolpathsProcessor.setMillingSpeed(myMillingSpeed);
 						}
 					} catch (ParseException e) {
 						evt.getEdit().undo();
@@ -518,8 +518,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 				public void undoableEditHappened(UndoableEditEvent evt) {
 					try {
 						myPlungeSpeed = NumberFormat.getInstance().parse(field.getText()).doubleValue();
-						if (myAoolpathsProcessor != null) {
-							myAoolpathsProcessor.setPlungeSpeed(myPlungeSpeed);
+						if (myToolpathsProcessor != null) {
+							myToolpathsProcessor.setPlungeSpeed(myPlungeSpeed);
 						}
 					} catch (ParseException e) {
 						evt.getEdit().undo();
@@ -554,8 +554,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 				public void undoableEditHappened(UndoableEditEvent evt) {
 					try {
 						selectedZCuttingHeight = NumberFormat.getInstance().parse(field.getText()).doubleValue();
-						if (myAoolpathsProcessor != null) {
-							myAoolpathsProcessor.setZCuttingHeight(selectedZCuttingHeight);
+						if (myToolpathsProcessor != null) {
+							myToolpathsProcessor.setZCuttingHeight(selectedZCuttingHeight);
 						}
 					} catch (ParseException e) {
 						evt.getEdit().undo();
@@ -603,8 +603,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 		getZCuttingHeightPanel().setEnabled(newValue);
 		getInitialXPanel().setEnabled(newValue);
 		getInitialYPanel().setEnabled(newValue);
-		if (myAoolpathsProcessor != null) {
-			myAoolpathsProcessor.setOutputAbsoluteCoordinates(newValue);
+		if (myToolpathsProcessor != null) {
+			myToolpathsProcessor.setOutputAbsoluteCoordinates(newValue);
 		}
 	}
 
@@ -619,8 +619,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 				public void actionPerformed(final ActionEvent e) {
 					if (myMetricButton.isSelected()) {
 						getImperialButton().setSelected(false);
-						if (myAoolpathsProcessor != null) {
-							myAoolpathsProcessor.setOutputMetricCoordinates(true);
+						if (myToolpathsProcessor != null) {
+							myToolpathsProcessor.setOutputMetricCoordinates(true);
 						}
 					}
 					
@@ -641,8 +641,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 				public void actionPerformed(final ActionEvent e) {
 					if (myImperialButton.isSelected()) {
 						getMetricButton().setSelected(false);
-						if (myAoolpathsProcessor != null) {
-							myAoolpathsProcessor.setOutputMetricCoordinates(false);
+						if (myToolpathsProcessor != null) {
+							myToolpathsProcessor.setOutputMetricCoordinates(false);
 						}
 					}
 					
@@ -695,14 +695,14 @@ public class Visolate extends JPanel implements SimulatorUI {
 		else
 			mode = ToolpathsProcessor.OUTLINE_MODE;
 
-		myAoolpathsProcessor = new ToolpathsProcessor(this, mode, getAbsoluteCoordinatesButton().isSelected(), selectedZClearance, getMetricButton().isSelected());
-		myAoolpathsProcessor.setZCuttingHeight(selectedZCuttingHeight);
-		myAoolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
-		myAoolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
-		myAoolpathsProcessor.setMillingSpeed(myMillingSpeed);
-		myAoolpathsProcessor.setPlungeSpeed(myPlungeSpeed);
+		myToolpathsProcessor = new ToolpathsProcessor(this, mode, getAbsoluteCoordinatesButton().isSelected(), selectedZClearance, getMetricButton().isSelected());
+		myToolpathsProcessor.setZCuttingHeight(selectedZCuttingHeight);
+		myToolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
+		myToolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
+		myToolpathsProcessor.setMillingSpeed(myMillingSpeed);
+		myToolpathsProcessor.setPlungeSpeed(myPlungeSpeed);
 
-		startProcess(myAoolpathsProcessor);
+		startProcess(myToolpathsProcessor);
 	}
 
 	private File browse() {
@@ -813,7 +813,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 		gcodeField.setText(file.toString());
 
-		if (myAoolpathsProcessor == null) {
+		if (myToolpathsProcessor == null) {
 			return;
 		}
 
@@ -832,7 +832,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 			try {
 				FileWriter w = new FileWriter(file);
-				myAoolpathsProcessor.writeGCode(w);
+				myToolpathsProcessor.writeGCode(w);
 				w.close();
 			} catch (IOException e) {
 				JOptionPane.
@@ -847,7 +847,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			accessControlError();
 
 			try {
-				myAoolpathsProcessor.writeGCode(null);
+				myToolpathsProcessor.writeGCode(null);
 			} catch (IOException e2) {
 				//nope
 			}
@@ -1009,7 +1009,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		voronoiButton.setEnabled(enable);
 		outlineButton.setEnabled(enable);
 
-		if (myAoolpathsProcessor != null) {
+		if (myToolpathsProcessor != null) {
 			gcodeButton.setEnabled(enable);
 			gcodeField.setEnabled(enable);
 			gcodeBrowseButton.setEnabled(enable);
@@ -1154,7 +1154,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 	/**
 	 * The ToolpathsProcessor generates the g-code that we write to a file.
 	 */
-	private ToolpathsProcessor myAoolpathsProcessor = null;
+	private ToolpathsProcessor myToolpathsProcessor = null;
 
 	private Set<Net> selectedNets = new LinkedHashSet<Net>();
 	private Net selectedNet = null;
