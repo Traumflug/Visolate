@@ -137,14 +137,13 @@ public class TopologyProcessor extends Processor {
     Raster raster = tile.getRaster();
     buffer = raster.getDataBuffer();
 
+    // The sender will restore these when done.
     model.setToolDiameter(0.0);
-
     model.enableBorderGeometry(true);
     model.enableLineGeometry(false);
     model.enableVoronoiGeometry(false);
     model.enableFlatGeometry(true);
     model.enableGCodeGeometry(false);
-    
     model.setTranslucent2D(true);
 
     model.clearPaths();
@@ -185,18 +184,8 @@ public class TopologyProcessor extends Processor {
     ignoreColors.add(new Integer(0));
   }
 
-  private void restoreModel() {
-
-  }
-
-  protected void processInterrupted() {
-    restoreModel();
-  }
-
   protected void processCompleted() {
     tile = null;
-    restoreModel();
-//    System.out.println(frames + " frames");
   }
 
   protected BufferedImage tile = null;

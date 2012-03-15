@@ -92,6 +92,7 @@ public class FatnessProcessor extends Processor {
     Raster raster = tile.getRaster();
     buffer = raster.getDataBuffer();
 
+    // The sender will restore these when done.
     model.enableBorderGeometry(false);
     model.enableLineGeometry(false);
     model.enableGCodeGeometry(false);
@@ -104,18 +105,9 @@ public class FatnessProcessor extends Processor {
     }
   }
 
-  private void restoreModel() {
-
-  }
-
-  protected void processInterrupted() {
-    restoreModel();
-  }
-
   protected void processCompleted() {
 
     tile = null;
-    restoreModel();
 
     System.out.println(misses + " misses");
 

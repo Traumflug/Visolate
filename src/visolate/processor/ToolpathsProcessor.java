@@ -233,6 +233,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		buffer = raster.getDataBuffer();
 
 		switch (mode) {
+    // The sender will restore these when done.
 		case VORONOI_MODE:
 			System.out.println("generating voronoi toolpaths");
 			model.enableBorderGeometry(true);
@@ -260,19 +261,9 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		model.clearGCode();
 	}
 
-	private void restoreModel() {
-
-	}
-
-	protected void processInterrupted() {
-		restoreModel();
-	}
-
 	protected void processCompleted() {
 
 		super.processCompleted();
-
-		restoreModel();
 
 		tile = null;
 
