@@ -191,15 +191,6 @@ public class TopologyProcessor extends Processor {
 
   private void restoreModel() {
 
-    model.setToolDiameter(toolDiameterWas);
-
-    model.enableBorderGeometry(borderGeometryWas);
-    model.enableLineGeometry(lineGeometryWas);
-    model.enableVoronoiGeometry(voronoiGeometryWas);
-    model.enableFlatGeometry(flatGeometryWas);
-    model.enableGCodeGeometry(gcodeGeometryWas);
-    
-    model.setTranslucent2D(wasTranslucent);
   }
 
   protected void processInterrupted() {

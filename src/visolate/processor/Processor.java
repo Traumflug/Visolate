@@ -57,6 +57,13 @@ public abstract class Processor {
                                    double right, double top);
 
   private void process() {
+    boolean borderGeometryWas;
+    boolean lineGeometryWas;
+    boolean voronoiGeometryWas;
+    boolean flatGeometryWas;
+    boolean gcodeGeometryWas;
+    boolean wasTranslucent;
+    double toolDiameterWas;
 
     long startTime = System.currentTimeMillis();
 
@@ -76,16 +83,15 @@ public abstract class Processor {
     flatGeometryWas = model.isFlatGeometryEnabled();
     wasTranslucent = model.isTranslucent2D();
     gcodeGeometryWas = model.isGCodeGeometryEnabled();
-
-    System.out.println("border: " + borderGeometryWas);
-    System.out.println("line: " + lineGeometryWas);
-    System.out.println("voronoi: " + voronoiGeometryWas);
-    System.out.println("flat: " + flatGeometryWas);
-    System.out.println("translucent: " + wasTranslucent);
-    System.out.println("gcode: " + gcodeGeometryWas);
-
     toolDiameterWas = model.getToolDiameter();
-    System.out.println("tool diameter: " + toolDiameterWas);
+
+//    System.out.println("border: " + borderGeometryWas);
+//    System.out.println("line: " + lineGeometryWas);
+//    System.out.println("voronoi: " + voronoiGeometryWas);
+//    System.out.println("flat: " + flatGeometryWas);
+//    System.out.println("translucent: " + wasTranslucent);
+//    System.out.println("gcode: " + gcodeGeometryWas);
+//    System.out.println("tool diameter: " + toolDiameterWas);
 
     dpi = display.getDPI();
 
@@ -194,6 +200,14 @@ public abstract class Processor {
     }
 
     processCompleted();
+    
+    model.setToolDiameter(toolDiameterWas);
+    model.setTranslucent2D(wasTranslucent);
+    model.enableGCodeGeometry(gcodeGeometryWas);
+    model.enableFlatGeometry(flatGeometryWas);
+    model.enableVoronoiGeometry(voronoiGeometryWas);
+    model.enableLineGeometry(lineGeometryWas);
+    model.enableBorderGeometry(borderGeometryWas);
 
     visolate.enableControls(true);
     model.enableControls(true);
@@ -249,13 +263,4 @@ public abstract class Processor {
 
   protected int numRows;
   protected int numCols;
-
-  protected boolean borderGeometryWas;
-  protected boolean lineGeometryWas;
-  protected boolean voronoiGeometryWas;
-  protected boolean flatGeometryWas;
-  protected boolean gcodeGeometryWas;
-  protected boolean wasTranslucent;
-
-  protected double toolDiameterWas;
 }

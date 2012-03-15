@@ -262,13 +262,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 	private void restoreModel() {
 
-		model.enableBorderGeometry(borderGeometryWas);
-		model.enableLineGeometry(lineGeometryWas);
-		model.enableVoronoiGeometry(voronoiGeometryWas);
-		model.enableFlatGeometry(flatGeometryWas);
-		model.enableGCodeGeometry(gcodeGeometryWas);
-
-		model.setTranslucent2D(wasTranslucent);
 	}
 
 	protected void processInterrupted() {
