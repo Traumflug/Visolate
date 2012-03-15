@@ -147,8 +147,8 @@ public class Model extends JPanel {
 		//    geometryBox.add(Box.createHorizontalStrut(16));
 		geometryBox.add(Box.createHorizontalGlue());
 
-		translucentButton = new JCheckBox("xlucent");
-		flatButton = new JCheckBox("flt");
+		translucentButton = new JCheckBox("translucent");
+		flatButton = new JCheckBox("flat");
 		flatButton.setBackground(Color.WHITE);
 		flatButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -186,7 +186,7 @@ public class Model extends JPanel {
 		pathsButton.setAlignmentY(0.0f);
 		geometryBox.add(pathsButton);
 
-		gCodeButton = new JCheckBox("ngc");
+		gCodeButton = new JCheckBox("g-code");
 		gCodeButton.setBackground(Color.WHITE);
 		gCodeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
