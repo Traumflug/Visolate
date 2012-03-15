@@ -831,7 +831,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			}
 
 			try {
-				FileWriter w = new FileWriter(file);
+				GCodeFileWriter w = new GCodeFileWriter(file);
 				myToolpathsProcessor.writeGCode(w);
 				w.close();
 			} catch (IOException e) {

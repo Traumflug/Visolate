@@ -26,14 +26,14 @@ import javax.media.j3d.*;
 import javax.vecmath.*;
 
 import java.util.*;
-import java.util.Locale;
-import java.text.*;
 import java.io.*;
 
 import visolate.*;
 import visolate.model.*;
 import visolate.processor.ToolpathNode;
 import visolate.processor.ToolpathPath;
+import visolate.processor.GCodeFileWriter;
+import visolate.processor.GCodeFileWriter.GCodeStroke;
 
 /**
  * The ToolpathsProcessor generates the content for a  g-code file.
@@ -48,26 +48,10 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 	public static final int DEF_MODE = VORONOI_MODE;
 
-	public static final double MMPERINCH = 25.4;
-
-	/**
-	 * This is the number format used for all numbers in the gcode.
-	 */
-	private static NumberFormat gCodeFormat = new DecimalFormat("###.#####", new DecimalFormatSymbols(Locale.ENGLISH));
-
 	/**
 	 * How much to move the toolhead in z-direction between cutting and moving.
 	 */
 	public static final double CLEARANCE_Z = 0.1;
-
-
-	public static final Color3f G_CODE_COLOR_NORMAL = new Color3f(0.0f,
-			1.0f,
-			0.0f);
-
-	public static final Color3f G_CODE_COLOR_RAPID = new Color3f(1.0f,
-			1.0f,
-			0.0f);
 
 	/**
 	 * If set to true, output absolute coordinates instead of relative.
@@ -523,14 +507,19 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		return closest;
 	}
 
-	public void writeGCode(Writer w) throws IOException {
+	public void writeGCode(GCodeFileWriter w) throws IOException {
 
 		model.clearGCode();
-		gCodeStrokes.clear();
 
-		gCodePreAmble(w);
-
-		Point3d p = new Point3d(0.0, 0.0, 0.0);
+    w.setIsMetric(isOutputMetricCoordinates());
+    w.setIsAbsolute(isOutputAbsoluteCoordinates());
+    w.setXOffset(getAbsoluteXStart());
+    w.setYOffset(getAbsoluteYStart());
+    w.setZClearance(getZClearance());
+    w.setZCuttingHeight(getZCuttingHeight());
+    w.setPlungeFeedrate(getPlungeSpeed());
+    w.setMillingFeedrate(getMillingSpeed());
+    w.preAmble();
 
 		//    for (Iterator it = paths.iterator(); it.hasNext(); )
 		//      ((Path) it.next()).writeGCode(w, p);
@@ -539,9 +528,12 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		paths.addAll(this.paths);
 
 		while (!paths.isEmpty()) {
-			getClosestPath(paths, p).writeGCode(w, p);
+			getClosestPath(paths, w.getCurrentPosition()).writeGCode(w);
 		}
-		gCodePostAmble(w, p);
+		
+		w.postAmble();
+		
+		List<GCodeStroke>gCodeStrokes = w.getGCodeStrokes();
 
 		int vertexCount = 2*gCodeStrokes.size() + 4;
 		float[] coords = new float[6*vertexCount];
@@ -560,7 +552,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 			coords[i++] = p3f.y;
 			coords[i++] = p3f.z;
 
-			p3f.add(stroke.d);
+			p3f = stroke.target;
 
 			coords[i++] = stroke.color.x;
 			coords[i++] = stroke.color.y;
@@ -570,8 +562,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 			coords[i++] = p3f.y;
 			coords[i++] = p3f.z;
 		}
-
-		gCodeStrokes.clear();
 
 		float[] h = new float[] {-1, 1, 0, 0};
 		float[] v = new float[] {0, 0, -1, 1};
@@ -604,167 +594,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		model.setGCode(gCodeBG);
 	}
 
-	private class GCodeStroke {
-
-		GCodeStroke(Vector3f d, Color3f color) {
-			this.color = color;
-			this.d = d;
-		}
-
-		Color3f color;
-		Vector3f d;
-	}
-
-	private void gCodePreAmble(Writer w) throws IOException {
-
-		if (w == null) {
-			return;
-		}
-
-		if (isOutputMetricCoordinates()) {
-			w.write("G21\n");    // millimeters
-		} else {
-			w.write("G20\n");    // inches
-		}
-		w.write("G17\n");     // X-Y plane
-		w.write("G40\nG49\n"); // Cancel tool lengh & cutter dia compensation
-		//    w.write("G53\n");     // Motion in machine co-ordinate system
-		w.write("G80\n");    // Cancel any existing motion cycle
-
-		if (isOutputAbsoluteCoordinates()) {
-			w.write("G90\n");    // Absolute distance mode
-		} else {
-			w.write("G91\n");    // Relative distance mode
-		}
-	}
-
-	private void gCodePostAmble(Writer w, Point3d p) throws IOException {
-
-		gCodeCutterUp(w, p);
-		gCodeRapidMovement(w, p, 0.0, 0.0); //rapid to origin
-
-		if (w == null) {
-			return;
-		}
-
-		w.write("M5\n"); // Spindle Stop
-		w.write("M2\n"); // End of program
-	}
-
-	public void gCodeCutterUp(Writer w, final Point3d p) throws IOException {
-
-		if (w != null) {
-			if (isOutputAbsoluteCoordinates()) {
-				w.write("G0 Z" + 
-						gCodeFormat.format(getZClearance()) + "\n");
-				p.z = getZClearance();
-			} else {
-				w.write("G0 Z" +
-						gCodeFormat.format(getZCuttingHeight() + getZClearance()) + "\n");
-			}
-		}
-
-		gCodeStrokes.add(new GCodeStroke(new Vector3f(0.0f,
-				0.0f,
-				(float) getZClearance()),
-				G_CODE_COLOR_NORMAL));
-	}
-
-	public void gCodeCutterDown(final Writer w, final Point3d p) throws IOException {
-
-		if (w != null) {
-			if (isOutputAbsoluteCoordinates()) {
-				currentFeedrate = getPlungeSpeed();
-				w.write("G1 Z" +
-						gCodeFormat.format(getZCuttingHeight()) + " F"+
-						gCodeFormat.format(60 * currentFeedrate) + "\n");
-				p.z = 0.0;
-			} else {
-				w.write("G1 Z" + gCodeFormat.format(-1 * getZClearance()) + "\n");
-			}
-		}
-
-		gCodeStrokes.add(new GCodeStroke(new Vector3f(0.0f,
-				0.0f,
-				(float) (-1 * getZClearance())),
-				G_CODE_COLOR_NORMAL));
-	}
-
-	/**
-	 * Add a g-code for a rapid, linear movement.
-     *
-	 * @param w where to write the gcode to
-	 * @param p the current location. SIDE EFFECT: Will be updated to be x,y
-	 * @param x the absolute location to move to
-	 * @param y the absolute location to move to
-	 * @throws IOException
-	 */
-	public void gCodeRapidMovement(final Writer w, final Point3d p, final double x, final double y)
-	throws IOException {
-
-		double dx = x - p.x;
-		double dy = y - p.y;
-
-		if (w != null) {
-			if (isOutputAbsoluteCoordinates()) {
-				w.write("G0 X" +
-						gCodeFormat.format(convertUnits(x) + getAbsoluteXStart()) + " Y" +
-						gCodeFormat.format(convertUnits(y) + getAbsoluteYStart()) + "\n");
-			} else {
-				w.write("G0 X" +
-						gCodeFormat.format(convertUnits(dx)) + " Y" +
-						gCodeFormat.format(convertUnits(dy)) + "\n");
-			}
-		}
-
-		p.x += dx;
-		p.y += dy;
-
-		gCodeStrokes.add(new GCodeStroke(new Vector3f((float) dx,
-				(float) dy,
-				0.0f),
-				G_CODE_COLOR_RAPID));
-	}
-
-	public void gCodeLinear(Writer w, Point3d p, double x, double y)
-	throws IOException {
-
-		double dx = x - p.x;
-		double dy = y - p.y;
-
-		if (w != null) {
-			if (isOutputAbsoluteCoordinates()) {
-				w.write("G1 X" +
-						gCodeFormat.format(convertUnits(x) + getAbsoluteXStart()) + " Y" +
-						gCodeFormat.format(convertUnits(y) + getAbsoluteYStart()));
-			} else {
-				w.write("G1 X" +
-						gCodeFormat.format(convertUnits(dx)) + " Y" +
-						gCodeFormat.format(convertUnits(dy)));
-			}
-			if (currentFeedrate != getMillingSpeed()) {
-				currentFeedrate = getMillingSpeed();
-				w.write(" F" + gCodeFormat.format(60 * currentFeedrate));
-			}
-			w.write("\n");
-		}
-
-		p.x += dx;
-		p.y += dy;
-
-		gCodeStrokes.add(new GCodeStroke(new Vector3f((float) dx,
-				(float) dy,
-				0.0f),
-				G_CODE_COLOR_NORMAL));
-	}
-
-	private double convertUnits(final double x) {
-		if (isOutputMetricCoordinates()) {
-			return x * MMPERINCH;
-		}
-		return x;
-	}
-
 	public Map<ToolpathNode, ToolpathNode> nodes = new LinkedHashMap<ToolpathNode, ToolpathNode>();
 	private List<ToolpathPath> paths = new LinkedList<ToolpathPath>();
 
@@ -775,6 +604,4 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	private int currentTick = 0;
 	
 	private int mode;
-
-	private List<GCodeStroke> gCodeStrokes = new LinkedList<GCodeStroke>();
 }

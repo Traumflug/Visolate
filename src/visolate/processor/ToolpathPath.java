@@ -21,7 +21,6 @@
 package visolate.processor;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -34,12 +33,12 @@ import javax.media.j3d.LineArray;
 import javax.media.j3d.PointArray;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point2d;
-import javax.vecmath.Point3d;
 
 import visolate.misc.Util;
 import visolate.model.Net;
 import visolate.processor.ToolpathsProcessor;
 import visolate.processor.ToolpathNode;
+import visolate.processor.GCodeFileWriter;
 
 public class ToolpathPath {
 
@@ -374,43 +373,44 @@ public class ToolpathPath {
 
     if (optimalPathEnd == null) {
       ToolpathNode start = (ToolpathNode) path.getFirst();
-      return new Point2d(start.x, start.y);
+      return new Point2d(processor.toModelX(start.x), processor.toModelY(start.y));
     } else {
       return new Point2d(optimalPathEnd.x, optimalPathEnd.y);
     }
   }
 
-  public void writeGCode(Writer w, Point3d p) throws IOException {
+  public void writeGCode(GCodeFileWriter writer) throws IOException {
 
-    processor.gCodeCutterUp(w, p);
+    writer.cutterUp();
 
     boolean first = true;
 
     if (optimalPathEnd == null) {
 
       for (ToolpathNode node : path) {
+        Point2d p = new Point2d(processor.toModelX(node.x),
+                                processor.toModelY(node.y));
 
         if (first) {
-          processor.gCodeRapidMovement(w, p, node.x, node.y); //rapid to start
-          processor.gCodeCutterDown(w, p);
+          writer.rapidMovement(p); //rapid to start
+          writer.cutterDown();
           first = false;
         } else {
-          processor.gCodeLinear(w, p, node.x, node.y);
+          writer.linearMovement(p);
         }
       }
 
     } else {
 
-      for (PathNode node = optimalPathEnd;
-          node != null;
-          node = node.getBestPrev()) {
+      for (PathNode node = optimalPathEnd; node != null; node = node.getBestPrev()) {
+        Point2d p = new Point2d(node.x, node.y);
 
         if (first) {
-          processor.gCodeRapidMovement(w, p, node.x, node.y); //rapid to start
-          processor.gCodeCutterDown(w, p);
+          writer.rapidMovement(p); //rapid to start
+          writer.cutterDown();
           first = false;
         } else {
-          processor.gCodeLinear(w, p, node.x, node.y);
+          writer.linearMovement(p);
         }
       }
     }
