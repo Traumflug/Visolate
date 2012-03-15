@@ -32,7 +32,6 @@ import java.io.*;
 
 import visolate.*;
 import visolate.model.*;
-import visolate.misc.*;
 import visolate.processor.ToolpathNode;
 import visolate.processor.ToolpathPath;
 
@@ -43,9 +42,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 	public static final Color3f ORIGIN_COLOR = new Color3f(1.0f, 0.0f, 1.0f);
 	public static final float ORIGIN_TICK = 0.1f;
-
-	public static final double[] HORIZ_DIR_BIAS = {-1, 1, 1, -1};
-	public static final double[] VERT_DIR_BIAS = {1, 1, -1, -1};
 
 	public static final int VORONOI_MODE = 0;
 	public static final int OUTLINE_MODE = 1;
@@ -278,8 +274,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		model.clearPaths();
 		model.clearGCode();
-
-		straightTol = 0.5/((double) dpi);
 	}
 
 	private void restoreModel() {
@@ -424,6 +418,8 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		visolate.resetInnerProgressBar(paths.size());
 
 		for (ToolpathPath path : paths) {
+		  
+		  path.setStraightTolerance(0.5/((double) dpi));
 			path.optimize();
 
 			visolate.tickInnerProgressBar();
@@ -477,130 +473,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		return node;
 	}
-
-	public class Sector {
-
-		Sector(PathNode apex, PathNode first) {
-
-			apexX = apex.x;
-			apexY = apex.y;
-
-			computeAnglesTo(first);
-
-			startAngle = startAngleTo;
-			endAngle = endAngleTo;
-		}
-
-		void intersectWithSectorTo(PathNode node) {
-
-			computeAnglesTo(node);
-
-			startAngle = Math.max(startAngle, startAngleTo);
-			endAngle = Math.min(endAngle, endAngleTo);
-		}
-
-		boolean isEmpty() {
-			return startAngle > endAngle;
-		}
-
-		private void computeAnglesTo(PathNode node) {
-
-			for (int i = 0; i < 4; i++)
-				angle[i] =
-					Util.canonicalAngle(
-							(node.x + HORIZ_DIR_BIAS[i]*straightTol) - apexX,
-							(node.y + VERT_DIR_BIAS[i]*straightTol) - apexY);
-
-			startAngleTo = Double.POSITIVE_INFINITY;
-			endAngleTo = Double.NEGATIVE_INFINITY;
-
-			for (int i = 0; i < 4; i++) {
-				startAngleTo = Math.min(startAngleTo, angle[i]);
-				endAngleTo = Math.max(endAngleTo, angle[i]);
-			}
-		}
-
-		double[] angle = new double[4];
-
-		double startAngleTo;
-		double endAngleTo;
-
-		double startAngle;
-		double endAngle;
-
-		double apexX;
-		double apexY;
-	}
-
-	public class PathNode {
-
-		PathNode(ToolpathNode node, PathNode prev, int index) {
-
-			x = toModelX(node.x);
-			y = toModelY(node.y);
-
-			this.index = index;
-
-			if (prev != null)
-				prev.addNext(this);
-
-			d = Double.POSITIVE_INFINITY;
-		}
-
-		void addNext(PathNode node) {
-			nexts.add(node);
-		}
-
-		PathNode getFirstNext() {
-
-			if (nexts.isEmpty()) {
-				return null;
-			}
-
-			//      return (PathNode) nexts.getFirst();
-			return (PathNode) nexts.get(0);
-		}
-
-		void addPrev(PathNode node) {
-			prevs.add(node);
-			//      if (prevs.size() > 1)
-			//        System.out.println("more than one prev from (" + x + ", " + y + ")");
-		}
-
-		boolean hasPrev(PathNode node) {
-			return prevs.contains(node);
-		}
-
-		PathNode getBestPrev() {
-
-			if (optimalPrev != null) {
-				return optimalPrev;
-			}
-
-			if (prevs.isEmpty()) {
-				return null;
-			}
-
-			return (PathNode) prevs.iterator().next();
-		}
-
-		void clearPrevs() {
-			prevs.clear();
-		}
-
-		float x;
-		float y;
-
-		double d;
-
-		ArrayList<PathNode> nexts = new ArrayList<PathNode>();
-		Set<PathNode> prevs = new LinkedHashSet<PathNode>();
-
-		PathNode optimalPrev = null;
-
-		int index;
-	}
-
+	
 	public BranchGroup getSceneGraph() {
 
 		if (sceneBG == null) {
@@ -900,10 +773,8 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	private BranchGroup sceneBG = null;
 
 	private int currentTick = 0;
-
+	
 	private int mode;
-
-	private double straightTol;
 
 	private List<GCodeStroke> gCodeStrokes = new LinkedList<GCodeStroke>();
 }

@@ -22,8 +22,11 @@ package visolate.processor;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryArray;
@@ -37,10 +40,11 @@ import visolate.misc.Util;
 import visolate.model.Net;
 import visolate.processor.ToolpathsProcessor;
 import visolate.processor.ToolpathNode;
-import visolate.processor.ToolpathsProcessor.PathNode;
-import visolate.processor.ToolpathsProcessor.Sector;
 
 public class ToolpathPath {
+
+  public static final double[] HORIZ_DIR_BIAS = {-1, 1, 1, -1};
+  public static final double[] VERT_DIR_BIAS = {1, 1, -1, -1};
 
   ToolpathPath(final ToolpathsProcessor processor, final ToolpathNode seed) {
 
@@ -111,6 +115,10 @@ public class ToolpathPath {
 
   }
 
+  public void setStraightTolerance(final double tolerance) {
+    straightTol = tolerance;
+  }
+  
   private boolean extendTail() {
 
     ToolpathNode next = getNext((ToolpathNode) path.getLast(), TAIL);
@@ -426,7 +434,7 @@ public class ToolpathPath {
     PathNode prev = null;
     int i = 0;
     for (Iterator<ToolpathNode> it = path.iterator(); it.hasNext(); ) {
-      PathNode node = processor.new PathNode((ToolpathNode) it.next(), prev, i++);
+      PathNode node = new PathNode((ToolpathNode) it.next(), prev, i++);
 
       if (optimalPathStart == null) {
         optimalPathStart = node;
@@ -455,7 +463,7 @@ public class ToolpathPath {
 
       PathNode prev = null;
 
-      for (Sector sector = processor.new Sector(start, next);
+      for (Sector sector = new Sector(start, next);
           (next != null);
           next = next.getFirstNext()) {
 
@@ -639,4 +647,129 @@ public class ToolpathPath {
   double[] Syy;
 
   double[] Sxy;
+  
+  private double straightTol;
+
+  
+  private class PathNode {
+    PathNode(ToolpathNode node, PathNode prev, int index) {
+
+      x = processor.toModelX(node.x);
+      y = processor.toModelY(node.y);
+
+      this.index = index;
+
+      if (prev != null)
+        prev.addNext(this);
+
+      d = Double.POSITIVE_INFINITY;
+    }
+
+    void addNext(PathNode node) {
+      nexts.add(node);
+    }
+
+    PathNode getFirstNext() {
+
+      if (nexts.isEmpty()) {
+        return null;
+      }
+
+      //      return (PathNode) nexts.getFirst();
+      return (PathNode) nexts.get(0);
+    }
+
+    void addPrev(PathNode node) {
+      prevs.add(node);
+      //      if (prevs.size() > 1)
+      //        System.out.println("more than one prev from (" + x + ", " + y + ")");
+    }
+
+    boolean hasPrev(PathNode node) {
+      return prevs.contains(node);
+    }
+
+    PathNode getBestPrev() {
+
+      if (optimalPrev != null) {
+        return optimalPrev;
+      }
+
+      if (prevs.isEmpty()) {
+        return null;
+      }
+
+      return (PathNode) prevs.iterator().next();
+    }
+
+    void clearPrevs() {
+      prevs.clear();
+    }
+
+    float x;
+    float y;
+
+    double d;
+
+    ArrayList<PathNode> nexts = new ArrayList<PathNode>();
+    Set<PathNode> prevs = new LinkedHashSet<PathNode>();
+
+    PathNode optimalPrev = null;
+
+    int index;
+  }
+  
+  private class Sector {
+    
+    Sector(PathNode apex, PathNode first) {
+
+      apexX = apex.x;
+      apexY = apex.y;
+
+      computeAnglesTo(first);
+
+      startAngle = startAngleTo;
+      endAngle = endAngleTo;
+    }
+
+    void intersectWithSectorTo(PathNode node) {
+
+      computeAnglesTo(node);
+
+      startAngle = Math.max(startAngle, startAngleTo);
+      endAngle = Math.min(endAngle, endAngleTo);
+    }
+
+    boolean isEmpty() {
+      return startAngle > endAngle;
+    }
+
+    private void computeAnglesTo(PathNode node) {
+
+      for (int i = 0; i < 4; i++)
+        angle[i] =
+          Util.canonicalAngle(
+              (node.x + HORIZ_DIR_BIAS[i]*straightTol) - apexX,
+              (node.y + VERT_DIR_BIAS[i]*straightTol) - apexY);
+
+      startAngleTo = Double.POSITIVE_INFINITY;
+      endAngleTo = Double.NEGATIVE_INFINITY;
+
+      for (int i = 0; i < 4; i++) {
+        startAngleTo = Math.min(startAngleTo, angle[i]);
+        endAngleTo = Math.max(endAngleTo, angle[i]);
+      }
+    }
+
+    double[] angle = new double[4];
+
+    double startAngleTo;
+    double endAngleTo;
+
+    double startAngle;
+    double endAngle;
+
+    double apexX;
+    double apexY;
+  }
 }
