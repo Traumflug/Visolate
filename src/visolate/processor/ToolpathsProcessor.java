@@ -514,9 +514,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
     w.setMillingFeedrate(getMillingSpeed());
     w.preAmble();
 
-		//    for (Iterator it = paths.iterator(); it.hasNext(); )
-		//      ((Path) it.next()).writeGCode(w, p);
-
 		Collection<ToolpathPath> paths = new LinkedList<ToolpathPath>();
 		paths.addAll(this.paths);
 
