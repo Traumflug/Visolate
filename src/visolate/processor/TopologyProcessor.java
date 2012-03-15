@@ -104,8 +104,6 @@ public class TopologyProcessor extends Processor {
     }
 
     mergeNets(nets);
-
-    frames++;
   }
 
   public static void mergeNets(Collection<Net> nets) {
@@ -132,8 +130,6 @@ public class TopologyProcessor extends Processor {
   }
 
   protected void processStarted() {
-
-    frames = 1;
 
     visolate.clearSelection();
 
@@ -208,6 +204,4 @@ public class TopologyProcessor extends Processor {
   private DataBuffer buffer;
 
   private Set<Integer> ignoreColors;
-
-  private int frames;
 }
