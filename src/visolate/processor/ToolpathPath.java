@@ -336,9 +336,9 @@ public class ToolpathPath {
   // Used for debugging only. This draws a white point for each Node.
   // Swap it against getGeometry() in PathNode.getSceneGraph().
   @SuppressWarnings("unused")
-  private Geometry getPointGeometry() {
-
-    int vertexCount = path.size()*2;
+  public Geometry getPointGeometry() {
+    
+    int vertexCount = path.size();
     float[] coords = new float[vertexCount*3];
 
     int i = 0;
@@ -352,9 +352,6 @@ public class ToolpathPath {
         coords[i++] = processor.toModelY(prev.y);
         coords[i++] = Net.PATH_Z;
 
-        coords[i++] = processor.toModelX(node.x);
-        coords[i++] = processor.toModelY(node.y);
-        coords[i++] = Net.PATH_Z;
       }
 
       prev = node;
