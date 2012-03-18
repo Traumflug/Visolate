@@ -381,6 +381,22 @@ public class ToolpathPath {
     return pointGeometry;
   }
 
+  public ToolpathNode getStartNode() {
+    return (ToolpathNode) path.getFirst();
+  }
+  
+  public ToolpathNode getEndNode() {
+    return (ToolpathNode) path.getLast();
+  }
+  
+  public void lockNode(ToolpathNode nodeToLock) {
+    
+    for (ToolpathNode node : path) {
+      if (node.equals(nodeToLock))
+        node.setIsLocked(true);
+    }
+  }
+  
   public Point2d getStartPoint() {
 
     if (optimalPathEnd == null) {

@@ -276,6 +276,11 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		if (thread.isInterrupted())
 			return;
+		
+		lockCrossingNodes();
+		
+		if (thread.isInterrupted())
+		  return;
 
 		optimizePaths();
 
@@ -366,6 +371,17 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		reportPathStats();
 	}
 
+	private void lockCrossingNodes() {
+	  
+	   for (ToolpathPath pathToLock : paths) {
+	     // Don't exclude pathToFix == path, as paths can be self-intersecting.
+	     for (ToolpathPath path : paths) {
+	       pathToLock.lockNode(path.getStartNode());
+	       pathToLock.lockNode(path.getEndNode());
+	     }
+	   }
+	}
+	
 	private void reportPathStats() {
 
 		double length = 0;
