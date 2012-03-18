@@ -486,8 +486,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 			}
 		}
 
-		paths.remove(closest);
-
 		return closest;
 	}
 
@@ -508,9 +506,13 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		Collection<ToolpathPath> paths = new LinkedList<ToolpathPath>();
 		paths.addAll(this.paths);
 
-		while (!paths.isEmpty()) {
-			getClosestPath(paths, w.getCurrentPosition()).writeGCode(w);
-		}
+    while (!paths.isEmpty()) {
+      
+      ToolpathPath closestPath = getClosestPath(paths, w.getCurrentPosition());
+      
+      closestPath.writeGCode(w);
+      paths.remove(closestPath);
+    }
 		
 		w.postAmble();
 		
