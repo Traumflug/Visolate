@@ -338,8 +338,11 @@ public class ToolpathPath {
   @SuppressWarnings("unused")
   public Geometry getPointGeometry() {
     
+    final float[] normalColor = { 1.0f, 1.0f, 1.0f };
+    final float[] fixedColor = { 1.0f, 0.0f, 0.0f };
+    
     int vertexCount = path.size();
-    float[] coords = new float[vertexCount*3];
+    float[] coords = new float[vertexCount*6];
 
     int i = 0;
 
@@ -348,6 +351,17 @@ public class ToolpathPath {
 
       if (prev != null) {
 
+        if (node.locked) {
+          coords[i++] = fixedColor[0];
+          coords[i++] = fixedColor[1];
+          coords[i++] = fixedColor[2];
+        }
+        else {
+          coords[i++] = normalColor[0];
+          coords[i++] = normalColor[1];
+          coords[i++] = normalColor[2];
+        }
+    
         coords[i++] = processor.toModelX(prev.x);
         coords[i++] = processor.toModelY(prev.y);
         coords[i++] = Net.PATH_Z;
@@ -359,6 +373,7 @@ public class ToolpathPath {
 
     GeometryArray pointGeometry = new PointArray(vertexCount,
                                                  GeometryArray.COORDINATES |
+                                                 GeometryArray.COLOR_3 |
                                                  GeometryArray.INTERLEAVED |
                                                  GeometryArray.BY_REFERENCE);
     pointGeometry.setInterleavedVertices(coords);
@@ -375,7 +390,7 @@ public class ToolpathPath {
       return new Point2d(optimalPathEnd.x, optimalPathEnd.y);
     }
   }
-
+  
   public void writeGCode(GCodeFileWriter writer) throws IOException {
 
     writer.cutterUp();

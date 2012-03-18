@@ -31,12 +31,22 @@ public class ToolpathNode {
 
     this.x = x;
     this.y = y;
+    
+    locked = false;
 
     hashCode = x^(y*31);
   }
 
   public int hashCode() {
     return hashCode;
+  }
+  
+  public void setIsLocked(boolean locked) {
+    this.locked = locked;
+  }
+  
+  public boolean isLocked() {
+    return locked;
   }
 
   public boolean equals(Object object) {
@@ -108,6 +118,8 @@ public class ToolpathNode {
 
   int x;
   int y;
+  
+  boolean locked;
 
   ToolpathNode north = null;
   ToolpathNode south = null;
