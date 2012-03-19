@@ -269,9 +269,9 @@ public class ToolpathPath {
     return geometry;
   }
 
-  // Used for debugging only. This draws a white point for each Node.
-  // Swap it against getGeometry() in PathNode.getSceneGraph().
-  @SuppressWarnings("unused")
+  // Used for debugging only. This draws a white point for each standard Node
+  // and a red dot for each fixed node. Swap it against getGeometry() in
+  // ToolpathsProcessor.getSceneGraph().
   public Geometry getPointGeometry() {
     
     final float[] normalColor = { 1.0f, 1.0f, 1.0f };
