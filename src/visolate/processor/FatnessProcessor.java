@@ -47,8 +47,6 @@ public class FatnessProcessor extends Processor {
     if (width < 2)
       return;
 
-    visolate.resetInnerProgressBar(height);
-
     try {
 
 //      display.getStill(tile);
@@ -73,8 +71,6 @@ public class FatnessProcessor extends Processor {
           if (thread.isInterrupted())
             return;
         }
-
-        visolate.tickInnerProgressBar();
       }
       
     } catch (InterruptedException e) {

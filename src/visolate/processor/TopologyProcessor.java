@@ -49,8 +49,6 @@ public class TopologyProcessor extends Processor {
     if (width < 2)
       return;
 
-    visolate.resetInnerProgressBar(height);
-
     try {
 
 //      display.getStill(tile);
@@ -68,8 +66,6 @@ public class TopologyProcessor extends Processor {
           if (thread.isInterrupted())
             return;
         }
-
-        visolate.tickInnerProgressBar();
       }
       
     } catch (InterruptedException e) {

@@ -203,11 +203,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 				public void actionPerformed(ActionEvent event) { stopProcess(); } });
 			stopButton.setEnabled(false);
 
-			innerProgressBar = new JProgressBar();
-			innerProgressBar.setBackground(Color.WHITE);
-
-			outerProgressBar = new JProgressBar();
-			outerProgressBar.setBackground(Color.WHITE);
+			progressBar = new JProgressBar();
+			progressBar.setBackground(Color.WHITE);
 		}
 		return myGcodeBox;
 	}
@@ -340,8 +337,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			//    processingBox.add(Box.createVerticalStrut(8));
 			myProcessingBox.add(stopButton);
 			//    processingBox.add(Box.createVerticalStrut(8));
-			myProcessingBox.add(innerProgressBar);
-			myProcessingBox.add(outerProgressBar);
+			myProcessingBox.add(progressBar);
 		}
 		return myProcessingBox;
 	}
@@ -1017,22 +1013,13 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 	}
 
-	public void resetOuterProgressBar(int numSteps) {
-		outerProgressBar.setMaximum(numSteps);
-		outerProgressBar.setValue(0);
+	public void resetProgressBar(int numSteps) {
+		progressBar.setMaximum(numSteps);
+		progressBar.setValue(0);
 	}
 
-	public void tickOuterProgressBar() {
-		outerProgressBar.setValue(outerProgressBar.getValue()+1);
-	}
-
-	public void resetInnerProgressBar(int numSteps) {
-		innerProgressBar.setMaximum(numSteps);
-		innerProgressBar.setValue(0);
-	}
-
-	public void tickInnerProgressBar() {
-		innerProgressBar.setValue(innerProgressBar.getValue()+1);
+	public void tickProgressBar() {
+		progressBar.setValue(progressBar.getValue()+1);
 	}
 
 	public void startProcess(Processor processor) {
@@ -1062,8 +1049,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 	public void processFinished() {
 
-		outerProgressBar.setValue(0);
-		innerProgressBar.setValue(0);
+		progressBar.setValue(0);
 
 		stopButton.setEnabled(false);
 
@@ -1133,8 +1119,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private JButton mosaicBrowseButton;
 	private JCheckBox mosaicTilesButton;
 
-	private JProgressBar innerProgressBar;
-	private JProgressBar outerProgressBar;
+	private JProgressBar progressBar;
 
 	private Processor processor = null;
 

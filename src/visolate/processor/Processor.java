@@ -122,7 +122,7 @@ public abstract class Processor {
     numRows = (int) Math.ceil(rows);
     numCols = (int) Math.ceil(cols);
 
-    visolate.resetOuterProgressBar(numRows*numCols);
+    visolate.resetProgressBar(numRows*numCols);
 
     processStarted();
 
@@ -195,7 +195,7 @@ public abstract class Processor {
           return;
         }
 
-        visolate.tickOuterProgressBar();
+        visolate.tickProgressBar();
       }
     }
 

@@ -216,14 +216,10 @@ public class ToolpathsProcessor extends MosaicProcessor {
 			double left, double bottom,
 			double right, double top) {
 
-		visolate.resetInnerProgressBar(1);
-
 		super.processTile(r, c,
 				ulx, uly,
 				width, height,
 				left, bottom, right, top);
-
-		visolate.tickInnerProgressBar();
 	}
 
 	protected void processStarted() {
@@ -294,8 +290,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		System.out.println("extracting nodes...");
 
-		visolate.resetInnerProgressBar(mosaicHeight);
-
 		for (int y = 0; y < mosaicHeight; y++) {
 
 			for (int x = 0; x < mosaicWidth; x++) {
@@ -335,8 +329,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 			if (thread.isInterrupted())
 				return;
-
-			visolate.tickInnerProgressBar();
 		}
 
 		System.out.println(nodes.size() + " nodes");
@@ -350,16 +342,9 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		Set<ToolpathNode> nodes = this.nodes.keySet();
 
-		currentTick = 0;
-		visolate.resetInnerProgressBar(100);
-
 		while (!nodes.isEmpty()) {
+		  
 			paths.add(new ToolpathPath(this, nodes.iterator().next()));
-
-	    if (Math.floor(((double) this.nodes.size())/((double) 100)) > currentTick) {
-	      currentTick++;
-	      visolate.tickInnerProgressBar();
-	    }
 
 			if (thread.isInterrupted()) {
 				return;
@@ -399,14 +384,10 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		System.out.println("optimizing paths...");
 
-		visolate.resetInnerProgressBar(paths.size());
-
 		for (ToolpathPath path : paths) {
 		  
 		  path.setStraightTolerance(1.1/((double) dpi));
 			path.optimize();
-
-			visolate.tickInnerProgressBar();
 
 			if (thread.isInterrupted())
 				return;
@@ -599,8 +580,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	private DataBuffer buffer;
 
 	private BranchGroup sceneBG = null;
-
-	private int currentTick = 0;
 	
 	private int mode;
 }

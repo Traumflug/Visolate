@@ -68,17 +68,10 @@ public class SaveMosaic extends MosaicProcessor {
                           double left, double bottom,
                           double right, double top) {
 
-    if (individualTiles)
-      visolate.resetInnerProgressBar(2);
-    else
-      visolate.resetInnerProgressBar(1);
-
     super.processTile(r, c,
                       ulx, uly,
                       width, height,
                       left, bottom, right, top);
-
-    visolate.tickInnerProgressBar();
 
     if (!individualTiles)
       return;
@@ -109,8 +102,6 @@ public class SaveMosaic extends MosaicProcessor {
       cropG2D.dispose();
       saveFile(file, cropTile);
     }
-
-    visolate.tickInnerProgressBar();
   }
 
   protected void processCompleted() {
