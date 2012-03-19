@@ -22,11 +22,7 @@ package visolate.processor;
 
 import java.awt.geom.Line2D;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
-import java.util.Set;
 
 import javax.media.j3d.Geometry;
 import javax.media.j3d.GeometryArray;
@@ -49,7 +45,6 @@ public class ToolpathPath {
   ToolpathPath(final ToolpathsProcessor processor, final ToolpathNode seed) {
 
     this.processor = processor;
-    //      this.seed = seed;
 
     path.add(seed);
 
@@ -204,49 +199,22 @@ public class ToolpathPath {
 
   public int numPathNodes() {
 
-    if (optimalPathEnd == null)
-      return path.size();
-
-    int n = 0;
-
-    for (PathNode node = optimalPathEnd;
-        node != null;
-        node = node.getBestPrev())
-      n++;
-
-    return n;
+    return path.size();
   }
 
   public double length() {
 
     double length = 0;
 
-    if (optimalPathEnd == null) {
+    ToolpathNode prev = null;
 
-      ToolpathNode prev = null;
+    for (ToolpathNode node : path) {
 
-      for (ToolpathNode node : path) {
-
-        if (prev != null) {
-          length += Util.distance(processor.toModelX(prev.x), processor.toModelY(prev.y),
-                                  processor.toModelX(node.x), processor.toModelY(node.y));
-        }
-        prev = node;
+      if (prev != null) {
+        length += Util.distance(processor.toModelX(prev.x), processor.toModelY(prev.y),
+                                processor.toModelX(node.x), processor.toModelY(node.y));
       }
-
-    } else {
-
-      PathNode prev = null;
-
-      for (PathNode node = optimalPathEnd;
-          node != null;
-          node = node.getBestPrev()) {
-
-        if (prev != null)
-          length += Util.distance(prev.x, prev.y, node.x, node.y);
-
-        prev = node;
-      }
+      prev = node;
     }
 
     return length;
@@ -264,63 +232,30 @@ public class ToolpathPath {
 
       int i = 0;
 
-      if (optimalPathEnd == null) {
+      ToolpathNode prev = null;
 
-        ToolpathNode prev = null;
+      for (ToolpathNode node : path) {
 
-        for (ToolpathNode node : path) {
+        if (prev != null) {
 
-          if (prev != null) {
+          coords[i++] = color.x;
+          coords[i++] = color.y;
+          coords[i++] = color.z;
 
-            coords[i++] = color.x;
-            coords[i++] = color.y;
-            coords[i++] = color.z;
+          coords[i++] = processor.toModelX(prev.x);
+          coords[i++] = processor.toModelY(prev.y);
+          coords[i++] = Net.PATH_Z;
 
-            coords[i++] = processor.toModelX(prev.x);
-            coords[i++] = processor.toModelY(prev.y);
-            coords[i++] = Net.PATH_Z;
+          coords[i++] = color.x;
+          coords[i++] = color.y;
+          coords[i++] = color.z;
 
-            coords[i++] = color.x;
-            coords[i++] = color.y;
-            coords[i++] = color.z;
-
-            coords[i++] = processor.toModelX(node.x);
-            coords[i++] = processor.toModelY(node.y);
-            coords[i++] = Net.PATH_Z;
-          }
-
-          prev = node;
+          coords[i++] = processor.toModelX(node.x);
+          coords[i++] = processor.toModelY(node.y);
+          coords[i++] = Net.PATH_Z;
         }
 
-      } else {
-
-        PathNode prev = null;
-
-        for (PathNode node = optimalPathEnd;
-            node != null;
-            node = node.getBestPrev()) {
-
-          if (prev != null) {
-
-            coords[i++] = color.x;
-            coords[i++] = color.y;
-            coords[i++] = color.z;
-
-            coords[i++] = prev.x;
-            coords[i++] = prev.y;
-            coords[i++] = Net.PATH_Z;
-
-            coords[i++] = color.x;
-            coords[i++] = color.y;
-            coords[i++] = color.z;
-
-            coords[i++] = node.x;
-            coords[i++] = node.y;
-            coords[i++] = Net.PATH_Z;
-          }
-
-          prev = node;
-        }
+        prev = node;
       }
 
       geometry = new LineArray(vertexCount,
@@ -400,47 +335,26 @@ public class ToolpathPath {
   
   public Point2d getStartPoint() {
 
-    if (optimalPathEnd == null) {
-      ToolpathNode start = (ToolpathNode) path.getFirst();
-      return new Point2d(processor.toModelX(start.x), processor.toModelY(start.y));
-    } else {
-      return new Point2d(optimalPathEnd.x, optimalPathEnd.y);
-    }
+    ToolpathNode start = (ToolpathNode) path.getFirst();
+    return new Point2d(processor.toModelX(start.x), processor.toModelY(start.y));
   }
-  
+
   public void writeGCode(GCodeFileWriter writer) throws IOException {
 
     writer.cutterUp();
 
     boolean first = true;
 
-    if (optimalPathEnd == null) {
+    for (ToolpathNode node : path) {
+      Point2d p = new Point2d(processor.toModelX(node.x),
+                              processor.toModelY(node.y));
 
-      for (ToolpathNode node : path) {
-        Point2d p = new Point2d(processor.toModelX(node.x),
-                                processor.toModelY(node.y));
-
-        if (first) {
-          writer.rapidMovement(p); //rapid to start
-          writer.cutterDown();
-          first = false;
-        } else {
-          writer.linearMovement(p);
-        }
-      }
-
-    } else {
-
-      for (PathNode node = optimalPathEnd; node != null; node = node.getBestPrev()) {
-        Point2d p = new Point2d(node.x, node.y);
-
-        if (first) {
-          writer.rapidMovement(p); //rapid to start
-          writer.cutterDown();
-          first = false;
-        } else {
-          writer.linearMovement(p);
-        }
+      if (first) {
+        writer.rapidMovement(p); //rapid to start
+        writer.cutterDown();
+        first = false;
+      } else {
+        writer.linearMovement(p);
       }
     }
   }
@@ -523,212 +437,6 @@ public class ToolpathPath {
     }
     
     path = optimizedPath;
-    
-//    //      System.out.println("init optimal");
-//    initOptimalPath();
-//    //      System.out.println("add potential segs");
-//    addPotentialSegments();
-//    //      System.out.println("compute topo");
-//    computeTopologicallyOptimalPaths();
-//    //      System.out.println("compute weights");
-//    computeSegmentWeights();
-//    //      System.out.println("find optimal");
-//    findOptimalPath();
-  }
-
-  private void initOptimalPath() {
-
-    PathNode prev = null;
-    int i = 0;
-    for (Iterator<ToolpathNode> it = path.iterator(); it.hasNext(); ) {
-      PathNode node = new PathNode((ToolpathNode) it.next(), prev, i++);
-
-      if (optimalPathStart == null) {
-        optimalPathStart = node;
-      }
-
-      prev = node;
-    }
-
-    optimalPathEnd = prev;
-  }
-
-  private void addPotentialSegments() {
-
-    //      boolean[] usedDir = new boolean[4];
-
-    PathNode next = null;
-    PathNode nextStart = null;
-    for (PathNode start = optimalPathStart;
-        start != null;
-        start = nextStart) {
-
-      nextStart = next = start.getFirstNext();
-
-      if (next == null)
-        break;
-
-      PathNode prev = null;
-
-      for (Sector sector = new Sector(start, next);
-          (next != null);
-          next = next.getFirstNext()) {
-
-        sector.intersectWithSectorTo(next);
-
-        if (sector.isEmpty())
-          break;
-
-        if (prev != null)
-          nextStart.addNext(prev);
-
-        prev = next;
-      }
-    }
-  }
-
-  //CLR 25.4: single-source shortest paths in directed acyclic graphs
-  private void computeTopologicallyOptimalPaths() {
-
-    for (PathNode node = optimalPathStart;
-        node != null;
-        node = node.getFirstNext())
-      node.d = Double.POSITIVE_INFINITY;
-
-    if (optimalPathStart != null)
-      optimalPathStart.d = 0;
-
-    for (PathNode node = optimalPathStart;
-        node != null;
-        node = node.getFirstNext()) {
-
-      for (PathNode next : node.nexts) {
-
-        double newD = node.d + 1.0;
-
-        if (newD < next.d) {
-          next.clearPrevs();
-          next.addPrev(node);
-          next.d = newD;
-        } else if (newD == next.d) {
-          next.addPrev(node);
-        }
-      }
-    }
-  }
-
-  private void computeSegmentWeights() {
-
-    int n = path.size();
-
-    Sx = new double[n];
-    Sy = new double[n];
-
-    Sxx = new double[n];
-    Syy = new double[n];
-
-    Sxy = new double[n];
-
-    double x = 0;
-    double y = 0;
-
-    double xx = 0;
-    double yy = 0;
-
-    double xy = 0;
-
-    int i = 0;
-
-    for (PathNode node = optimalPathStart;
-        node != null;
-        node = node.getFirstNext()) {
-
-      x += node.x;
-      y += node.y;
-
-      xx += node.x*node.x;
-      yy += node.y*node.y;
-
-      xy += node.x*node.y;
-
-      i = node.index;
-
-      Sx[i] = x;
-      Sy[i] = y;
-
-      Sxx[i] = xx;
-      Syy[i] = yy;
-
-      Sxy[i] = xy;
-    }
-  }
-
-  private double Ex(int i, int j) {
-    return (Sx[j] - Sx[i])/((double) (j-i));
-  }
-
-  private double Ey(int i, int j) {
-    return (Sy[j] - Sy[i])/((double) (j-i));
-  }
-
-  private double Exx(int i, int j) {
-    return (Sxx[j] - Sxx[i])/((double) (j-i));
-  }
-
-  private double Eyy(int i, int j) {
-    return (Syy[j] - Syy[i])/((double) (j-i));
-  }
-
-  private double Exy(int i, int j) {
-    return (Sxy[j] - Sxy[i])/((double) (j-i));
-  }
-
-  private double segmentWeight(PathNode from, PathNode to) {
-
-    double x = to.x - from.x;
-    double y = to.y - from.y;
-
-    double xAvg = (to.x + from.x)/2.0;
-    double yAvg = (to.y + from.y)/2.0;
-
-    int i = from.index;
-    int j = to.index;
-
-    double a = Exx(i, j) - 2*xAvg*Ex(i, j) + xAvg*xAvg;
-    double b = Exy(i, j) - xAvg*Ex(i, j) - yAvg*Ey(i, j) + xAvg*yAvg;
-    double c = Eyy(i, j) - 2*yAvg*Ey(i, j) + yAvg*yAvg;
-
-    return Math.sqrt(c*x*x + 2*b*x*y + a*y*y);
-  }
-
-  private void findOptimalPath() {
-
-    for (PathNode node = optimalPathStart; node != null; node = node.getFirstNext()) {
-      node.d = Double.POSITIVE_INFINITY;
-    }
-
-    if (optimalPathStart != null) {
-      optimalPathStart.d = 0;
-    }
-
-    for (PathNode node = optimalPathStart;
-        node != null;
-        node = node.getFirstNext()) {
-
-      for (PathNode next : node.nexts) {
-
-        if (!next.hasPrev(node)) {
-          continue;
-        }
-
-        double newD = node.d + segmentWeight(node, next);
-
-        if (newD < next.d) {
-          next.optimalPrev = node;
-          next.d = newD;
-        }
-      }
-    }
   }
 
   private ToolpathsProcessor processor = null;
@@ -741,142 +449,7 @@ public class ToolpathPath {
   private LinkedList<ToolpathNode> path = new LinkedList<ToolpathNode>();
 
   GeometryArray geometry;
-
-  //    Node seed;
-
-  PathNode optimalPathStart = null;
-  PathNode optimalPathEnd = null;
-
-  double[] Sx;
-  double[] Sy;
-
-  double[] Sxx;
-  double[] Syy;
-
-  double[] Sxy;
   
   private double straightTol;
 
-  
-  private class PathNode {
-    PathNode(ToolpathNode node, PathNode prev, int index) {
-
-      x = processor.toModelX(node.x);
-      y = processor.toModelY(node.y);
-
-      this.index = index;
-
-      if (prev != null)
-        prev.addNext(this);
-
-      d = Double.POSITIVE_INFINITY;
-    }
-
-    void addNext(PathNode node) {
-      nexts.add(node);
-    }
-
-    PathNode getFirstNext() {
-
-      if (nexts.isEmpty()) {
-        return null;
-      }
-
-      //      return (PathNode) nexts.getFirst();
-      return (PathNode) nexts.get(0);
-    }
-
-    void addPrev(PathNode node) {
-      prevs.add(node);
-      //      if (prevs.size() > 1)
-      //        System.out.println("more than one prev from (" + x + ", " + y + ")");
-    }
-
-    boolean hasPrev(PathNode node) {
-      return prevs.contains(node);
-    }
-
-    PathNode getBestPrev() {
-
-      if (optimalPrev != null) {
-        return optimalPrev;
-      }
-
-      if (prevs.isEmpty()) {
-        return null;
-      }
-
-      return (PathNode) prevs.iterator().next();
-    }
-
-    void clearPrevs() {
-      prevs.clear();
-    }
-
-    float x;
-    float y;
-
-    double d;
-
-    ArrayList<PathNode> nexts = new ArrayList<PathNode>();
-    Set<PathNode> prevs = new LinkedHashSet<PathNode>();
-
-    PathNode optimalPrev = null;
-
-    int index;
-  }
-  
-  private class Sector {
-    
-    Sector(PathNode apex, PathNode first) {
-
-      apexX = apex.x;
-      apexY = apex.y;
-
-      computeAnglesTo(first);
-
-      startAngle = startAngleTo;
-      endAngle = endAngleTo;
-    }
-
-    void intersectWithSectorTo(PathNode node) {
-
-      computeAnglesTo(node);
-
-      startAngle = Math.max(startAngle, startAngleTo);
-      endAngle = Math.min(endAngle, endAngleTo);
-    }
-
-    boolean isEmpty() {
-      return startAngle > endAngle;
-    }
-
-    private void computeAnglesTo(PathNode node) {
-
-      for (int i = 0; i < 4; i++)
-        angle[i] =
-          Util.canonicalAngle(
-              (node.x + HORIZ_DIR_BIAS[i]*straightTol) - apexX,
-              (node.y + VERT_DIR_BIAS[i]*straightTol) - apexY);
-
-      startAngleTo = Double.POSITIVE_INFINITY;
-      endAngleTo = Double.NEGATIVE_INFINITY;
-
-      for (int i = 0; i < 4; i++) {
-        startAngleTo = Math.min(startAngleTo, angle[i]);
-        endAngleTo = Math.max(endAngleTo, angle[i]);
-      }
-    }
-
-    double[] angle = new double[4];
-
-    double startAngleTo;
-    double endAngleTo;
-
-    double startAngle;
-    double endAngle;
-
-    double apexX;
-    double apexY;
-  }
 }
