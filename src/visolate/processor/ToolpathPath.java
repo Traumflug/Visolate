@@ -20,6 +20,7 @@
 
 package visolate.processor;
 
+import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -445,16 +446,94 @@ public class ToolpathPath {
   }
 
   public void optimize() {
-    //      System.out.println("init optimal");
-    initOptimalPath();
-    //      System.out.println("add potential segs");
-    addPotentialSegments();
-    //      System.out.println("compute topo");
-    computeTopologicallyOptimalPaths();
-    //      System.out.println("compute weights");
-    computeSegmentWeights();
-    //      System.out.println("find optimal");
-    findOptimalPath();
+    
+    // TODO: Pre-optimize by removing nodes which are on a straight line.
+    //       Pretty simple, as such straight lines can be on X and Y only,
+    //       so if three consecutive nodes have the same X or the same Y value,
+    //       the middle one can be removed.
+    //
+    //       Start and end of longer straight lines should be fixed at start
+    //       and end, so no almost-horizontal and almost-vertical lines appear?
+    
+    LinkedList<ToolpathNode> optimizedPath = new LinkedList<ToolpathNode>();
+    optimizedPath.add(path.get(0));
+    
+    // Proceed until there are no nodes left.
+    while (path.size() > 1) {
+      int end = 0;
+
+      // At most, a segment can go to the next locked node.
+      for (end = 1; end < path.size(); end++) {
+        if (path.get(end).isLocked())
+          break;
+      }
+
+      while (end > 0) {
+        
+        int segmentEnd = end;
+        
+        // This algorithm lays a single path/segment from start to end, then
+        // looks wether this is within tolerance. If not, it tries again with
+        // the first half of the nodes, then with the first quarter ... and so on.
+        //
+        // As soon as a segment is within tolerance, the segment is used and the
+        // process is repeated with the remaining set of nodes.
+        //
+        // Stepping from the start node to each subsequent node until one of the
+        // nodes in between is out of tolerance would produce some fewer segments,
+        // but also require a lot more processing power.
+        while (true) {
+
+          int i;
+          
+          // Fully closed paths require at least two segments.
+          if (path.get(0).x == path.get(segmentEnd).x &&
+              path.get(0).y == path.get(segmentEnd).y) {
+            segmentEnd /= 2;
+          }
+          
+          Line2D line = new Line2D.Float(processor.toModelX(path.get(0).x),
+                                         processor.toModelY(path.get(0).y),
+                                         processor.toModelX(path.get(segmentEnd).x),
+                                         processor.toModelY(path.get(segmentEnd).y));
+          
+          for (i = 1; i < segmentEnd; i++) {
+            if (line.ptLineDist(processor.toModelX(path.get(i).x),
+                                processor.toModelY(path.get(i).y)) > straightTol)
+              break;
+          }
+          
+          if (i == segmentEnd) {
+            // No intermediate node was out of tolerance -> make the segment.
+            optimizedPath.add(path.get(i));
+            
+            // Remove processed nodes.
+            for ( ; segmentEnd > 0; segmentEnd--, end--) {
+              path.removeFirst();
+            }
+            
+            break;
+          }
+          else {
+            // Try again with half the distance.
+            segmentEnd /= 2;
+          }
+        }
+      }
+    }
+    
+    path = optimizedPath;
+    
+//    //      System.out.println("init optimal");
+//    initOptimalPath();
+//    //      System.out.println("add potential segs");
+//    addPotentialSegments();
+//    //      System.out.println("compute topo");
+//    computeTopologicallyOptimalPaths();
+//    //      System.out.println("compute weights");
+//    computeSegmentWeights();
+//    //      System.out.println("find optimal");
+//    findOptimalPath();
   }
 
   private void initOptimalPath() {

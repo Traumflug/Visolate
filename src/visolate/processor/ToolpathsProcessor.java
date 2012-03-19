@@ -403,7 +403,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		for (ToolpathPath path : paths) {
 		  
-		  path.setStraightTolerance(0.5/((double) dpi));
+		  path.setStraightTolerance(1.1/((double) dpi));
 			path.optimize();
 
 			visolate.tickInnerProgressBar();
