@@ -28,6 +28,8 @@ import org.apache.commons.cli.*;
 
 public class Main extends JApplet {
 
+  private static final long serialVersionUID = 1L;
+  
   public static final String APPNAME = "Visolate 2.1.6";
   public static final int DEF_LOC_X = 100;
   public static final int DEF_LOC_Y = 100;

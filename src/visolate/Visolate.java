@@ -46,6 +46,8 @@ import org.apache.commons.cli.CommandLine;
 
 public class Visolate extends JPanel implements SimulatorUI {
 
+  private static final long serialVersionUID = 1L;
+
 	public static final String DEMO_FILE = "example.grb";
 	/**
 	 * kept here so it is available in the invokeLater Runnable in Main

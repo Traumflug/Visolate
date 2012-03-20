@@ -22,6 +22,8 @@ package visolate.simulator;
 
 public class SimulatorException extends RuntimeException {
 
+  private static final long serialVersionUID = 1L;
+
   public SimulatorException(String message) {
     super(message);
   }

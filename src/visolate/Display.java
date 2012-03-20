@@ -33,6 +33,8 @@ import javax.vecmath.*;
 
 public class Display extends JPanel {
 
+  private static final long serialVersionUID = 1L;
+
   public static final int MAX_UPDATE_FRAME_TIME = 100;
 
   public static final int NUM_UPDATE_FRAMES = 3;
@@ -244,7 +246,9 @@ public class Display extends JPanel {
     nativeDPILabel = new JLabel("native DPI: ");
     navControlsBox.add(nativeDPILabel);
 
-    nativeDPIField = new JTextField() { { columnWidth = getColumnWidth(); } };
+    nativeDPIField = new JTextField() {
+      private static final long serialVersionUID = 1L;
+    { columnWidth = getColumnWidth(); } };
     nativeDPIField.setHorizontalAlignment(JTextField.RIGHT);
     d = nativeDPIField.getPreferredSize();
     nativeDPIField.setMaximumSize(new Dimension(columnWidth*3, d.height));
@@ -872,7 +876,9 @@ public class Display extends JPanel {
   }
 
   private class MyCanvas3D extends Canvas3D {
-                
+
+    private static final long serialVersionUID = 1L;
+
     MyCanvas3D(GraphicsConfiguration gc) {
 
       super(gc);
@@ -1250,7 +1256,9 @@ public class Display extends JPanel {
   private int rSpread, gSpread, bSpread;
 
   private NumberFormat fpsFormat =
-  new DecimalFormat() { {
+  new DecimalFormat() {
+    private static final long serialVersionUID = 1L;
+  {
     setMaximumFractionDigits(2); 
     setMinimumFractionDigits(2); } };
 
