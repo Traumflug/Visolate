@@ -106,7 +106,7 @@ public class Display extends JPanel {
           wakeupOn(frameCriterion);
         }
 
-        public void processStimulus(java.util.Enumeration criteria) {
+        public void processStimulus(@SuppressWarnings("rawtypes") java.util.Enumeration criteria) {
 
           synchronized (frameTasks) {
 
@@ -457,7 +457,7 @@ public class Display extends JPanel {
         if (appearance != null)
           graphicsContext.setAppearance(appearance);
 
-        for (Enumeration e = shape.getAllGeometries(); e.hasMoreElements(); ) {
+        for (Enumeration<Geometry> e = shape.getAllGeometries(); e.hasMoreElements(); ) {
           Geometry geometry = (Geometry) e.nextElement();
 //          assert geometry != null;
           if (geometry != null)

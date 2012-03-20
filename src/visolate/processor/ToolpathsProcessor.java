@@ -46,8 +46,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	public static final int VORONOI_MODE = 0;
 	public static final int OUTLINE_MODE = 1;
 
-	public static final int DEF_MODE = VORONOI_MODE;
-
 	/**
 	 * How much to move the toolhead in z-direction between cutting and moving.
 	 */

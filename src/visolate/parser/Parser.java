@@ -19,7 +19,7 @@ public class Parser implements ParserConstants {
 		parser.Input();
 	}
 
-	private static double getModifier(List modifiers, int index) {
+	private static double getModifier(List<Double> modifiers, int index) {
 		return ((Double) modifiers.get(index)).doubleValue();
 	}
 
@@ -1482,7 +1482,7 @@ public class Parser implements ParserConstants {
 			return (jj_ntk = jj_nt.kind);
 	}
 
-	private java.util.Vector jj_expentries = new java.util.Vector();
+	private java.util.Vector<int[]> jj_expentries = new java.util.Vector<int[]>();
 	private int[] jj_expentry;
 	private int jj_kind = -1;
 

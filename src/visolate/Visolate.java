@@ -242,17 +242,17 @@ public class Visolate extends JPanel implements SimulatorUI {
 		voronoiButton = new JRadioButton("voronoi");
 		modeGroup.add(voronoiButton);
 		voronoiButton.setBackground(Color.WHITE);
-		if (ToolpathsProcessor.DEF_MODE == ToolpathsProcessor.VORONOI_MODE)
-			voronoiButton.setSelected(true);
+		// VORONOI_MODE is the default mode.
+		voronoiButton.setSelected(true);
 		toolpathsBox.add(voronoiButton);
 
 		outlineButton = new JRadioButton("outline");
 		modeGroup.add(outlineButton);
 		outlineButton.setBackground(Color.WHITE);
-		if (ToolpathsProcessor.DEF_MODE == ToolpathsProcessor.OUTLINE_MODE) {
-			outlineButton.setSelected(true);
-		}
+    // VORONOI_MODE is the default mode.
+		outlineButton.setSelected(false);
 		toolpathsBox.add(outlineButton);
+
 		return toolpathsBox;
 	}
 
