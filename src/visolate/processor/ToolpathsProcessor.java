@@ -95,12 +95,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	private double myAbsoluteXStart = 0.0;
 	
 	/**
-	 * Our current work feedrate.
-	 * @see #gcodeLinear()
-	 */
-	private double currentFeedrate = 0.0;
-
-	/**
 	 * @return If we use absolute coordinates, then this is the X-value for the left upper corner.
 	 * @see #isOutputAbsoluteCoordinates()
 	 */
