@@ -44,6 +44,8 @@ import java.security.*;
 
 import org.apache.commons.cli.CommandLine;
 
+import visolate.processor.GCodeFileWriter;
+
 public class Visolate extends JPanel implements SimulatorUI {
 
   private static final long serialVersionUID = 1L;
@@ -56,7 +58,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 	public int processstatus;
 	public boolean auto_mode;
 
-	private double selectedZClearance = ToolpathsProcessor.CLEARANCE_Z;
 	private double selectedZCuttingHeight = 0;
 	private double selectedInitialXCoordinate = 0;
 	private double selectedInitialYCoordinate = 0;
@@ -72,6 +73,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		display = new Display(this);
 		simulator = new Simulator(this);
 		model = new Model(this);
+		gCodeWriter = new GCodeFileWriter();
 
 		setBackground(Color.WHITE);
 		setOpaque(true);
@@ -449,18 +451,15 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myZDownMovementPanel = new JPanel();
 			myZDownMovementPanel.setLayout(new BorderLayout());
 			myZDownMovementPanel.add(new JLabel("travel clearance"), BorderLayout.WEST);
-			myZDownMovementPanel.setToolTipText("When not cutting, lift the head this much (mm or inch)");
-			final JTextField field = new JTextField(NumberFormat.getInstance().format(ToolpathsProcessor.CLEARANCE_Z));
+			myZDownMovementPanel.setToolTipText("When not cutting, lift the head this much (mm or inch) above origin");
+			final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getZClearance()));
 			myZDownMovementPanel.add(field, BorderLayout.CENTER);
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
 				
 				@Override
 				public void undoableEditHappened(UndoableEditEvent evt) {
 					try {
-						selectedZClearance = NumberFormat.getInstance().parse(field.getText()).doubleValue();
-						if (myToolpathsProcessor != null) {
-							myToolpathsProcessor.setZClearance(selectedZClearance);
-						}
+						gCodeWriter.setZClearance(NumberFormat.getInstance().parse(field.getText()).doubleValue());
 					} catch (ParseException e) {
 						evt.getEdit().undo();
 					}
@@ -693,7 +692,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 		else
 			mode = ToolpathsProcessor.OUTLINE_MODE;
 
-		myToolpathsProcessor = new ToolpathsProcessor(this, mode, getAbsoluteCoordinatesButton().isSelected(), selectedZClearance, getMetricButton().isSelected());
+		myToolpathsProcessor = new ToolpathsProcessor(this, mode, getAbsoluteCoordinatesButton().isSelected(),
+		                                              getMetricButton().isSelected());
 		myToolpathsProcessor.setZCuttingHeight(selectedZCuttingHeight);
 		myToolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
 		myToolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
@@ -829,9 +829,9 @@ public class Visolate extends JPanel implements SimulatorUI {
 			}
 
 			try {
-				GCodeFileWriter w = new GCodeFileWriter(file);
-				myToolpathsProcessor.writeGCode(w);
-				w.close();
+				gCodeWriter.open(file);
+				myToolpathsProcessor.writeGCode(gCodeWriter);
+				gCodeWriter.close();
 			} catch (IOException e) {
 				JOptionPane.
 				showMessageDialog(this,
@@ -1107,9 +1107,12 @@ public class Visolate extends JPanel implements SimulatorUI {
 	}
 
 
-	private Simulator simulator;
-	public Model model;
-	private Display display;
+	private Simulator simulator = null;
+	public Model model = null;
+	private Display display = null;
+	private Processor processor = null;
+	private ToolpathsProcessor myToolpathsProcessor = null;
+	private GCodeFileWriter gCodeWriter = null;
 
 	private JTextField loadField;
 	private JButton loadButton;
@@ -1123,7 +1126,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 	private JProgressBar progressBar;
 
-	private Processor processor = null;
 
 	private JButton stopButton;
 
@@ -1141,7 +1143,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 	/**
 	 * The ToolpathsProcessor generates the g-code that we write to a file.
 	 */
-	private ToolpathsProcessor myToolpathsProcessor = null;
 
 	private Set<Net> selectedNets = new LinkedHashSet<Net>();
 	private Net selectedNet = null;

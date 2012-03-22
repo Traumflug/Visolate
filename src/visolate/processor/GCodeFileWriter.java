@@ -46,10 +46,17 @@ public class GCodeFileWriter {
   private static final Color3f G_CODE_COLOR_PLUNGE = new Color3f(0.0f, 0.0f, 1.0f);
   private static final Color3f G_CODE_COLOR_MILLING = new Color3f(0.0f, 1.0f, 1.0f);
 
-  public GCodeFileWriter(final File outputFile) throws IOException {
-    out = new FileWriter(outputFile);
+  public GCodeFileWriter() {
   }
   
+  public void open(final File outputFile) throws IOException {
+    out = new FileWriter(outputFile);
+  }
+
+  public void close() throws IOException {
+    out.close();
+  }
+
   public void setIsMetric(final boolean isMetric) {
     this.isMetric = isMetric;
   }
@@ -66,6 +73,16 @@ public class GCodeFileWriter {
     this.yOffset = offset;
   }
   
+  /**
+   * We move this much above origin for traveling.
+   * This is not to be converted from inches.
+   */
+  private double zClearance = 1.0;
+  
+  public double getZClearance() {
+    return zClearance;
+  }
+
   public void setZClearance(final double zClearance) {
     this.zClearance = zClearance;
   }
@@ -90,10 +107,6 @@ public class GCodeFileWriter {
     return gCodeStrokes;
   }
   
-  public void close() throws IOException {
-    out.close();
-  }
-
   public void preAmble() throws IOException {
 
     if (isMetric) {
@@ -237,7 +250,6 @@ public class GCodeFileWriter {
   private double xOffset = 0.0;
   private double yOffset = 0.0;
   
-  private double zClearance = 1.0;
   private double zCuttingHeight = -0.1;
   
   private double plungeFeedrate = 0.5;

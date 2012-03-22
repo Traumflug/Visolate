@@ -76,11 +76,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	}
 
 	/**
-	 * We move this much above origin for traveling.
-	 */
-	private double myzClearance;
-
-	/**
 	 * If we use absolute coordinates,
 	 * then this is the height-value for cutting.
 	 * @see #isOutputAbsoluteCoordinates()
@@ -167,20 +162,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	}
 
 	/**
-	 * @return  We move this much upward from cutting to traveling.
-	 */
-	public double getZClearance() {
-		return myzClearance;
-	}
-
-	/**
-	 * @param myzClearance  We move this much upward from cutting to traveling.
-	 */
-	public void setZClearance(final double myzClearance) {
-		this.myzClearance = myzClearance;
-	}
-
-	/**
 	 * @return If true, output absolute coordinates instead of relative.
 	 */
 	public boolean isOutputAbsoluteCoordinates() {
@@ -194,12 +175,12 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		this.outputAbsoluteCoordinates = outputAbsoluteCoordinates;
 	}
 
-	public ToolpathsProcessor(final Visolate visolate, final int mode, final boolean useAbsoluteCoordinates, final double zClearance, final boolean metric) {
+	public ToolpathsProcessor(final Visolate visolate, final int mode,
+	    final boolean useAbsoluteCoordinates, final boolean metric) {
 		super(visolate);
 		this.mode = mode;
 		this.outputMetricCoordinates = metric;
 		this.outputAbsoluteCoordinates = useAbsoluteCoordinates;
-		this.myzClearance = zClearance;
 	}
 
 	public void processTile(int r, int c,
@@ -486,7 +467,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
     w.setIsAbsolute(isOutputAbsoluteCoordinates());
     w.setXOffset(getAbsoluteXStart());
     w.setYOffset(getAbsoluteYStart());
-    w.setZClearance(getZClearance());
     w.setZCuttingHeight(getZCuttingHeight());
     w.setPlungeFeedrate(getPlungeSpeed());
     w.setMillingFeedrate(getMillingSpeed());
