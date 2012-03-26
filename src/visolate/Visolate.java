@@ -357,7 +357,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			panel.add(new JLabel("Z-coordinates"));
 			panel.add(new JLabel("left upper coordinates"));
 			panel.add(new JLabel("Metric"));
-			panel.add(new JLabel("Speed"));
+			panel.add(new JLabel("Feedrates"));
 
 			panel.add(getRelativeCoordinatesButton());
 			panel.add(getZCuttingHeightPanel());
@@ -451,7 +451,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myZDownMovementPanel = new JPanel();
 			myZDownMovementPanel.setLayout(new BorderLayout());
 			myZDownMovementPanel.add(new JLabel("travel clearance"), BorderLayout.WEST);
-			myZDownMovementPanel.setToolTipText("When not cutting, lift the head this much (mm or inch) above origin");
+			myZDownMovementPanel.setToolTipText("When not cutting, lift the cutter to this above origin, in mm or inch. Decimals in native language (point or comma).");
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getZClearance()));
 			myZDownMovementPanel.add(field, BorderLayout.CENTER);
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
@@ -474,8 +474,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 		if (myMillingSpeedPanel == null) {
 			myMillingSpeedPanel = new JPanel();
 			myMillingSpeedPanel.setLayout(new BorderLayout());
-			myMillingSpeedPanel.add(new JLabel("milling speed"), BorderLayout.WEST);
-			myMillingSpeedPanel.setToolTipText("speed of head-movement during milling (mm or inch per second)");
+			myMillingSpeedPanel.add(new JLabel("cutting feedrate"), BorderLayout.WEST);
+			myMillingSpeedPanel.setToolTipText("Feedrate during cutting in mm or inch per minute.");
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
 			myMillingSpeedPanel.add(field, BorderLayout.CENTER);
 
@@ -504,8 +504,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 		if (myPlungeSpeedPanel == null) {
 			myPlungeSpeedPanel = new JPanel();
 			myPlungeSpeedPanel.setLayout(new BorderLayout());
-			myPlungeSpeedPanel.add(new JLabel("plunge speed"), BorderLayout.WEST);
-			myPlungeSpeedPanel.setToolTipText("speed of head-movement when moving vertically into workpiece (mm or inch per second)");
+			myPlungeSpeedPanel.add(new JLabel("plunge feedrate"), BorderLayout.WEST);
+			myPlungeSpeedPanel.setToolTipText("Feedrate when moving vertically into the workpiece in mm or inch per minute.");
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
 			myPlungeSpeedPanel.add(field, BorderLayout.CENTER);
 
@@ -533,7 +533,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myZCuttingHeightPanel = new JPanel();
 			myZCuttingHeightPanel.setLayout(new BorderLayout());
 			myZCuttingHeightPanel.add(new JLabel("cutting height"), BorderLayout.WEST);
-			myZCuttingHeightPanel.setToolTipText("When cutting the head should have this z-coordinate (mm or inch)");
+			myZCuttingHeightPanel.setToolTipText("When cutting, the head should have this z-coordinate, in mm or inch. Likely a negative value, decimals in native language (point or comma)");
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
 			myZCuttingHeightPanel.add(field, BorderLayout.CENTER);
 			myZCuttingHeightPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
