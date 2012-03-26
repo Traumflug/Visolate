@@ -57,6 +57,15 @@ public class GCodeFileWriter {
     out.close();
   }
 
+  /**
+   * If set to true, output metric coordinates instead of imperial ones.
+   */
+  private boolean isMetric = true;
+  
+  public boolean getIsMetric() {
+    return isMetric;
+  }
+
   public void setIsMetric(final boolean isMetric) {
     this.isMetric = isMetric;
   }
@@ -254,7 +263,6 @@ public class GCodeFileWriter {
   private Point3d currentPosition;
   private double currentFeedrate;
     
-  private boolean isMetric = true;
   private boolean isAbsolute = true;
   
   private double xOffset = 0.0;

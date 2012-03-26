@@ -54,25 +54,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	private boolean outputAbsoluteCoordinates;
 
 	/**
-	 * If set to true, output metric coordinates instead of relative.
-	 */
-	private boolean outputMetricCoordinates;
-
-	/**
-	 * @return If set to true, output metric coordinates instead of relative.
-	 */
-	public boolean isOutputMetricCoordinates() {
-		return outputMetricCoordinates;
-	}
-
-	/**
-	 * @param outputMetricCoordinates If set to true, output metric coordinates instead of relative.
-	 */
-	public void setOutputMetricCoordinates(final boolean outputMetricCoordinates) {
-		this.outputMetricCoordinates = outputMetricCoordinates;
-	}
-
-	/**
 	 * If we use absolute coordinates,
 	 * then this is the X-value for the left upper corner.
 	 * @see #isOutputAbsoluteCoordinates()
@@ -161,10 +142,9 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	}
 
 	public ToolpathsProcessor(final Visolate visolate, final int mode,
-	    final boolean useAbsoluteCoordinates, final boolean metric) {
+	    final boolean useAbsoluteCoordinates) {
 		super(visolate);
 		this.mode = mode;
-		this.outputMetricCoordinates = metric;
 		this.outputAbsoluteCoordinates = useAbsoluteCoordinates;
 	}
 
@@ -450,7 +430,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		// TODO: get rid of this setup and do it directly in Visolate.java.
 		//       Also see a TO DO, there.
-    w.setIsMetric(isOutputMetricCoordinates());
     w.setIsAbsolute(isOutputAbsoluteCoordinates());
     w.setXOffset(getAbsoluteXStart());
     w.setYOffset(getAbsoluteYStart());

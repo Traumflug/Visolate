@@ -629,19 +629,15 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private JRadioButton getMetricButton() {
 		if (myMetricButton == null) {
 			myMetricButton = new JRadioButton("metric");
-			myMetricButton.setSelected(false);
-			myMetricButton.setToolTipText("output gcode in mm. coordinates entered here must be in mm too");
+			myMetricButton.setSelected(gCodeWriter.getIsMetric());
+			myMetricButton.setToolTipText("Output G-code in mm. Coordinates entered here are in mm, too.");
 			myMetricButton.addActionListener(new ActionListener() {
-				
 				@Override
 				public void actionPerformed(final ActionEvent e) {
 					if (myMetricButton.isSelected()) {
 						getImperialButton().setSelected(false);
-						if (myToolpathsProcessor != null) {
-							myToolpathsProcessor.setOutputMetricCoordinates(true);
-						}
+						gCodeWriter.setIsMetric(true);
 					}
-					
 				}
 			});
 		}
@@ -651,19 +647,15 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private JRadioButton getImperialButton() {
 		if (myImperialButton == null) {
 			myImperialButton = new JRadioButton("imperial");
-			myImperialButton.setSelected(true);
-			myImperialButton.setToolTipText("output gcode in inch. coordinates entered here must be in inch too");
+			myImperialButton.setSelected( ! gCodeWriter.getIsMetric());
+			myImperialButton.setToolTipText("Output G-code in inches. Coordinates entered here are in inches, too.");
 			myImperialButton.addActionListener(new ActionListener() {
-				
 				@Override
 				public void actionPerformed(final ActionEvent e) {
 					if (myImperialButton.isSelected()) {
 						getMetricButton().setSelected(false);
-						if (myToolpathsProcessor != null) {
-							myToolpathsProcessor.setOutputMetricCoordinates(false);
-						}
+						gCodeWriter.setIsMetric(false);
 					}
-					
 				}
 			});
 		}
@@ -713,8 +705,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		else
 			mode = ToolpathsProcessor.OUTLINE_MODE;
 
-		myToolpathsProcessor = new ToolpathsProcessor(this, mode, getAbsoluteCoordinatesButton().isSelected(),
-		                                              getMetricButton().isSelected());
+		myToolpathsProcessor = new ToolpathsProcessor(this, mode, getAbsoluteCoordinatesButton().isSelected());
 		myToolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
 		myToolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
 		myToolpathsProcessor.setMillingSpeed(myMillingSpeed);
