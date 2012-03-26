@@ -87,6 +87,16 @@ public class GCodeFileWriter {
     this.zClearance = zClearance;
   }
   
+  /**
+   * When cutting, the head should have this z-coordinate, in mm or inch.
+   * This is not to be converted from inches.
+   */
+  private double zCuttingHeight = -0.1;
+  
+  public double getZCuttingHeight() {
+    return zCuttingHeight;
+  }
+
   public void setZCuttingHeight(final double zCuttingHeight) {
     this.zCuttingHeight = zCuttingHeight;
   }
@@ -249,8 +259,6 @@ public class GCodeFileWriter {
   
   private double xOffset = 0.0;
   private double yOffset = 0.0;
-  
-  private double zCuttingHeight = -0.1;
   
   private double plungeFeedrate = 0.5;
   private double millingFeedrate = 1.0;

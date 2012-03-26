@@ -58,7 +58,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 	public int processstatus;
 	public boolean auto_mode;
 
-	private double selectedZCuttingHeight = 0;
 	private double selectedInitialXCoordinate = 0;
 	private double selectedInitialYCoordinate = 0;
 
@@ -556,7 +555,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myZCuttingHeightPanel.setLayout(new BorderLayout());
 			myZCuttingHeightPanel.add(new JLabel("cutting height"), BorderLayout.WEST);
 			myZCuttingHeightPanel.setToolTipText("When cutting, the head should have this z-coordinate, in mm or inch. Likely a negative value, decimals in native language (point or comma)");
-			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
+			final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getZCuttingHeight()));
 			myZCuttingHeightPanel.add(field, BorderLayout.CENTER);
 			myZCuttingHeightPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
 				
@@ -575,10 +574,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 				@Override
 				public void undoableEditHappened(UndoableEditEvent evt) {
 					try {
-						selectedZCuttingHeight = NumberFormat.getInstance().parse(field.getText()).doubleValue();
-						if (myToolpathsProcessor != null) {
-							myToolpathsProcessor.setZCuttingHeight(selectedZCuttingHeight);
-						}
+            gCodeWriter.setZCuttingHeight(NumberFormat.getInstance().parse(field.getText()).doubleValue());
 					} catch (ParseException e) {
 						evt.getEdit().undo();
 					}
@@ -719,7 +715,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 		myToolpathsProcessor = new ToolpathsProcessor(this, mode, getAbsoluteCoordinatesButton().isSelected(),
 		                                              getMetricButton().isSelected());
-		myToolpathsProcessor.setZCuttingHeight(selectedZCuttingHeight);
 		myToolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
 		myToolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
 		myToolpathsProcessor.setMillingSpeed(myMillingSpeed);

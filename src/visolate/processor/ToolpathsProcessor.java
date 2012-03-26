@@ -49,11 +49,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	// TODO: move all these variables to GCodeFileWriter.
 	//       As an example, see zClearance.
 	/**
-	 * How much to move the toolhead in z-direction between cutting and moving.
-	 */
-	public static final double CLEARANCE_Z = 0.1;
-
-	/**
 	 * If set to true, output absolute coordinates instead of relative.
 	 */
 	private boolean outputAbsoluteCoordinates;
@@ -76,13 +71,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	public void setOutputMetricCoordinates(final boolean outputMetricCoordinates) {
 		this.outputMetricCoordinates = outputMetricCoordinates;
 	}
-
-	/**
-	 * When cutting, the head should have this z-coordinate, in mm or inch.
-	 * This is not to be converted from inch to mm.
-	 * @see #isOutputAbsoluteCoordinates()
-	 */
-	private double myZCuttingHeight = 0.0;
 
 	/**
 	 * If we use absolute coordinates,
@@ -157,21 +145,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	 * @see #isOutputAbsoluteCoordinates()
 	 */
 	private double myAbsoluteYStart = 0.0;
-	/**
-	 * @return If we use absolute coordinates, then this is the height-value for cutting.
-	 * @see #isOutputAbsoluteCoordinates()
-	 */
-	public double getZCuttingHeight() {
-		return myZCuttingHeight;
-	}
-
-	/**
-	 * @param myZCuttingHeight If we use absolute coordinates, then this is the height-value for cutting.
-	 * @see #isOutputAbsoluteCoordinates()
-	 */
-	public void setZCuttingHeight(final double myZCuttingHeight) {
-		this.myZCuttingHeight = myZCuttingHeight;
-	}
 
 	/**
 	 * @return If true, output absolute coordinates instead of relative.
@@ -481,7 +454,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
     w.setIsAbsolute(isOutputAbsoluteCoordinates());
     w.setXOffset(getAbsoluteXStart());
     w.setYOffset(getAbsoluteYStart());
-    w.setZCuttingHeight(getZCuttingHeight());
     w.setPlungeFeedrate(getPlungeSpeed());
     w.setMillingFeedrate(getMillingSpeed());
     w.preAmble();
