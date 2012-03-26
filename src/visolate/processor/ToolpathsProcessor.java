@@ -49,11 +49,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	// TODO: move all these variables to GCodeFileWriter.
 	//       As an example, see zClearance.
 	/**
-	 * If set to true, output absolute coordinates instead of relative.
-	 */
-	private boolean outputAbsoluteCoordinates;
-
-	/**
 	 * If we use absolute coordinates,
 	 * then this is the X-value for the left upper corner.
 	 * @see #isOutputAbsoluteCoordinates()
@@ -127,25 +122,9 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	 */
 	private double myAbsoluteYStart = 0.0;
 
-	/**
-	 * @return If true, output absolute coordinates instead of relative.
-	 */
-	public boolean isOutputAbsoluteCoordinates() {
-		return outputAbsoluteCoordinates;
-	}
-
-	/**
-	 * @param outputAbsoluteCoordinates If true, output absolute coordinates instead of relative.
-	 */
-	public void setOutputAbsoluteCoordinates(final boolean outputAbsoluteCoordinates) {
-		this.outputAbsoluteCoordinates = outputAbsoluteCoordinates;
-	}
-
-	public ToolpathsProcessor(final Visolate visolate, final int mode,
-	    final boolean useAbsoluteCoordinates) {
+	public ToolpathsProcessor(final Visolate visolate, final int mode) {
 		super(visolate);
 		this.mode = mode;
-		this.outputAbsoluteCoordinates = useAbsoluteCoordinates;
 	}
 
 	public void processTile(int r, int c,
@@ -430,7 +409,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		// TODO: get rid of this setup and do it directly in Visolate.java.
 		//       Also see a TO DO, there.
-    w.setIsAbsolute(isOutputAbsoluteCoordinates());
     w.setXOffset(getAbsoluteXStart());
     w.setYOffset(getAbsoluteYStart());
     w.setPlungeFeedrate(getPlungeSpeed());

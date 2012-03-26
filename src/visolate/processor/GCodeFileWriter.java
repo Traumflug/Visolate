@@ -70,6 +70,15 @@ public class GCodeFileWriter {
     this.isMetric = isMetric;
   }
   
+  /**
+   * If set to true, output absolute coordinates instead of relative ones.
+   */
+  private boolean isAbsolute = true;
+  
+  public boolean getIsAbsolute() {
+    return isAbsolute;
+  }
+
   public void setIsAbsolute(final boolean isAbsolute) {
     this.isAbsolute = isAbsolute;
   }
@@ -263,8 +272,6 @@ public class GCodeFileWriter {
   private Point3d currentPosition;
   private double currentFeedrate;
     
-  private boolean isAbsolute = true;
-  
   private double xOffset = 0.0;
   private double yOffset = 0.0;
   

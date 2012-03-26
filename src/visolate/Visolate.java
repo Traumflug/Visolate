@@ -382,9 +382,10 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myInitialXPanel = new JPanel();
 			myInitialXPanel.setLayout(new BorderLayout());
 			myInitialXPanel.add(new JLabel("X"), BorderLayout.WEST);
+			myInitialXPanel.setToolTipText("Left side is at this coordinate (mm or inch)");
+			myInitialXPanel.setEnabled(gCodeWriter.getIsAbsolute());
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
 			myInitialXPanel.add(field, BorderLayout.CENTER);
-			myInitialXPanel.setToolTipText("Left side is at this coordinate (mm or inch)");
 			myInitialXPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
 				
 				@Override
@@ -392,7 +393,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 					field.setEnabled(myInitialXPanel.isEnabled());
 				}
 			});
-			myInitialXPanel.setEnabled(false);
+      field.setEnabled(myInitialXPanel.isEnabled());
 
 			// TODO: get rid fo this listener and fetch the value from the field
 			//       just before the G-code file is written.
@@ -421,9 +422,10 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myInitialYPanel = new JPanel();
 			myInitialYPanel.setLayout(new BorderLayout());
 			myInitialYPanel.add(new JLabel("Y"), BorderLayout.WEST);
+			myInitialYPanel.setToolTipText("Upper side is at this coordinates (mm or inch)");
+			myInitialYPanel.setEnabled(gCodeWriter.getIsAbsolute());
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
 			myInitialYPanel.add(field, BorderLayout.CENTER);
-			myInitialYPanel.setToolTipText("Upper side is at this coordinates (mm or inch)");
 			myInitialYPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
 				
 				@Override
@@ -431,7 +433,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 					field.setEnabled(myInitialYPanel.isEnabled());
 				}
 			});
-			myInitialYPanel.setEnabled(false);
+      field.setEnabled(myInitialYPanel.isEnabled());
 
       // TODO: get rid fo this listener and fetch the value from the field
       //       just before the G-code file is written.
@@ -555,16 +557,16 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myZCuttingHeightPanel.setLayout(new BorderLayout());
 			myZCuttingHeightPanel.add(new JLabel("cutting height"), BorderLayout.WEST);
 			myZCuttingHeightPanel.setToolTipText("When cutting, the head should have this z-coordinate, in mm or inch. Likely a negative value, decimals in native language (point or comma)");
+      myZCuttingHeightPanel.setEnabled(gCodeWriter.getIsAbsolute());
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getZCuttingHeight()));
 			myZCuttingHeightPanel.add(field, BorderLayout.CENTER);
 			myZCuttingHeightPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
-				
 				@Override
 				public void propertyChange(PropertyChangeEvent evt) {
 					field.setEnabled(myZCuttingHeightPanel.isEnabled());
 				}
 			});
-			myZCuttingHeightPanel.setEnabled(false);
+      field.setEnabled(myZCuttingHeightPanel.isEnabled());
 
       // TODO: get rid fo this listener and fetch the value from the field
       //       just before the G-code file is written.
@@ -588,9 +590,9 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private JRadioButton getAbsoluteCoordinatesButton() {
 		if (myAbsoluteCoordinatesButton == null) {
 			myAbsoluteCoordinatesButton = new JRadioButton("absolute");
-			myAbsoluteCoordinatesButton.setSelected(false);
+			myAbsoluteCoordinatesButton.setSelected(gCodeWriter.getIsAbsolute());
+      myAbsoluteCoordinatesButton.setToolTipText("Output absolute G-code coordinates. For the starting point, set X, Y and cutting height.");
 			myAbsoluteCoordinatesButton.addActionListener(new ActionListener() {
-				
 				@Override
 				public void actionPerformed(final ActionEvent e) {
 					setAbsoluteCoordinates(myAbsoluteCoordinatesButton.isSelected());
@@ -603,12 +605,12 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private JRadioButton getRelativeCoordinatesButton() {
 		if (myRelativeCoordinatesButton == null) {
 			myRelativeCoordinatesButton = new JRadioButton("relative");
-			myRelativeCoordinatesButton.setSelected(true);
+			myRelativeCoordinatesButton.setSelected( ! gCodeWriter.getIsAbsolute());
+			myRelativeCoordinatesButton.setToolTipText("Output relative G-code coordinates, starting at { 0.0, 0.0, 0.0 }.");
 			myRelativeCoordinatesButton.addActionListener(new ActionListener() {
-				
 				@Override
 				public void actionPerformed(final ActionEvent e) {
-					setAbsoluteCoordinates(!myRelativeCoordinatesButton.isSelected());
+					setAbsoluteCoordinates( ! myRelativeCoordinatesButton.isSelected());
 				}
 			});
 		}
@@ -621,9 +623,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		getZCuttingHeightPanel().setEnabled(newValue);
 		getInitialXPanel().setEnabled(newValue);
 		getInitialYPanel().setEnabled(newValue);
-		if (myToolpathsProcessor != null) {
-			myToolpathsProcessor.setOutputAbsoluteCoordinates(newValue);
-		}
+		gCodeWriter.setIsAbsolute(newValue);
 	}
 
 	private JRadioButton getMetricButton() {
@@ -705,7 +705,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		else
 			mode = ToolpathsProcessor.OUTLINE_MODE;
 
-		myToolpathsProcessor = new ToolpathsProcessor(this, mode, getAbsoluteCoordinatesButton().isSelected());
+		myToolpathsProcessor = new ToolpathsProcessor(this, mode);
 		myToolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
 		myToolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
 		myToolpathsProcessor.setMillingSpeed(myMillingSpeed);
