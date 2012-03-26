@@ -76,8 +76,8 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	}
 
 	/**
-	 * If we use absolute coordinates,
-	 * then this is the height-value for cutting.
+	 * When cutting, the head should have this z-coordinate, in mm or inch.
+	 * This is not to be converted from inch to mm.
 	 * @see #isOutputAbsoluteCoordinates()
 	 */
 	private double myZCuttingHeight = 0.0;
@@ -121,8 +121,12 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		this.myAbsoluteYStart = setAbsoluteYStart;
 	}
 
+	/**
+   * Feedrate when plunging from travel height to cutting height.
+	 * This is not to be converted from inch to mm.
+	 */
 	private double myPlungeSpeed = 2;
-	private double myMillingSpeed = 2;
+	
 	public double getPlungeSpeed() {
 		return myPlungeSpeed;
 	}
@@ -130,7 +134,13 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	public void setPlungeSpeed(double myPlungeSpeed) {
 		this.myPlungeSpeed = myPlungeSpeed;
 	}
-
+	
+  /**
+	 * Feedrate when cutting.
+   * This is not to be converted from inch to mm.
+   */
+	private double myMillingSpeed = 2;
+	
 	public double getMillingSpeed() {
 		return myMillingSpeed;
 	}
