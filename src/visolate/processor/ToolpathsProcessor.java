@@ -46,6 +46,8 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	public static final int VORONOI_MODE = 0;
 	public static final int OUTLINE_MODE = 1;
 
+	// TODO: move all these variables to GCodeFileWriter.
+	//       As an example, see zClearance.
 	/**
 	 * How much to move the toolhead in z-direction between cutting and moving.
 	 */
@@ -473,6 +475,8 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		model.clearGCode();
 
+		// TODO: get rid of this setup and do it directly in Visolate.java.
+		//       Also see a TO DO, there.
     w.setIsMetric(isOutputMetricCoordinates());
     w.setIsAbsolute(isOutputAbsoluteCoordinates());
     w.setXOffset(getAbsoluteXStart());

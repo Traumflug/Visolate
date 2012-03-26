@@ -191,6 +191,8 @@ public class Display extends JPanel {
       rootBG.addChild(background);
 
     //lights
+    // TODO: add useable lighting and offer it to the user,
+    //       with a light switch.
 //    Color3f lColor1 = new Color3f(0.7f, 0.7f, 0.7f);
 //    Vector3f lDir1  = new Vector3f(-1.0f, -1.0f, -1.0f);
 //    Color3f alColor = new Color3f(0.2f, 0.2f, 0.2f);

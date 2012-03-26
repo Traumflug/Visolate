@@ -73,6 +73,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		display = new Display(this);
 		simulator = new Simulator(this);
 		model = new Model(this);
+		// TODO: get a toolpathsProcessor here, too, and get rid of myToolpathsProcessor.
 		gCodeWriter = new GCodeFileWriter();
 
 		setBackground(Color.WHITE);
@@ -377,6 +378,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 	}
 
 	private JPanel getInitialXPanel() {
+    // TODO: Don't store the panel, but the field instead.
 		if (myInitialXPanel == null) {
 			myInitialXPanel = new JPanel();
 			myInitialXPanel.setLayout(new BorderLayout());
@@ -393,6 +395,9 @@ public class Visolate extends JPanel implements SimulatorUI {
 			});
 			myInitialXPanel.setEnabled(false);
 
+			// TODO: get rid fo this listener and fetch the value from the field
+			//       just before the G-code file is written.
+      //       See also dpiField in Display.java.
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
 				
 				@Override
@@ -412,6 +417,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		return myInitialXPanel;
 	}
 	private JPanel getInitialYPanel() {
+	  // TODO: Don't store the panel, but the field instead.
 		if (myInitialYPanel == null) {
 			myInitialYPanel = new JPanel();
 			myInitialYPanel.setLayout(new BorderLayout());
@@ -428,6 +434,9 @@ public class Visolate extends JPanel implements SimulatorUI {
 			});
 			myInitialYPanel.setEnabled(false);
 
+      // TODO: get rid fo this listener and fetch the value from the field
+      //       just before the G-code file is written.
+      //       See also dpiField in Display.java.
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
 				
 				@Override
@@ -447,6 +456,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		return myInitialYPanel;
 	}
 	private Component getZDownMovementPanel() {
+    // TODO: Don't store the panel, but the field instead.
 		if (myZDownMovementPanel == null) {
 			myZDownMovementPanel = new JPanel();
 			myZDownMovementPanel.setLayout(new BorderLayout());
@@ -454,6 +464,9 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myZDownMovementPanel.setToolTipText("When not cutting, lift the cutter to this above origin, in mm or inch. Decimals in native language (point or comma).");
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getZClearance()));
 			myZDownMovementPanel.add(field, BorderLayout.CENTER);
+      // TODO: get rid fo this listener and fetch the value from the field
+      //       just before the G-code file is written.
+      //       See also dpiField in Display.java.
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
 				
 				@Override
@@ -471,6 +484,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 	}
 
 	private JPanel getMillingSpeedPanel() {
+    // TODO: Don't store the panel, but the field instead.
 		if (myMillingSpeedPanel == null) {
 			myMillingSpeedPanel = new JPanel();
 			myMillingSpeedPanel.setLayout(new BorderLayout());
@@ -479,6 +493,9 @@ public class Visolate extends JPanel implements SimulatorUI {
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
 			myMillingSpeedPanel.add(field, BorderLayout.CENTER);
 
+      // TODO: get rid fo this listener and fetch the value from the field
+      //       just before the G-code file is written.
+      //       See also dpiField in Display.java.
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
 				
 
@@ -501,6 +518,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 	}
 
 	private JPanel getPlungeSpeedPanel() {
+    // TODO: Don't store the panel, but the field instead.
 		if (myPlungeSpeedPanel == null) {
 			myPlungeSpeedPanel = new JPanel();
 			myPlungeSpeedPanel.setLayout(new BorderLayout());
@@ -509,6 +527,9 @@ public class Visolate extends JPanel implements SimulatorUI {
 			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
 			myPlungeSpeedPanel.add(field, BorderLayout.CENTER);
 
+      // TODO: get rid fo this listener and fetch the value from the field
+      //       just before the G-code file is written.
+      //       See also dpiField in Display.java.
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
 				
 				@Override
@@ -529,6 +550,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 	}
 
 	private JPanel getZCuttingHeightPanel() {
+    // TODO: Don't store the panel, but the field instead.
 		if (myZCuttingHeightPanel == null) {
 			myZCuttingHeightPanel = new JPanel();
 			myZCuttingHeightPanel.setLayout(new BorderLayout());
@@ -545,6 +567,9 @@ public class Visolate extends JPanel implements SimulatorUI {
 			});
 			myZCuttingHeightPanel.setEnabled(false);
 
+      // TODO: get rid fo this listener and fetch the value from the field
+      //       just before the G-code file is written.
+			//       See also dpiField in Display.java.
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
 				
 				@Override
@@ -829,6 +854,10 @@ public class Visolate extends JPanel implements SimulatorUI {
 			}
 
 			try {
+			  // TODO: set up the writer here. Currently this is done
+			  //       from the field's editListeners via the toolpathsProcessor.
+			  // TODO: read the relevant fields and write them back,
+			  //       so the user sees what was taken.
 				gCodeWriter.open(file);
 				myToolpathsProcessor.writeGCode(gCodeWriter);
 				gCodeWriter.close();
