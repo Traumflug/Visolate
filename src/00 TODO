@@ -1,0 +1,20 @@
+
+- JTextFields for numbers are hard to use.
+
+- The "stop" button should move to the left of the progress bar,
+  to free up room. More room for the main display means faster operation.
+  
+- Geometry border checkbox should actually draw a border.
+
+- Assume the outmost paths are of an outline and use them to measure
+  the board dimensions. This also means, board size should _not_
+  use the thickness of the outmost paths.
+  
+- Setting up the GCodeFileWriter should be done in Visolate.java
+  directly. No intermediate step over ToolpathsProcessor. Also,
+  move all the comments about what is what from ToolpathsProcessor
+  to GCodeFileWriter.
+
+- ToolpathNode should receive it's inch values in the constructor already.
+  This would remove a lot of calls to ToolpathsProcessor.toModelX/Y.
+  
