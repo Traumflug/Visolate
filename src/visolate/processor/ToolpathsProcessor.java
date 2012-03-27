@@ -227,6 +227,10 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		for (ToolpathPath path : paths) {
 		  
+      // TODO: This "straightTolerance" is actually an very important value,
+      //       it tells the optimizer how close the optimized path should
+      //       match the original, exact path. At such importance,
+      //       it should definitely be user-configurable by a GUI text field.
 		  path.setStraightTolerance(1.1/((double) dpi));
 			path.optimize();
 
