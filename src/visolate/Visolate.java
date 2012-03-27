@@ -510,25 +510,20 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myPlungeSpeedPanel.setLayout(new BorderLayout());
 			myPlungeSpeedPanel.add(new JLabel("plunge feedrate"), BorderLayout.WEST);
 			myPlungeSpeedPanel.setToolTipText("Feedrate when moving vertically into the workpiece in mm or inch per minute.");
-			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
+			final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getPlungeFeedrate()));
 			myPlungeSpeedPanel.add(field, BorderLayout.CENTER);
 
       // TODO: get rid fo this listener and fetch the value from the field
       //       just before the G-code file is written.
       //       See also dpiField in Display.java.
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
-				
 				@Override
 				public void undoableEditHappened(UndoableEditEvent evt) {
 					try {
-						myPlungeSpeed = NumberFormat.getInstance().parse(field.getText()).doubleValue();
-						if (myToolpathsProcessor != null) {
-							myToolpathsProcessor.setPlungeSpeed(myPlungeSpeed);
-						}
+            gCodeWriter.setPlungeFeedrate(NumberFormat.getInstance().parse(field.getText()).doubleValue());
 					} catch (ParseException e) {
 						evt.getEdit().undo();
 					}
-					
 				}
 			});
 		}
@@ -692,7 +687,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 		myToolpathsProcessor = new ToolpathsProcessor(this, mode);
 		myToolpathsProcessor.setMillingSpeed(myMillingSpeed);
-		myToolpathsProcessor.setPlungeSpeed(myPlungeSpeed);
 
 		startProcess(myToolpathsProcessor);
 	}
@@ -1167,5 +1161,4 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private JPanel myInitialXPanel;
 	private JPanel myInitialYPanel;
 	private double myMillingSpeed = 2;
-	private double myPlungeSpeed = 2;
 }

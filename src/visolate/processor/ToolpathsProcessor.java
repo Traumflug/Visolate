@@ -48,20 +48,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 	// TODO: move all these variables to GCodeFileWriter.
 	//       As an example, see zClearance.
-	/**
-   * Feedrate when plunging from travel height to cutting height.
-	 * This is not to be converted from inch to mm.
-	 */
-	private double myPlungeSpeed = 2;
-	
-	public double getPlungeSpeed() {
-		return myPlungeSpeed;
-	}
-
-	public void setPlungeSpeed(double myPlungeSpeed) {
-		this.myPlungeSpeed = myPlungeSpeed;
-	}
-	
   /**
 	 * Feedrate when cutting.
    * This is not to be converted from inch to mm.
@@ -363,7 +349,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		// TODO: get rid of this setup and do it directly in Visolate.java.
 		//       Also see a TO DO, there.
-    w.setPlungeFeedrate(getPlungeSpeed());
     w.setMillingFeedrate(getMillingSpeed());
     w.preAmble();
 

@@ -139,6 +139,16 @@ public class GCodeFileWriter {
     this.zCuttingHeight = zCuttingHeight;
   }
   
+  /**
+   * Feedrate when plunging from travel height to cutting height.
+   * This is not to be converted from inch to mm.
+   */
+  private double plungeFeedrate = 60.0;
+
+  public double getPlungeFeedrate() {
+    return plungeFeedrate;
+  }
+
   public void setPlungeFeedrate(final double plungeFeedrate) {
     this.plungeFeedrate = plungeFeedrate;
   }
@@ -292,7 +302,6 @@ public class GCodeFileWriter {
   private Point3d currentPosition;
   private double currentFeedrate;
     
-  private double plungeFeedrate = 0.5;
   private double millingFeedrate = 1.0;
   
   private List<GCodeStroke> gCodeStrokes = new LinkedList<GCodeStroke>();
