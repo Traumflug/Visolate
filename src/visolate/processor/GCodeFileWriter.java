@@ -83,6 +83,16 @@ public class GCodeFileWriter {
     this.isAbsolute = isAbsolute;
   }
   
+  /**
+   * If we use absolute coordinates, then this
+   * is the X-value for the left upper corner.
+   */
+  private double xOffset = 0.0;
+  
+  public double getXOffset() {
+    return xOffset;
+  }
+
   public void setXOffset(final double offset) {
     this.xOffset = offset;
   }
@@ -272,7 +282,6 @@ public class GCodeFileWriter {
   private Point3d currentPosition;
   private double currentFeedrate;
     
-  private double xOffset = 0.0;
   private double yOffset = 0.0;
   
   private double plungeFeedrate = 0.5;

@@ -58,7 +58,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 	public int processstatus;
 	public boolean auto_mode;
 
-	private double selectedInitialXCoordinate = 0;
 	private double selectedInitialYCoordinate = 0;
 
 
@@ -384,38 +383,32 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myInitialXPanel.add(new JLabel("X"), BorderLayout.WEST);
 			myInitialXPanel.setToolTipText("Left side is at this coordinate (mm or inch)");
 			myInitialXPanel.setEnabled(gCodeWriter.getIsAbsolute());
-			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
+      final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getXOffset()));
 			myInitialXPanel.add(field, BorderLayout.CENTER);
 			myInitialXPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
-				
 				@Override
 				public void propertyChange(PropertyChangeEvent evt) {
 					field.setEnabled(myInitialXPanel.isEnabled());
 				}
 			});
       field.setEnabled(myInitialXPanel.isEnabled());
-
 			// TODO: get rid fo this listener and fetch the value from the field
 			//       just before the G-code file is written.
       //       See also dpiField in Display.java.
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
-				
 				@Override
 				public void undoableEditHappened(UndoableEditEvent evt) {
 					try {
-						selectedInitialXCoordinate = NumberFormat.getInstance().parse(field.getText()).doubleValue();
-						if (myToolpathsProcessor != null) {
-							myToolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
-						}
+            gCodeWriter.setXOffset(NumberFormat.getInstance().parse(field.getText()).doubleValue());
 					} catch (ParseException e) {
 						evt.getEdit().undo();
 					}
-					
 				}
 			});
 		}
 		return myInitialXPanel;
 	}
+	
 	private JPanel getInitialYPanel() {
 	  // TODO: Don't store the panel, but the field instead.
 		if (myInitialYPanel == null) {
@@ -706,7 +699,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 			mode = ToolpathsProcessor.OUTLINE_MODE;
 
 		myToolpathsProcessor = new ToolpathsProcessor(this, mode);
-		myToolpathsProcessor.setAbsoluteXStart(selectedInitialXCoordinate);
 		myToolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
 		myToolpathsProcessor.setMillingSpeed(myMillingSpeed);
 		myToolpathsProcessor.setPlungeSpeed(myPlungeSpeed);

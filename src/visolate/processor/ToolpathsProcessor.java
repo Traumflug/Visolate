@@ -49,29 +49,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	// TODO: move all these variables to GCodeFileWriter.
 	//       As an example, see zClearance.
 	/**
-	 * If we use absolute coordinates,
-	 * then this is the X-value for the left upper corner.
-	 * @see #isOutputAbsoluteCoordinates()
-	 */
-	private double myAbsoluteXStart = 0.0;
-	
-	/**
-	 * @return If we use absolute coordinates, then this is the X-value for the left upper corner.
-	 * @see #isOutputAbsoluteCoordinates()
-	 */
-	public double getAbsoluteXStart() {
-		return myAbsoluteXStart;
-	}
-
-	/**
-	 * @param myZCuttingHeight If we use absolute coordinates, then this is the X-value for the left upper corner.
-	 * @see #isOutputAbsoluteCoordinates()
-	 */
-	public void setAbsoluteXStart(final double setAbsoluteXStart) {
-		this.myAbsoluteXStart = setAbsoluteXStart;
-	}
-
-	/**
 	 * @return If we use absolute coordinates, then this is the Y-value for the left upper corner.
 	 * @see #isOutputAbsoluteCoordinates()
 	 */
@@ -409,7 +386,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		// TODO: get rid of this setup and do it directly in Visolate.java.
 		//       Also see a TO DO, there.
-    w.setXOffset(getAbsoluteXStart());
     w.setYOffset(getAbsoluteYStart());
     w.setPlungeFeedrate(getPlungeSpeed());
     w.setMillingFeedrate(getMillingSpeed());
