@@ -255,10 +255,8 @@ public class Display extends JPanel {
     d = nativeDPIField.getPreferredSize();
     nativeDPIField.setMaximumSize(new Dimension(columnWidth*3, d.height));
     nativeDPIField.setPreferredSize(new Dimension(columnWidth*3, d.height));
-    nativeDPIField.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) { updateNativeDPI(); } });
-//    nativeDPIField.addFocusListener(new FocusAdapter() {
-//        public void focusLost(FocusEvent e) { updateNativeDPI(); } });
+    nativeDPIField.addFocusListener(new FocusAdapter() {
+      public void focusLost(FocusEvent e) { updateNativeDPI(); } });
 
     navControlsBox.add(nativeDPIField);
 
@@ -284,10 +282,8 @@ public class Display extends JPanel {
                                           d.height));
     dpiField.setPreferredSize(new Dimension(columnWidth*ZOOM_FIELD_WIDTH,
                                             d.height));
-    dpiField.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) { updateDPI(); } });
-//    dpiField.addFocusListener(new FocusAdapter() {
-//        public void focusLost(FocusEvent e) { updateDPI(); } });
+    dpiField.addFocusListener(new FocusAdapter() {
+      public void focusLost(FocusEvent e) { updateDPI(); } });
     zoomBox.add(dpiField);
 
     dpiSlider = new JSlider(MIN_DPI, MAX_DPI);

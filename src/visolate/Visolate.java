@@ -113,34 +113,38 @@ public class Visolate extends JPanel implements SimulatorUI {
 		if (myLoadFileBox == null) {
 			myLoadFileBox = Box.createHorizontalBox();
 
-			loadField = new JTextField();
-			Dimension d = loadField.getPreferredSize();
-			loadField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
-			loadField.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					loadFile();
-				} });
-			//    loadField.addFocusListener(new FocusAdapter() {
-			//        public void focusLost(FocusEvent e) { 
-			//          loadFile();
-			//        } });
-
-			myLoadFileBox.add(loadField);
-
-			loadButton = new JButton("Browse...");
+			loadButton = new JButton("Load");
+			loadButton.setEnabled(false);
 			loadButton.setBackground(Color.WHITE);
 			loadButton.setVerticalAlignment(AbstractButton.CENTER);
 			loadButton.setHorizontalAlignment(AbstractButton.CENTER);
-			d = loadButton.getPreferredSize();
+			Dimension d = loadButton.getPreferredSize();
 			loadButton.setMaximumSize(new Dimension(d.width, d.height));
 			loadButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent event) {
+					loadFile();
+				}});
+			myLoadFileBox.add(loadButton);
+			
+			loadField = new JTextField();
+			d = loadField.getPreferredSize();
+			loadField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+			myLoadFileBox.add(loadField);
+
+			browseButton = new JButton("Browse...");
+			browseButton.setBackground(Color.WHITE);
+			browseButton.setVerticalAlignment(AbstractButton.CENTER);
+			browseButton.setHorizontalAlignment(AbstractButton.CENTER);
+			d = browseButton.getPreferredSize();
+			browseButton.setMaximumSize(new Dimension(d.width, d.height));
+			browseButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent event) {
 					File file = browse();
 					if (file != null)
 						loadFile(file);
+					loadButton.setEnabled(true);
 				}});
-
-			myLoadFileBox.add(loadButton);
+			myLoadFileBox.add(browseButton);
 
 			myLoadFileBox.setBorder(BorderFactory.createTitledBorder("Input File"));
 		}
@@ -169,10 +173,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 			gcodeField.setEnabled(false);
 			d = gcodeField.getPreferredSize();
 			gcodeField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
-			gcodeField.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) { saveGCode(); } });
-			//    gcodeField.addFocusListener(new FocusAdapter() {
-			//        public void focusLost(FocusEvent e) { saveGCode(); } });
 			myGcodeBox.add(gcodeField);
 
 			gcodeBrowseButton = new JButton("Browse...");
@@ -919,8 +919,16 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 	public void enableControls(boolean enable) {
 
+		if (enable == true &&
+		    loadField.getText() != null &&
+		    ! loadField.getText().endsWith("]")) {
+		  loadButton.setEnabled(true);
+		}
+		else {
+		  loadButton.setEnabled(false);
+		}
 		loadField.setEnabled(enable);
-		loadButton.setEnabled(enable);
+		browseButton.setEnabled(enable);
 
 		mosaicButton.setEnabled(enable);
 		mosaicField.setEnabled(enable);
@@ -989,7 +997,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		  computeToolpaths();
 		} else if (processstatus==2) { //returning from automated toolpath creation
 		  System.out.println("Writing to gcode file: "+gcodeField.getText().trim());
-		  saveGCode(new File(gcodeField.getText().trim()));
+		  saveGCode();
 		  System.out.println("Exiting, all work done");
 		  System.exit(0);
 		}
@@ -1041,8 +1049,9 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private ToolpathsProcessor myToolpathsProcessor = null;
 	private GCodeFileWriter gCodeWriter = null;
 
-	private JTextField loadField;
 	private JButton loadButton;
+	private JTextField loadField;
+	private JButton browseButton;
 
 	private File currentFile = null;
 

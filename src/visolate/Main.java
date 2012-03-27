@@ -22,7 +22,10 @@ package visolate;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.cli.*;
 
@@ -100,6 +103,16 @@ public class Main extends JApplet {
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setLocation(DEF_LOC_X, DEF_LOC_Y);
 
+    // Add the Enter key to the forward traversal keys, so fields loose focus
+    // when using it in a field and we don't need to set up both, an ActionListener
+    // and a FocusListener for each text/number field.
+    Set<AWTKeyStroke> forwardKeys = new HashSet<AWTKeyStroke>(
+        frame.getFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS));
+    Set<AWTKeyStroke> newForwardKeys = new HashSet<AWTKeyStroke>(forwardKeys);
+    newForwardKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
+    frame.setFocusTraversalKeys(
+        KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, newForwardKeys);
+    
     final Visolate visolate = new Visolate();
     visolate.commandline = commandline;
 

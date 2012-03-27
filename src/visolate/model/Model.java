@@ -255,10 +255,8 @@ public class Model extends JPanel {
 		d = limitField.getPreferredSize();
 		limitField.setMaximumSize(new Dimension(columnWidth*6, d.height));
 		limitField.setPreferredSize(new Dimension(columnWidth*6, d.height));
-		limitField.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) { updateLimit(); } });
-		//    limitField.addFocusListener(new FocusAdapter() {
-		//        public void focusLost(FocusEvent e) { updateLimit(); } });
+		limitField.addFocusListener(new FocusAdapter() {
+			public void focusLost(FocusEvent e) { updateLimit(); } });
 		settingsBox.add(limitField);
 
 		autoLimitButton = new JCheckBox("auto");
