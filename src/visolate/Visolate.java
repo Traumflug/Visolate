@@ -476,27 +476,19 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myMillingSpeedPanel.setLayout(new BorderLayout());
 			myMillingSpeedPanel.add(new JLabel("cutting feedrate"), BorderLayout.WEST);
 			myMillingSpeedPanel.setToolTipText("Feedrate during cutting in mm or inch per minute.");
-			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
+			final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getMillingFeedrate()));
 			myMillingSpeedPanel.add(field, BorderLayout.CENTER);
-
       // TODO: get rid fo this listener and fetch the value from the field
       //       just before the G-code file is written.
       //       See also dpiField in Display.java.
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
-				
-
-
 				@Override
 				public void undoableEditHappened(UndoableEditEvent evt) {
 					try {
-						myMillingSpeed = NumberFormat.getInstance().parse(field.getText()).doubleValue();
-						if (myToolpathsProcessor != null) {
-							myToolpathsProcessor.setMillingSpeed(myMillingSpeed);
-						}
+            gCodeWriter.setMillingFeedrate(NumberFormat.getInstance().parse(field.getText()).doubleValue());
 					} catch (ParseException e) {
 						evt.getEdit().undo();
 					}
-					
 				}
 			});
 		}
@@ -686,7 +678,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 			mode = ToolpathsProcessor.OUTLINE_MODE;
 
 		myToolpathsProcessor = new ToolpathsProcessor(this, mode);
-		myToolpathsProcessor.setMillingSpeed(myMillingSpeed);
 
 		startProcess(myToolpathsProcessor);
 	}
@@ -817,8 +808,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 			}
 
 			try {
-			  // TODO: set up the writer here. Currently this is done
-			  //       from the field's editListeners via the toolpathsProcessor.
 			  // TODO: read the relevant fields and write them back,
 			  //       so the user sees what was taken.
 				gCodeWriter.open(file);
@@ -1160,5 +1149,4 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private JPanel myPlungeSpeedPanel;
 	private JPanel myInitialXPanel;
 	private JPanel myInitialYPanel;
-	private double myMillingSpeed = 2;
 }

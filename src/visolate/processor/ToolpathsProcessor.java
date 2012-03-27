@@ -46,22 +46,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	public static final int VORONOI_MODE = 0;
 	public static final int OUTLINE_MODE = 1;
 
-	// TODO: move all these variables to GCodeFileWriter.
-	//       As an example, see zClearance.
-  /**
-	 * Feedrate when cutting.
-   * This is not to be converted from inch to mm.
-   */
-	private double myMillingSpeed = 2;
-	
-	public double getMillingSpeed() {
-		return myMillingSpeed;
-	}
-
-	public void setMillingSpeed(double myMillingSpeed) {
-		this.myMillingSpeed = myMillingSpeed;
-	}
-
 	public ToolpathsProcessor(final Visolate visolate, final int mode) {
 		super(visolate);
 		this.mode = mode;
@@ -347,9 +331,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		model.clearGCode();
 
-		// TODO: get rid of this setup and do it directly in Visolate.java.
-		//       Also see a TO DO, there.
-    w.setMillingFeedrate(getMillingSpeed());
     w.preAmble();
 
 		Collection<ToolpathPath> paths = new LinkedList<ToolpathPath>();

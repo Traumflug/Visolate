@@ -153,10 +153,24 @@ public class GCodeFileWriter {
     this.plungeFeedrate = plungeFeedrate;
   }
   
+  /**
+   * Feedrate when cutting.
+   * This is not to be converted from inch to mm.
+   */
+  private double millingFeedrate = 250.0;
+
+  public double getMillingFeedrate() {
+    return millingFeedrate;
+  }
+
   public void setMillingFeedrate(final double millingFeedrate) {
     this.millingFeedrate = millingFeedrate;
   }
   
+  /**
+   * @return The position of the end of
+   * the last stroke written to the G-code file.
+   */
   public Point3d getCurrentPosition() {
     return currentPosition;
   }
@@ -302,8 +316,6 @@ public class GCodeFileWriter {
   private Point3d currentPosition;
   private double currentFeedrate;
     
-  private double millingFeedrate = 1.0;
-  
   private List<GCodeStroke> gCodeStrokes = new LinkedList<GCodeStroke>();
 
 
