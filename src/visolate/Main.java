@@ -37,6 +37,7 @@ public class Main extends JApplet {
   public static final int DEF_LOC_X = 100;
   public static final int DEF_LOC_Y = 100;
 
+  // This is needed when Visolate is run as an applet.
   public void init() {
 
     visolate = new Visolate();
@@ -55,6 +56,7 @@ public class Main extends JApplet {
     
   }
  
+  // This is needed when Visolate is run as an applet.
   public void destroy() {
     visolate.destroy();
   }
