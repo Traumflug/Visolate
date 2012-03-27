@@ -708,6 +708,9 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private void load(InputStream inputStream) {
 
 		stopProcess();
+    
+    enableControls(false);
+    myToolpathsProcessor = null;
 
 		simulator.reset();
 
@@ -724,6 +727,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		}
 
 		model.rebuild();
+		enableControls(true);
 	}
 
 	public void setGcodeFile(String filename) {
