@@ -58,9 +58,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 	public int processstatus;
 	public boolean auto_mode;
 
-	private double selectedInitialYCoordinate = 0;
-
-
 	public Visolate() {
 		this(null);
 	}
@@ -417,29 +414,23 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myInitialYPanel.add(new JLabel("Y"), BorderLayout.WEST);
 			myInitialYPanel.setToolTipText("Upper side is at this coordinates (mm or inch)");
 			myInitialYPanel.setEnabled(gCodeWriter.getIsAbsolute());
-			final JTextField field = new JTextField(NumberFormat.getInstance().format(0.0));
+      final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getYOffset()));
 			myInitialYPanel.add(field, BorderLayout.CENTER);
 			myInitialYPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
-				
 				@Override
 				public void propertyChange(PropertyChangeEvent evt) {
 					field.setEnabled(myInitialYPanel.isEnabled());
 				}
 			});
       field.setEnabled(myInitialYPanel.isEnabled());
-
       // TODO: get rid fo this listener and fetch the value from the field
       //       just before the G-code file is written.
       //       See also dpiField in Display.java.
 			field.getDocument().addUndoableEditListener(new UndoableEditListener() {
-				
 				@Override
 				public void undoableEditHappened(UndoableEditEvent evt) {
 					try {
-						selectedInitialYCoordinate = NumberFormat.getInstance().parse(field.getText()).doubleValue();
-						if (myToolpathsProcessor != null) {
-							myToolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
-						}
+            gCodeWriter.setYOffset(NumberFormat.getInstance().parse(field.getText()).doubleValue());
 					} catch (ParseException e) {
 						evt.getEdit().undo();
 					}
@@ -449,6 +440,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 		}
 		return myInitialYPanel;
 	}
+	
 	private Component getZDownMovementPanel() {
     // TODO: Don't store the panel, but the field instead.
 		if (myZDownMovementPanel == null) {
@@ -699,7 +691,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 			mode = ToolpathsProcessor.OUTLINE_MODE;
 
 		myToolpathsProcessor = new ToolpathsProcessor(this, mode);
-		myToolpathsProcessor.setAbsoluteYStart(selectedInitialYCoordinate);
 		myToolpathsProcessor.setMillingSpeed(myMillingSpeed);
 		myToolpathsProcessor.setPlungeSpeed(myPlungeSpeed);
 

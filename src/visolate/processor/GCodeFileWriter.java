@@ -97,6 +97,16 @@ public class GCodeFileWriter {
     this.xOffset = offset;
   }
   
+  /**
+   * If we use absolute coordinates, then this
+   * is the Y-value for the left upper corner.
+   */
+  private double yOffset = 0.0;
+  
+  public double getYOffset() {
+    return yOffset;
+  }
+
   public void setYOffset(final double offset) {
     this.yOffset = offset;
   }
@@ -282,8 +292,6 @@ public class GCodeFileWriter {
   private Point3d currentPosition;
   private double currentFeedrate;
     
-  private double yOffset = 0.0;
-  
   private double plungeFeedrate = 0.5;
   private double millingFeedrate = 1.0;
   

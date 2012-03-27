@@ -49,22 +49,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	// TODO: move all these variables to GCodeFileWriter.
 	//       As an example, see zClearance.
 	/**
-	 * @return If we use absolute coordinates, then this is the Y-value for the left upper corner.
-	 * @see #isOutputAbsoluteCoordinates()
-	 */
-	public double getAbsoluteYStart() {
-		return myAbsoluteYStart;
-	}
-
-	/**
-	 * @param myZCuttingHeight If we use absolute coordinates, then this is the Y-value for the left upper corner.
-	 * @see #isOutputAbsoluteCoordinates()
-	 */
-	public void setAbsoluteYStart(final double setAbsoluteYStart) {
-		this.myAbsoluteYStart = setAbsoluteYStart;
-	}
-
-	/**
    * Feedrate when plunging from travel height to cutting height.
 	 * This is not to be converted from inch to mm.
 	 */
@@ -91,13 +75,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	public void setMillingSpeed(double myMillingSpeed) {
 		this.myMillingSpeed = myMillingSpeed;
 	}
-
-	/**
-	 * If we use absolute coordinates,
-	 * then this is the X-value for the left upper corner.
-	 * @see #isOutputAbsoluteCoordinates()
-	 */
-	private double myAbsoluteYStart = 0.0;
 
 	public ToolpathsProcessor(final Visolate visolate, final int mode) {
 		super(visolate);
@@ -386,7 +363,6 @@ public class ToolpathsProcessor extends MosaicProcessor {
 
 		// TODO: get rid of this setup and do it directly in Visolate.java.
 		//       Also see a TO DO, there.
-    w.setYOffset(getAbsoluteYStart());
     w.setPlungeFeedrate(getPlungeSpeed());
     w.setMillingFeedrate(getMillingSpeed());
     w.preAmble();
