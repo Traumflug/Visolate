@@ -1,0 +1,6 @@
+
+- Make sure the path between to box and the via
+  is generated and not optimised away. There was
+  a bug which removed paths if their start point
+  and their end point matched.
+
