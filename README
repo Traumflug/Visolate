@@ -1,0 +1,135 @@
+
+Visolate is an application for calculating machining toolpaths (G-code) for
+manufacturing printed circuit boards (PCBs) by isolation milling. As an
+outstanding feature, this calculation is done on the computer's screen,
+using the features of 3D graphics drivers.
+
+
+USAGE
+
+To use Visolate, run it in a terminal with the Java engine:
+
+  java -jar visolate-2.1.6.jar
+
+If this results in tons of error gibberish, see installation instructions below.
+
+The most simple use case is to load a Gerber file at the top of the window,
+then clicking "Fix Topology" and "Make Toolpaths", then saving the G-code
+file. For all the options in between, move your mouse over all the buttons
+and fields. Tooltips appear which shall be helpful.
+
+Accuracy of the G-code is adjusted by adjusting the DPI value of the display.
+
+
+NEW since 2.1.6:
+
+- Toolspaths now respect the thickness of elements. Earlier, only the centers
+  of tracks/pads were taken for calculation, now the entire perimeters are.
+  
+- Path junctions are now kept accurately.
+
+- Much faster path optimisation. So fast one of the progress bars went useless.
+
+
+INSTALLATION - Debian/Ubuntu Linux
+
+Visolate it's self needs no installation, but it requires some dependencies:
+
+  sudo apt-get install --no-install-recommends libjava3d-java
+  sudo apt-get install --no-install-recommends libjava3d-jni
+  sudo apt-get install --no-install-recommends libvecmath-java
+  
+Getting this to work on Ubuntu requires a few tweaks:
+
+  sudo update-java-alternatives -s java-6-openjdk
+  sudo ln -s /usr/share/java/j3dcore.jar /usr/lib/jvm/java-6-openjdk/jre/lib/ext
+  sudo ln -s /usr/share/java/j3dutils.jar /usr/lib/jvm/java-6-openjdk/jre/lib/ext
+  sudo ln -s /usr/share/java/vecmath.jar /usr/lib/jvm/java-6-openjdk/jre/lib/ext
+
+
+DEVELOPMENT
+
+Unfortunately, there are no makefiles available. Development is currently done
+in the totally overfeatured, but well working Eclipse IDE:
+
+1. Make sure you have all dependencies. Easiest way to find out is to
+   run the JAR executable, see section USAGE.
+
+2. Install Eclipse:
+
+     sudo apt-get install eclipse
+
+3. Grab sources:
+
+     git clone https://github.com/Traumflug/Visolate.git
+
+4. Launch Eclipse, select Menu -> File -> Import... ->
+                          Existing Projects into Workspace.
+
+   Find the just grabbed sources; avoid copying them (see checkbox there).
+
+5. Create a Run Configuration:
+
+   (essential, as applet and/or application, to be defined)
+
+6. Turn off useless warnings:
+
+   By default, a large number of warnings about missing privileges in system
+   libraries appear. This is counterproductive, as it hides real warnings.
+
+   (non-essential, to be defined)
+
+7. Tell Eclipse to always update externally modified files:
+
+   This is essential when using Git.
+
+   (non-essential, to be defined)
+
+8. Tell Eclipse to show the TODO list:
+
+   All known flaws and a wishlist are marked as TODO in the sources. This is
+   really helpful when developing and better than Eclipse's "bookmark" feature.
+
+   (non-essential, to be defined)
+
+9. Compile and run the executable
+
+   Select Menu -> Run -> Run.
+
+
+SOURCE CODE OVERVIEW
+
+Please take this with a grain of salt. All the code is well crafted and easy
+to understand, even for C programmers. However, I (Traumflug, early 2012)
+learned about the workings of Visolate only when enhancing from version 2.1.6
+to version 3.0, so I very likely missed the parts not needed for these new
+features.
+
+Whatever, it's big fun to learn about the workings as you hack away. Clear
+design, excellent base for further enhancements. Starting points can be
+found by searching for the texts displayed in the GUI.
+
+What I found out so far:
+
+Main.java is the launcher and does the command line stuff. Display.java does
+all the handling of the 3D display while Visolate.java handles the remaining
+GUI. All this is in the visolate package. Model.java in the visolate.model
+package has some GUI code as well(?!?).
+
+When a Gerber is loaded, it's parsed and it's geometry is stored as a simulator
+object. The simulator is in the visolate.simulator package, one class for
+each type of element.
+
+All the track and pin drawing stuff is done in the package visolate.model,
+namedly in Net.java. There are different types of drawings, like flat geometry,
+cone geometry or line geometry. For each GUI checkbox you'll find an almost 1:1
+corresponding method there. Hack this if you want to change the appearance
+of your elements.
+
+Path creation stuff is done in the visolate.processor package. Basically, the
+elements are drawn as needed (ToolpathsProcessor: processStarted()), then
+the "real" work is done in ProcessCompleted(). Pixel-sized toolpath nodes are
+found by searching color differences between adjectant pixels. After assembling
+them to larger paths they're optimized, to be written out as G-code later.
+Very straightforward.
+
