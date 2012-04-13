@@ -133,3 +133,42 @@ found by searching color differences between adjectant pixels. After assembling
 them to larger paths they're optimized, to be written out as G-code later.
 Very straightforward.
 
+
+MAKING A RELEASE
+
+1. Find the APPNAME variable in Main.java and adjust the string to the new
+   version.
+
+2. Update the NEW section above in this file.
+
+3. Update the name of the JAR file in the USAGE section above.
+
+4. Create a JAR:
+
+   - Eclipse-> Menu -> File -> Export... -> Java -> Runnable JAR file
+
+   - Click "Next".
+
+   - Locate the destination into the "releases" folder.
+
+   - Check "Extract required libraries into generated JAR".
+
+   - Click "Finish".
+
+   - Accept repackaging the libraries.
+
+5. Commit the JAR file with the message "Make release x.x." and a short
+   description of the new features, starting in subsequent lines.
+
+6. Create a signed tag of the release:
+
+     RELEASE=x.x  # e.g. RELEASE=3.0
+     git tag -u 806F3A3E -m "Release ${RELEASE}." "release-${RELEASE}"
+
+   Note: This "806F3A3E" is my own (Traumflug's) GPG key. On how to set up
+         your own key, consult Google.
+
+7. Done. Push the stuff out to Github:
+
+     git push && git push --tags
+
