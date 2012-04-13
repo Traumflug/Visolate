@@ -9,7 +9,7 @@ USAGE
 
 To use Visolate, run it in a terminal with the Java engine:
 
-  java -jar visolate-2.1.6.jar
+  java -jar visolate-3.0.jar
 
 If this results in tons of error gibberish, see installation instructions below.
 
@@ -21,7 +21,7 @@ and fields. Tooltips appear which shall be helpful.
 Accuracy of the G-code is adjusted by adjusting the DPI value of the display.
 
 
-NEW since 2.1.6:
+NEW in 3.0:
 
 - Toolspaths now respect the thickness of elements. Earlier, only the centers
   of tracks/pads were taken for calculation, now the entire perimeters are.
