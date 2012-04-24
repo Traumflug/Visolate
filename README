@@ -9,7 +9,7 @@ USAGE
 
 To use Visolate, run it in a terminal with the Java engine:
 
-  java -jar visolate-3.0.jar
+  java -jar visolate-3.0.1.jar
 
 If this results in tons of error gibberish, see installation instructions below.
 
@@ -20,6 +20,10 @@ and fields. Tooltips appear which shall be helpful.
 
 Accuracy of the G-code is adjusted by adjusting the DPI value of the display.
 
+
+NEW in 3.0.1:
+
+- Make it work on Ubuntu 12.04.
 
 NEW in 3.0:
 
@@ -35,11 +39,12 @@ INSTALLATION - Debian/Ubuntu Linux
 
 Visolate it's self needs no installation, but it requires some dependencies:
 
+  sudo apt-get install --no-install-recommends openjdk-6-jre
   sudo apt-get install --no-install-recommends libjava3d-java
   sudo apt-get install --no-install-recommends libjava3d-jni
   sudo apt-get install --no-install-recommends libvecmath-java
   
-Getting this to work on Ubuntu requires a few tweaks:
+Getting this to work on Ubuntu 11.10 and earlier requires a few additional tweaks:
 
   sudo update-java-alternatives -s java-6-openjdk
   sudo ln -s /usr/share/java/j3dcore.jar /usr/lib/jvm/java-6-openjdk/jre/lib/ext

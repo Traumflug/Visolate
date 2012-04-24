@@ -33,7 +33,7 @@ public class Main extends JApplet {
 
   private static final long serialVersionUID = 1L;
   
-  public static final String APPNAME = "Visolate 3.0";
+  public static final String APPNAME = "Visolate 3.0.1";
   public static final int DEF_LOC_X = 100;
   public static final int DEF_LOC_Y = 100;
 
