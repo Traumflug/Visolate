@@ -231,7 +231,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
       //       it tells the optimizer how close the optimized path should
       //       match the original, exact path. At such importance,
       //       it should definitely be user-configurable by a GUI text field.
-		  path.setStraightTolerance(1.1/((double) dpi));
+		  path.setStraightTolerance(2.0/((double) dpi));
 			path.optimize();
 
 			if (thread.isInterrupted())
