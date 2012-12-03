@@ -386,20 +386,26 @@ public class ToolpathPath {
         
         int segmentEnd = end;
         
-        // This algorithm lays a single path/segment from start to end, then
-        // looks wether this is within tolerance. If not, it tries again with
-        // the first half of the nodes, then with the first quarter ... and so on.
+        // This algorithm is known as Douglas-Peucker Line Approximation.
+        // It first lays a single path/segment from start to end, then
+        // looks wether this is within tolerance. If not, it shortens the next
+        // segment to the node with the previously farthest deviation and tries
+        // again.
         //
         // As soon as a segment is within tolerance, the segment is used and the
         // process is repeated with the remaining set of nodes.
         //
         // Stepping from the start node to each subsequent node until one of the
         // nodes in between is out of tolerance would produce some fewer segments,
-        // but also require a lot more processing power.
+        // but also require a lot more processing power and reduce the "prettyness"
+        // of the result.
         while (true) {
 
           int i;
-          
+          boolean sameDeviation = false;
+          double maxDeviation = 0.0;
+          int maxDeviationIndex = 0; // actually, twice the index
+
           // Fully closed paths require at least two segments.
           if (path.get(0).x == path.get(segmentEnd).x &&
               path.get(0).y == path.get(segmentEnd).y) {
@@ -412,14 +418,32 @@ public class ToolpathPath {
                                          processor.toModelY(path.get(segmentEnd).y));
           
           for (i = 1; i < segmentEnd; i++) {
-            if (line.ptLineDist(processor.toModelX(path.get(i).x),
-                                processor.toModelY(path.get(i).y)) > straightTol)
-              break;
+            double deviation;
+            
+            deviation = line.ptLineDist(processor.toModelX(path.get(i).x),
+                                        processor.toModelY(path.get(i).y));
+            
+            // Here we deal with the case several pixels have the about
+            // same deviation. In this case, we want the middle pixel.
+            if (Math.abs(deviation - maxDeviation) < straightTol / 100) {
+              if ( ! sameDeviation) {
+                maxDeviationIndex = (i - 1) * 2;
+                sameDeviation = true;
+              }
+              maxDeviationIndex++;
+            }
+            else {
+              sameDeviation = false;
+              if (deviation > maxDeviation) {
+                maxDeviation = deviation;
+                maxDeviationIndex = i * 2;
+              }
+            }
           }
           
-          if (i == segmentEnd) {
+          if (maxDeviation <= straightTol) {
             // No intermediate node was out of tolerance -> make the segment.
-            optimizedPath.add(path.get(i));
+            optimizedPath.add(path.get(segmentEnd));
             
             // Remove processed nodes.
             for ( ; segmentEnd > 0; segmentEnd--, end--) {
@@ -429,8 +453,8 @@ public class ToolpathPath {
             break;
           }
           else {
-            // Try again with half the distance.
-            segmentEnd /= 2;
+            // Try again with a shorter distance.
+            segmentEnd = maxDeviationIndex / 2;
           }
         }
       }
