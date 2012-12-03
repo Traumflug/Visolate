@@ -282,29 +282,20 @@ public class ToolpathPath {
 
     int i = 0;
 
-    ToolpathNode prev = null;
     for (ToolpathNode node : path) {
-
-      if (prev != null) {
-
-        if (node.locked) {
-          coords[i++] = fixedColor[0];
-          coords[i++] = fixedColor[1];
-          coords[i++] = fixedColor[2];
-        }
-        else {
-          coords[i++] = normalColor[0];
-          coords[i++] = normalColor[1];
-          coords[i++] = normalColor[2];
-        }
-    
-        coords[i++] = processor.toModelX(prev.x);
-        coords[i++] = processor.toModelY(prev.y);
-        coords[i++] = Net.PATH_Z;
-
+      if (node.locked) {
+        coords[i++] = fixedColor[0];
+        coords[i++] = fixedColor[1];
+        coords[i++] = fixedColor[2];
       }
-
-      prev = node;
+      else {
+        coords[i++] = normalColor[0];
+        coords[i++] = normalColor[1];
+        coords[i++] = normalColor[2];
+      }
+      coords[i++] = processor.toModelX(node.x);
+      coords[i++] = processor.toModelY(node.y);
+      coords[i++] = Net.PATH_Z;
     }
 
     GeometryArray pointGeometry = new PointArray(vertexCount,
