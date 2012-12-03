@@ -20,6 +20,7 @@
 
 package visolate.processor;
 
+import java.awt.geom.Point2D;
 import java.awt.geom.Line2D;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -393,26 +394,34 @@ public class ToolpathPath {
         while (true) {
 
           int i;
+          Point2D point = null;
+          Line2D line = null;
           boolean sameDeviation = false;
           double maxDeviation = 0.0;
           int maxDeviationIndex = 0; // actually, twice the index
 
-          // Fully closed paths require at least two segments.
+          // For fully closed paths, the start-to-end line collapses.
           if (path.get(0).x == path.get(segmentEnd).x &&
               path.get(0).y == path.get(segmentEnd).y) {
-            segmentEnd /= 2;
+            point = new Point2D.Float(processor.toModelX(path.get(0).x),
+                                      processor.toModelY(path.get(0).y));
           }
-          
-          Line2D line = new Line2D.Float(processor.toModelX(path.get(0).x),
-                                         processor.toModelY(path.get(0).y),
-                                         processor.toModelX(path.get(segmentEnd).x),
-                                         processor.toModelY(path.get(segmentEnd).y));
+          else {
+            line = new Line2D.Float(processor.toModelX(path.get(0).x),
+                                    processor.toModelY(path.get(0).y),
+                                    processor.toModelX(path.get(segmentEnd).x),
+                                    processor.toModelY(path.get(segmentEnd).y));
+          }
           
           for (i = 1; i < segmentEnd; i++) {
             double deviation;
             
-            deviation = line.ptLineDist(processor.toModelX(path.get(i).x),
-                                        processor.toModelY(path.get(i).y));
+            if (point != null)
+              deviation = point.distance(processor.toModelX(path.get(i).x),
+                                         processor.toModelY(path.get(i).y));
+            else
+              deviation = line.ptLineDist(processor.toModelX(path.get(i).x),
+                                          processor.toModelY(path.get(i).y));
             
             // Here we deal with the case several pixels have the about
             // same deviation. In this case, we want the middle pixel.
