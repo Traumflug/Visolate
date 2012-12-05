@@ -9,7 +9,7 @@ USAGE
 
 To use Visolate, run it in a terminal with the Java engine:
 
-  java -jar visolate-3.0.1.jar
+  java -jar visolate-3.1.jar
 
 If this results in tons of error gibberish, see installation instructions below.
 
@@ -20,6 +20,17 @@ and fields. Tooltips appear which shall be helpful.
 
 Accuracy of the G-code is adjusted by adjusting the DPI value of the display.
 
+
+NEW in 3.1:
+
+- Use a slightly modified Douglas-Peucker algorithm for path optimisation.
+  This reduces the number of G-code lines by some 20% while increasing
+  accuracy and prettyness.
+
+- Make path optimisation more coarse, as in some cases stair-steps weren't
+  optimised away. To re-gain the same granularity, you have to increase the
+  resolution of the drawn image (dpi value slider). Together, this results
+  in even better accuracy at the same granularity.
 
 NEW in 3.0.1:
 
