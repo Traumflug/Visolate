@@ -716,9 +716,6 @@ public class Visolate extends JPanel implements SimulatorUI {
 
 		simulator.reset();
 
-		// TODO: Either reset the x-flip and y-flip buttons here
-		//       or - better - make sure the file is loaded
-		//       correctly flipped.
 		try {
 			Parser parser = new Parser(inputStream);
 			parser.setSimulator(simulator);

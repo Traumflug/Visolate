@@ -573,6 +573,8 @@ public class Model extends JPanel {
 			flipTG.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 
 			flipT3D = new Transform3D();
+      setFlipX(flipXButton.isSelected());
+      setFlipY(flipYButton.isSelected());
 
 			sceneBG = new BranchGroup();
 			sceneBG.setCapability(BranchGroup.ALLOW_DETACH);
@@ -952,42 +954,35 @@ public class Model extends JPanel {
 
 	public void setFlipX(boolean flipX) {
 		if (flipX) {
-			if (flipXScale > 0.0) {
-				flipXScale = -1.0;
-				Rect b = getBoardBounds();
-				flipXOffset = 2.0*b.x+b.width;
-				updateFlipT3D();
-			}
+		  flipXScale = -1.0;
+		  Rect b = getBoardBounds();
+		  flipXOffset = 2.0*b.x+b.width;
+		  updateFlipT3D();
 		} else {
-			if (flipXScale < 0.0) {
-				flipXScale = 1.0;
-				flipXOffset = 0.0;
-				updateFlipT3D();
-			}
+		  flipXScale = 1.0;
+		  flipXOffset = 0.0;
+		  updateFlipT3D();
 		}
 		flipXButton.setSelected(flipX);
 	}
 
 	public void setFlipY(boolean flipY) {
 		if (flipY) {
-			if (flipYScale > 0.0) {
-				flipYScale = -1.0;
-				Rect b = getBoardBounds();
-				flipYOffset = 2.0*b.y+b.height;
-				updateFlipT3D();
-			}
+		  flipYScale = -1.0;
+		  Rect b = getBoardBounds();
+		  flipYOffset = 2.0*b.y+b.height;
+		  updateFlipT3D();
 		} else {
-			if (flipYScale < 0.0) {
-				flipYScale = 1.0;
-				flipYOffset = 0.0;
-				updateFlipT3D();
-			}
+		  flipYScale = 1.0;
+		  flipYOffset = 0.0;
+		  updateFlipT3D();
 		}
 		flipYButton.setSelected(flipY);
 	}
 
 	private void updateFlipT3D() {
-		flipT3D.set(new double[] {flipXScale, 0.0,        0.0, flipXOffset,
+		flipT3D.set(new double[] {
+		    flipXScale, 0.0,        0.0, flipXOffset,
 				0.0,        flipYScale, 0.0, flipYOffset,
 				0.0,        0.0,        1.0, 0.0,
 				0.0,        0.0,        0.0, 1.0});
