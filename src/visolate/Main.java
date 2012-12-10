@@ -67,13 +67,13 @@ public class Main extends JApplet {
     Options options = new Options();
     options.addOption( "x", "flip-x", false, "flip around x axis" );
     options.addOption( "y", "flip-y", false, "flip around y axis" );
-    options.addOption( "absolute", false, "use absolute cooridnates" );
+    options.addOption( "a", "absolute", false, "use absolute cooridnates" );
     options.addOption( "d", "dpi", true, "dpi to use for rastering");
-    options.addOption( "a", "auto", false, "auto-mode (run, save and exit)");
+    options.addOption( "A", "auto", false, "auto-mode (run, save and exit)");
     options.addOption( "o", "outfile", true, "name of output file");
 
     options.addOption( "h", "help", false, "display this help and exit" );
-    options.addOption( "version", false, "output version information and exit" );
+    options.addOption( "V", "version", false, "output version information and exit" );
 
     CommandLine commandline;
     try {
