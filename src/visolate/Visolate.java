@@ -697,9 +697,11 @@ public class Visolate extends JPanel implements SimulatorUI {
 		try {
 			load(new FileInputStream(file));
 		} catch (FileNotFoundException e) {
+		  loadDemo();
 			JOptionPane.
 			showMessageDialog(this,
-					"File Not Found: " + e.getMessage(),
+					"File Not Found: " + e.getMessage() +
+					"\nLoaded Demo file instead.",
 					"File Not Found",
 					JOptionPane.ERROR_MESSAGE);
 		}
