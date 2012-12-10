@@ -136,8 +136,6 @@ public class Main extends JApplet {
                 visolate.loadDemo();
             }
 
-            visolate.model.rebuild();
-
             if (visolate.commandline.hasOption("auto")) {
                      System.out.println("Automatic processing enabled! Files will be overwritten without asking!");
                      visolate.auto_mode=true;
@@ -169,6 +167,8 @@ public class Main extends JApplet {
                      visolate.fixTopology();
                      // fix.Topology() calls visolate.processFinished after its done. Also, the Toolpathprocessor does so. processstatus discriminates this.
             }
+
+            visolate.model.rebuild();
         }
 
       });
