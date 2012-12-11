@@ -206,9 +206,6 @@ public class GCodeFileWriter {
 
     cutterUp();
     
-    Point2d p = new Point2d(0.0, 0.0);
-    rapidMovement(p); //rapid to origin
-
     out.write("M5\n"); // Spindle Stop
     out.write("M2\n"); // End of program
   }
