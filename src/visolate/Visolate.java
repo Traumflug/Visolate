@@ -375,7 +375,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myInitialXPanel = new JPanel();
 			myInitialXPanel.setLayout(new BorderLayout());
 			myInitialXPanel.add(new JLabel("X"), BorderLayout.WEST);
-			myInitialXPanel.setToolTipText("Left side is at this coordinate (mm or inch)");
+			myInitialXPanel.setToolTipText("Left side is at this coordinate (mm or inch).");
 			myInitialXPanel.setEnabled(gCodeWriter.getIsAbsolute());
       final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getXOffset()));
 			myInitialXPanel.add(field, BorderLayout.CENTER);
@@ -402,7 +402,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 			myInitialYPanel = new JPanel();
 			myInitialYPanel.setLayout(new BorderLayout());
 			myInitialYPanel.add(new JLabel("Y"), BorderLayout.WEST);
-			myInitialYPanel.setToolTipText("Upper side is at this coordinates (mm or inch)");
+			myInitialYPanel.setToolTipText("Upper side is at this coordinates (mm or inch).");
 			myInitialYPanel.setEnabled(gCodeWriter.getIsAbsolute());
       final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getYOffset()));
 			myInitialYPanel.add(field, BorderLayout.CENTER);
@@ -1053,7 +1053,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private Display display = null;
 	private Processor processor = null;
 	private ToolpathsProcessor myToolpathsProcessor = null;
-	private GCodeFileWriter gCodeWriter = null;
+	public GCodeFileWriter gCodeWriter = null;
 
 	private JButton loadButton;
 	private JTextField loadField;
