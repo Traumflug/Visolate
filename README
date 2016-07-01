@@ -25,6 +25,13 @@ and fields. Tooltips appear which shall be helpful.
 Accuracy of the G-code is adjusted by adjusting the DPI value of the display.
 
 
+NEW in 3.2:
+
+- A bunch of new command line options. Automated G-code creation can now
+  control feedrates and offsets, too.
+
+- Dependency on Eclipse IDE removed by introducing a Makefile.
+
 NEW in 3.1.1:
 
 - Make command line options more consistent.
@@ -61,69 +68,38 @@ NEW in 3.0:
 
 INSTALLATION - Debian/Ubuntu Linux
 
-Visolate it's self needs no installation, but it requires some dependencies:
+Nicely, Debian/Ubuntu package repositories provides Visolate as a package,
+so installing it is rather simple:
 
-  sudo apt-get install --no-install-recommends openjdk-6-jre
-  sudo apt-get install --no-install-recommends libjava3d-java
-  sudo apt-get install --no-install-recommends libjava3d-jni
-  sudo apt-get install --no-install-recommends libvecmath-java
+  sudo apt-get install --no-install-recommends openjdk-8-jre-headless visolate
 
-Getting this to work on Ubuntu 11.10 and earlier requires a few additional tweaks:
-
-  sudo update-java-alternatives -s java-6-openjdk
-  sudo ln -s /usr/share/java/j3dcore.jar /usr/lib/jvm/java-6-openjdk/jre/lib/ext
-  sudo ln -s /usr/share/java/j3dutils.jar /usr/lib/jvm/java-6-openjdk/jre/lib/ext
-  sudo ln -s /usr/share/java/vecmath.jar /usr/lib/jvm/java-6-openjdk/jre/lib/ext
+This also installs all requirements (libcommons-cli-java, libjava3d-java and
+libvecmath-java) for running the latest version provided here, so doing this
+installation is a good idea anyways.
 
 
 DEVELOPMENT
 
-Unfortunately, there are no makefiles available. Development is currently done
-in the totally overfeatured, but well working Eclipse IDE:
+Since version 3.2, Visolate uses a Makefile to create the executable JAR file.
+Accordingly you can use any text editor for editing the .java files and a
+simple 'make' will update the JAR archive.
+
+Preparations:
 
 1. Make sure you have all dependencies. Easiest way to find out is to
    run the JAR executable, see section USAGE.
 
-2. Install Eclipse:
+2. Install the Java Development Kit (JDK):
 
-     sudo apt-get install eclipse
+     sudo apt-get --no-install-recommends install openjdk-9-jdk-headless
 
 3. Grab sources:
 
      git clone https://github.com/Traumflug/Visolate.git
 
-4. Launch Eclipse, select Menu -> File -> Import... ->
-                          Existing Projects into Workspace.
+4. Compile and run the executable
 
-   Find the just grabbed sources; avoid copying them (see checkbox there).
-
-5. Create a Run Configuration:
-
-   (essential, as applet and/or application, to be defined)
-
-6. Turn off useless warnings:
-
-   By default, a large number of warnings about missing privileges in system
-   libraries appear. This is counterproductive, as it hides real warnings.
-
-   (non-essential, to be defined)
-
-7. Tell Eclipse to always update externally modified files:
-
-   This is essential when using Git.
-
-   (non-essential, to be defined)
-
-8. Tell Eclipse to show the TODO list:
-
-   All known flaws and a wishlist are marked as TODO in the sources. This is
-   really helpful when developing and better than Eclipse's "bookmark" feature.
-
-   (non-essential, to be defined)
-
-9. Compile and run the executable
-
-   Select Menu -> Run -> Run.
+    make all run
 
 
 SOURCE CODE OVERVIEW
@@ -168,28 +144,20 @@ MAKING A RELEASE
 1. Find the APPNAME variable in Main.java and adjust the string to the new
    version.
 
-2. Update the NEW section above in this file.
+2. Adjust variable 'VERSION' in the Makefile (near the top).
 
-3. Update the name of the JAR file in the USAGE section above.
+3. Update the NEW section above in this file.
 
-4. Create a JAR:
+4. Update the name of the JAR file in the USAGE section above.
 
-   - Eclipse-> Menu -> File -> Export... -> Java -> Runnable JAR file
+5. Create a JAR:
 
-   - Click "Next".
+    make
 
-   - Locate the destination into the "releases" folder.
-
-   - Check "Extract required libraries into generated JAR".
-
-   - Click "Finish".
-
-   - Accept repackaging the libraries.
-
-5. Commit the JAR file with the message "Make release x.x." and a short
+6. Commit the JAR file with the message "Make release x.x." and a short
    description of the new features, starting in subsequent lines.
 
-6. Create a signed tag of the release:
+7. Create a signed tag of the release:
 
      RELEASE=x.x  # e.g. RELEASE=3.0
      git tag -u 806F3A3E -m "Release ${RELEASE}." "release-${RELEASE}"
@@ -197,7 +165,7 @@ MAKING A RELEASE
    Note: This "806F3A3E" is my own (Traumflug's) GPG key. On how to set up
          your own key, consult Google.
 
-7. Done. Push the stuff out to Github:
+8. Done. Push the stuff out to Github:
 
      git push && git push --tags
 

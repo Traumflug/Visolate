@@ -1,2 +1,2 @@
 Main-Class: visolate.Main
-
+Class-Path: /usr/share/java/commons-cli.jar /usr/share/java/vecmath.jar /usr/share/java/j3dcore.jar /usr/share/java/j3dutils.jar
