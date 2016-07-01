@@ -74,7 +74,7 @@ public class ThermalInstance extends PrimitiveInstance {
                                              double ro, double ri,
                                              double gapWidth,
                                              double rotation) {
-    
+
     Collection<TriangleArray> geometries = new LinkedList<TriangleArray>();
 
     int segments = CircleAperture.SEGMENTS;
@@ -105,18 +105,18 @@ public class ThermalInstance extends PrimitiveInstance {
 
         x = rad*Math.cos(angle);
         y = rad*Math.sin(angle);
-      
+
         coords[i++] = (float) (x+xCenter);
         coords[i++] = (float) (y+yCenter);
         coords[i++] = 0.0f;
-      
+
         angle += segment;
       }
       angle = anglei;
       rad = ri;
       segment = segmenti;
     }
-    
+
     GeometryInfo gi = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
     gi.setCoordinates(coords);
     gi.setStripCounts(new int[] {2*(segments + 1)});
@@ -130,7 +130,7 @@ public class ThermalInstance extends PrimitiveInstance {
   private double x, y;
 
   private double od, id;
-  
+
   private double xHairThickness;
 
   private double rotation;

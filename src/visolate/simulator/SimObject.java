@@ -43,7 +43,7 @@ public abstract class SimObject {
     if (geometries == null) {
       makeGeometries();
     }
-    
+
     return geometries;
   }
 
@@ -77,7 +77,7 @@ public abstract class SimObject {
   public boolean getInverse() {
     return inverse;
   }
- 
+
   public void setInverse(boolean inverse) {
 
     boolean changed = (this.inverse != inverse);
@@ -108,9 +108,9 @@ public abstract class SimObject {
     TriangleArray geometry = new MyTriangleArray(numVertices,
                                                  GeometryArray.COORDINATES |
                                                  GeometryArray.BY_REFERENCE);
-    
+
     geometry.setCoordRefFloat(vertices);
-    
+
     return geometry;
   }
 
@@ -135,12 +135,12 @@ public abstract class SimObject {
       stripVertexCounts = new int[] {numVertices};
     }
 
-    TriangleFanArray geometry = 
+    TriangleFanArray geometry =
       new MyTriangleFanArray(numVertices,
                              GeometryArray.COORDINATES |
                              GeometryArray.BY_REFERENCE,
                              stripVertexCounts);
-   
+
     geometry.setCoordRefFloat(vertices);
 
     return geometry;
@@ -178,18 +178,18 @@ public abstract class SimObject {
                                                    final Vector2f t) {
 
     float[] coords = geometry.getCoordRefFloat();
-    
+
     float[] newCoords = new float[coords.length];
-    
+
     for (int i = 0; i < coords.length/3; i++) {
       newCoords[3*i+0] = coords[3*i+0] + t.x;
       newCoords[3*i+1] = coords[3*i+1] + t.y;
       newCoords[3*i+2] = coords[3*i+2];
     }
-    
+
     geometry.setCoordRefFloat(newCoords);
   }
-  
+
   // This rotates a geometry around (0.0, 0.0).
   protected static void rotateGeometry(final GeometryArray geometry,
       final double angle) {
@@ -202,14 +202,14 @@ public abstract class SimObject {
     t.rotZ(angle);
 
     Point3f p = new Point3f();
-    
+
     for (int i = 0; i < coords.length; i += 3) {
       p.x = coords[i];
       p.y = coords[i+1];
       p.z = coords[i+2];
-      
+
       t.transform(p);
-      
+
       newCoords[i] = p.x;
       newCoords[i+1] = p.y;
       newCoords[i+2] = p.z;
@@ -275,7 +275,7 @@ class MyTriangleArray extends TriangleArray {
                    Arrays.equals(myCoords, other.myCoords));
 
 //    System.out.println((ret) ? "eq" : "neq");
-    
+
     return ret;
   }
 

@@ -41,7 +41,7 @@ public class TopologyProcessor extends Processor {
 
 //    System.out.println("processTile: " +
 //                       "(row, col) = (" + r + ", " + c + "); " +
-//                       "ul = (" + ulx + ", " + uly + "); " + 
+//                       "ul = (" + ulx + ", " + uly + "); " +
 //                       "dimensions = (" + width + ", " + height  + "); " +
 //                       "lbrt = " +
 //                       left + ", " + bottom + ", " + right + ", " + top + ")");
@@ -62,20 +62,20 @@ public class TopologyProcessor extends Processor {
 
           if (!ignoreColors.contains(new Integer(color)))
             mergeNets(x, y, left, top, color);
-          
+
           if (thread.isInterrupted())
             return;
         }
       }
-      
+
     } catch (InterruptedException e) {
       thread.interrupt(); //reset interrupt status
     }
   }
 
-  private void mergeNets(final int x, final int y, final double left, final double top, final int color) 
+  private void mergeNets(final int x, final int y, final double left, final double top, final int color)
     throws InterruptedException {
-    
+
     double px = left+x/((double) dpi);
     double py = top-y/((double) dpi);
 
@@ -105,13 +105,13 @@ public class TopologyProcessor extends Processor {
   public static void mergeNets(Collection<Net> nets) {
 
     Set<Net> superNet = null;
-    
+
     for (Net net : nets) {
       if (superNet == null) {
         superNet = net.getSuperNet();
       }
     }
-    
+
     if (superNet == null) {
       superNet = new LinkedHashSet<Net>();
     }

@@ -26,7 +26,7 @@ import visolate.misc.*;
 import javax.media.j3d.*;
 
 public class ObroundAperture extends StandardAperture {
-  
+
   public static final int SEGMENTS = 16; // Must be a multiple of two.
   public static final double SECTOR = 2.0*Math.PI/SEGMENTS;
 
@@ -149,7 +149,7 @@ public class ObroundAperture extends StandardAperture {
     if (rx > ry) {
       rotateGeometry(tfa, Math.PI / 2);
     }
-    
+
     geometries.add(tfa);
   }
 

@@ -55,7 +55,7 @@ public abstract class MacroPrimitive {
         buf.append(", ");
       }
     }
-    
+
     return buf.toString();
   }
 

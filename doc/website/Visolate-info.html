@@ -1,48 +1,4 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
 
@@ -116,7 +72,7 @@ pre {
 }
 
  </style>
-  
+
  <title>Marsette Vona:  Visolate Info </title>
 </head>
 
@@ -127,7 +83,7 @@ pre {
       <td nowrap="true">
         <font size="5"><a href="http://www.mit.edu/~vona">Marsette Vona</a>:</font>
       </td>
-      
+
       <td><font size="5">Visolate Info</font></td>
     </tr>
   </table>
@@ -161,7 +117,7 @@ pre {
 <!-- <p>If Voronoi diagram is new to you, here's a commonly used intuitive definition.  Imagine that instead of a PCB we are talking about a big flat field of uniform dry grass.  Now, simultaneously and uniformly, start little fires where all the traces would be.  As each trace's fire spreads, the burned region it leaves is the trace's Voronoi region.  You can imagine that the fires from two nearby traces will eventually expand, meet each other, and go out.  These meetings of fires occur at the boundaries between the Voronoi regions.</p> -->
 
 <p>Cutting the Voronoi boundaries has both advantages and disadvantages.  Compared with boundary tracing, the Voronoi method produces only one cut instead of two to separate traces.  This can produce cleaner and more consistent results for closely spaced traces.  While there is no guarantee that the overall length of the Voronoi toolpath will be shorter than boundary tracing, in practice on real board designs we found that the Voronoi toolpath was on average nearly 40% shorter (see paper below).  The Voronoi method usually produces "fat" traces, thus maximizing current carrying capacity, though in its basic form there is no way to specify particular traces that should be fattened more than others.  On the downside, the Voronoi traces will have different second-order properties, such as parasitic capacitance, than the originally designed traces.</p>
- 
+
 <p>More information is available in a paper we wrote about the algorithms in our system: "<a href="http://www.mit.edu/~vona/publications/Vona_Rus__2005__Voronoi_toolpaths_for_PCB_mechanical_etch_Simple_and_intuitive_algorithms_with_the_3D_GPU.pdf">Voronoi toolpaths for PCB mechanical etch: Simple and intuitive algorithms with the 3D GPU</a>" by Marsette A. Vona and Daniela Rus, which is published in the proceedings of the International Conference on Robotics and Automation, 2005.</p>
 
 <h2 class="separator"><a name="Download"/a>Download</h2>

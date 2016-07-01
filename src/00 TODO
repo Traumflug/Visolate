@@ -1,7 +1,7 @@
 
 - The "stop" button should move to the left of the progress bar,
   to free up room. More room for the main display means faster operation.
-  
+
 - Geometry border checkbox should actually draw a border.
 
 - Assume the outmost paths are of an outline and use them to measure
@@ -10,4 +10,3 @@
 
 - ToolpathNode should receive it's inch values in the constructor already.
   This would remove a lot of calls to ToolpathsProcessor.toModelX/Y.
-  

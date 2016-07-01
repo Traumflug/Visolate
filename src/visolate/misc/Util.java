@@ -73,12 +73,12 @@ public class Util {
     if (closest < 0) {
 
       int next = -closest - 1;
-      
+
       int prev = next - 1;
-      
+
       if (next == angle.length)
         next = 0;
-      
+
       if (prev < 0)
         prev = angle.length-1;
 
@@ -93,7 +93,7 @@ public class Util {
 
   public static double getPolyWidth(float[] x, float[] y, double[] angle,
                                     double theta) {
-    
+
     theta = canonicalizeAngle(theta);
 
     double dx = Math.cos(theta);
@@ -131,15 +131,15 @@ public class Util {
   }
 
   public static double vertexOffset(double offset, double angle) {
-    
+
     Vector2d p0 = new Vector2d(Math.cos(angle-Math.PI/2),
                               Math.sin(angle-Math.PI/2));
-    
+
     p0.scale(-offset);
 
     Vector2d p1 = new Vector2d(p0.x + Math.cos(angle),
                                p0.y + Math.sin(angle));
-    
+
     double dy = p1.y-p0.y;
 
     if (dy < MIN_DY)

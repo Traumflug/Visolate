@@ -34,7 +34,7 @@ public class RectangleAperture extends StandardAperture {
                            double holeX,
                            double holeY) {
     super(number, holeX, holeY);
-    init(dimensionX, dimensionY); 
+    init(dimensionX, dimensionY);
   }
 
   private void init(double dimensionX, double dimensionY) {
@@ -52,19 +52,19 @@ public class RectangleAperture extends StandardAperture {
 
       h = (float) Math.max(0.0, (dimensionX/2.0 + signedOffset));
       v = (float) Math.max(0.0, (dimensionY/2.0 + signedOffset));
-      
+
       x[0] = h;
       y[0] = v;
-      
+
       x[1] = -h;
       y[1] = v;
-      
+
       x[2] = -h;
       y[2] = -v;
-      
+
       x[3] = h;
       y[3] = -v;
-      
+
       for (int i = 0; i < angle.length; i++)
         angle[i] = Util.canonicalAngle(x[i], y[i]);
     }
@@ -75,12 +75,12 @@ public class RectangleAperture extends StandardAperture {
                            double dimensionY,
                            double hole) {
     super(number, hole);
-    init(dimensionX, dimensionY); 
+    init(dimensionX, dimensionY);
   }
 
   public RectangleAperture(int number, double dimensionX, double dimensionY) {
     super(number);
-    init(dimensionX, dimensionY); 
+    init(dimensionX, dimensionY);
   }
 
   public String toString() {
@@ -108,25 +108,25 @@ public class RectangleAperture extends StandardAperture {
     getPerimeter();
 
     geometries = new LinkedList<GeometryArray>();
-    
+
     float[] coords = new float[3*6];
-    
+
     int i = 0;
-    
+
     coords[i++] = 0.0f;
     coords[i++] = 0.0f;
     coords[i++] = 0.0f;
-    
+
     for (int j = 0; j < 4; j++) {
       coords[i++] = x[j];
       coords[i++] = y[j];
       coords[i++] = 0.0f;
     }
-    
+
     coords[i++] = x[0];
     coords[i++] = y[0];
     coords[i++] = 0.0f;
-    
+
     geometries.add(makeTFA(coords));
   }
 
@@ -136,7 +136,7 @@ public class RectangleAperture extends StandardAperture {
     h = v = Float.NaN;
     angle = null;
   }
-                                   
+
   protected void inverseChanged() {
     super.inverseChanged();
     x = y = null;

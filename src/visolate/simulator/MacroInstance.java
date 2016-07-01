@@ -45,7 +45,7 @@ public class MacroInstance extends SimObject {
       bounds.add(prim.getBounds());
     }
   }
-      
+
   public double getWidth(double direction) {
     throw new UnsupportedOperationException("cannot draw with macro aperture");
   }
@@ -53,11 +53,11 @@ public class MacroInstance extends SimObject {
   protected void makeGeometries() {
 
     geometries = new LinkedList<GeometryArray>();
-      
+
     for (Iterator<PrimitiveInstance> it = primInstances.iterator(); it.hasNext(); ) {
-        
+
       Collection<GeometryArray> primGeoms = it.next().getGeometries();
-        
+
       if (primGeoms != null)
         geometries.addAll(primGeoms);
     }

@@ -66,8 +66,8 @@ PARSER_END(Parser)
 
 SKIP :
 {
-  " " 
-| "\t"  
+  " "
+| "\t"
 | "\n"
 | "\r"
 }
@@ -174,7 +174,7 @@ void GCode() :
 |
   "G54" //tool prepare
   //ignore
-| 
+|
   "G70" //specify inches
   //ignore
 |
@@ -210,9 +210,9 @@ void DCode() :
 
 void CoordinateDCode() :
 {
-  String[] c = new String[4]; 
+  String[] c = new String[4];
 }
-{ 
+{
 
   Coordinates(c) [ NonCoordinateDCode() ]
 
@@ -276,25 +276,25 @@ void Coordinates(String[] c) :
 void XCoord(String[] c) :
 {}
 {
-  "X" c[0] = Coord() 
+  "X" c[0] = Coord()
 }
 
 void YCoord(String[] c) :
 {}
 {
-  "Y" c[1] = Coord() 
+  "Y" c[1] = Coord()
 }
 
 void ICoord(String[] c) :
 {}
 {
-  "I" c[2] = Coord() 
+  "I" c[2] = Coord()
 }
 
 void JCoord(String[] c) :
 {}
 {
-  "J" c[3] = Coord() 
+  "J" c[3] = Coord()
 }
 
 String Coord() :
@@ -365,12 +365,12 @@ void ParameterCode() :
   ImageName()
 |
   Mode()
-|  
+|
   ScaleFactor()
 |
   LayerName()
 |
-  StepAndRepeat()   
+  StepAndRepeat()
 }
 
 void InputEncoding() :
@@ -409,18 +409,18 @@ void FormatStatement() :
     { if ("T".equals(ignore.image))
         simulator.ignoreTrailingZeros(); } ]
 
-  [ ( mode = "A" | mode = "I" ) 
+  [ ( mode = "A" | mode = "I" )
     { if ("I".equals(mode.image))
         simulator.setIncremental(true);
       else
         simulator.setIncremental(false); } ]
 
-  [ "N" <DIGITS> ] 
+  [ "N" <DIGITS> ]
 
-  [ "G" <DIGITS> ] 
+  [ "G" <DIGITS> ]
 
   [ "X" fmt = <DIGITS>
-    { 
+    {
       if (fmt.image.length() != 2) {
         System.err.println("WARNING: ignoring bad X format, not 2 digits: " +
                            fmt);
@@ -429,10 +429,10 @@ void FormatStatement() :
                              Integer.parseInt(fmt.image.substring(1, 2)));
       }
     }
-  ] 
+  ]
 
   [ "Y" fmt = <DIGITS>
-    { 
+    {
       if (fmt.image.length() != 2) {
         System.err.println("WARNING: ignoring bad Y format, not 2 digits: " +
                            fmt);
@@ -441,13 +441,13 @@ void FormatStatement() :
                              Integer.parseInt(fmt.image.substring(1, 2)));
       }
     }
-  ] 
+  ]
 
-  [ "Z" <DIGITS> ] 
+  [ "Z" <DIGITS> ]
 
-  [ "D" <DIGITS> ] 
+  [ "D" <DIGITS> ]
 
-  [ "M" <DIGITS> ] 
+  [ "M" <DIGITS> ]
 
   <CODE_DELIM>
 }
@@ -504,7 +504,7 @@ void Offset() :
 {
   "OF" [ "A" a = Double() ] [ "B" b = Double() ] <CODE_DELIM>
   {System.err.println("WARNING: ignoring offset OF" +
-                      ((!Double.isNaN(a)) ? ("A" + a) : "") + 
+                      ((!Double.isNaN(a)) ? ("A" + a) : "") +
                       ((!Double.isNaN(b)) ? ("B" + b) : ""));}
 }
 
@@ -515,7 +515,7 @@ void ScaleFactor() :
 {
   "SF" [ "A" a = Double() ] [ "B" b = Double() ] <CODE_DELIM>
   {System.err.println("WARNING: ignoring scale factor SF" +
-                      ((!Double.isNaN(a)) ? ("A" + a) : "") + 
+                      ((!Double.isNaN(a)) ? ("A" + a) : "") +
                       ((!Double.isNaN(b)) ? ("B" + b) : ""));}
 }
 
@@ -534,7 +534,7 @@ void StepAndRepeat() :
   [ "J" j = Double() ]
   <CODE_DELIM>
   {System.err.println("WARNING: ignoring step and repeat SR" +
-                      ((x != null) ? ("X" + x.image) : "") + 
+                      ((x != null) ? ("X" + x.image) : "") +
                       ((y != null) ? ("Y" + y.image) : "") +
                       ((!Double.isNaN(i)) ? ("I" + i) : "") +
                       ((!Double.isNaN(j)) ? ("J" + j) : ""));}
@@ -544,7 +544,7 @@ void ApertureDescription() :
 {
   Token number;
   Token typeToken;
-  List modifiers = new LinkedList(); 
+  List modifiers = new LinkedList();
 }
 {
   <ADD>
@@ -555,12 +555,12 @@ void ApertureDescription() :
 
   {
     int num = Integer.parseInt(number.image);
-    
+
     String type = typeToken.image;
 
     if ("C".equals(type)) {
 
-      switch (modifiers.size()) {  
+      switch (modifiers.size()) {
       case 0:
         System.err.println(
           "WARNING: ignoring circle aperture with no modifiers on line " +
@@ -592,7 +592,7 @@ void ApertureDescription() :
 
     } else if ("R".equals(type)) {
 
-      switch (modifiers.size()) {  
+      switch (modifiers.size()) {
         case 0:
         case 1:
         System.err.println(
@@ -611,7 +611,7 @@ void ApertureDescription() :
                                           getModifier(modifiers, 0),
                                           getModifier(modifiers, 1),
                                           getModifier(modifiers, 2)));
-                                          
+
         break;
         case 4:
         simulator.
@@ -627,10 +627,10 @@ void ApertureDescription() :
           number.beginLine);
         break;
       }
-      
+
     } else if ("O".equals(type)) {
-      
-      switch (modifiers.size()) {  
+
+      switch (modifiers.size()) {
         case 0:
         case 1:
         System.err.println(
@@ -664,10 +664,10 @@ void ApertureDescription() :
           number.beginLine);
         break;
       }
-      
+
     } else if ("P".equals(type)) {
 
-      switch (modifiers.size()) {  
+      switch (modifiers.size()) {
         case 0:
         case 1:
         System.err.println(
@@ -709,7 +709,7 @@ void ApertureDescription() :
           number.beginLine);
         break;
       }
-      
+
     } else {
 
       try {
@@ -741,8 +741,8 @@ void ApertureMacro() :
   List primitives = new LinkedList();
 }
 {
-  <AM> name = <TEXT> <CODE_DELIM> PrimitiveList(primitives) 
-  { simulator.addMacro(new Macro(name.image, primitives)); } 
+  <AM> name = <TEXT> <CODE_DELIM> PrimitiveList(primitives)
+  { simulator.addMacro(new Macro(name.image, primitives)); }
 }
 
 void PrimitiveList(List primitives) :
@@ -754,7 +754,7 @@ void PrimitiveList(List primitives) :
   {
     if (primitive != null)
       primitives.add(0, primitive);
-  } 
+  }
 }
 
 MacroPrimitive Primitive() :
@@ -769,7 +769,7 @@ MacroPrimitive Primitive() :
   }
 |
   numberToken = <DIGITS> [ "," ExprList(exprs) ] <CODE_DELIM>
-  { 
+  {
     int primitiveNumber = Integer.parseInt(numberToken.image);
     switch (primitiveNumber) {
     case 1: return new CirclePrimitive(exprs);
@@ -796,7 +796,7 @@ void ExprList(List exprs) :
 }
 {
   expr = Expr() [ "," ExprList(exprs) ]
-  {exprs.add(0, expr);} 
+  {exprs.add(0, expr);}
 }
 
 MacroExpression Expr() :
@@ -808,7 +808,7 @@ MacroExpression Expr() :
 }
 {
   lhs = MulExpr() [ op = <SIGN> rhs = MulExpr() ]
-  { 
+  {
     if (rhs == null)
       return lhs;
 
@@ -831,7 +831,7 @@ MacroExpression MulExpr() :
       return lhs;
 
     int operator = MacroBinOp.MULTIPLY;
-    
+
     if ("-".equals(op.image))
       operator = MacroBinOp.DIVIDE;
 

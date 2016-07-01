@@ -710,7 +710,7 @@ public class Visolate extends JPanel implements SimulatorUI {
 	private void load(InputStream inputStream) {
 
 		stopProcess();
-    
+
     enableControls(false);
     myToolpathsProcessor = null;
 

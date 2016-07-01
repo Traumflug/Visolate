@@ -32,7 +32,7 @@ m4_define(`MAIN_CLASS', `PKGNAME/CLASSNAME.class')
 <p align="center">
 <!--"CONVERTED_APPLET"-->
 <!-- HTML CONVERTER -->
-<OBJECT 
+<OBJECT
     classid = "clsid:8AD9C840-044E-11D1-B3E9-00805F499D93"
     codebase = "http://java.sun.com/update/1.5.0/jinstall-1_5-windows-i586.cab#Version=1,5,0,0"
 m4_dnl    codebase = "http://java.sun.com/update/1.4.2/jinstall-1_4-windows-i586.cab#Version=1,4,0,0"
@@ -44,7 +44,7 @@ m4_dnl    <PARAM NAME = "type" VALUE = "application/x-java-applet;version=1.5">
     <PARAM NAME = "archive" value = "APPNAME.jar">
 
 <COMMENT>
-	<EMBED 
+	<EMBED
 
 m4_dnl TBD OSX
 m4_dnl            type = "application/x-java-applet;version=1.5" \

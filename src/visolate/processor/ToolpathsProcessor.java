@@ -184,7 +184,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		Set<ToolpathNode> nodes = this.nodes.keySet();
 
 		while (!nodes.isEmpty()) {
-		  
+		
 			paths.add(new ToolpathPath(this, nodes.iterator().next()));
 
 			if (thread.isInterrupted()) {
@@ -198,7 +198,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 	}
 
 	private void lockCrossingNodes() {
-	  
+	
 	   for (ToolpathPath pathToLock : paths) {
 	     // Don't exclude pathToFix == path, as paths can be self-intersecting.
 	     for (ToolpathPath path : paths) {
@@ -226,7 +226,7 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		System.out.println("optimizing paths...");
 
 		for (ToolpathPath path : paths) {
-		  
+		
       // TODO: This "straightTolerance" is actually an very important value,
       //       it tells the optimizer how close the optimized path should
       //       match the original, exact path. At such importance,
@@ -341,9 +341,9 @@ public class ToolpathsProcessor extends MosaicProcessor {
 		paths.addAll(this.paths);
 
     while (!paths.isEmpty()) {
-      
+
       ToolpathPath closestPath = getClosestPath(paths, w.getCurrentPosition());
-      
+
       closestPath.writeGCode(w);
       paths.remove(closestPath);
     }

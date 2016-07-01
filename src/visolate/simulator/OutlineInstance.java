@@ -32,7 +32,7 @@ import com.sun.j3d.utils.geometry.*;
 public class OutlineInstance extends PrimitiveInstance {
 
   public static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
-  
+
   public static final double MIN_D_LENGTH = 1e-6;
 
   public OutlineInstance(final int aN, final List<Point2d> aPoints, double aRotation) {
@@ -40,11 +40,11 @@ public class OutlineInstance extends PrimitiveInstance {
 //    this.myN = aN;
 
     this.myPoints = aPoints;
-    
+
     this.myRotation = aRotation;
-    
+
     numVerts = aPoints.size();
-    
+
     if (aN != numVerts)
       System.err.println("WARNING: amacro primitive type 4 num points (" + aN +
                          ") disagrees with actual number of coordinates; " +
@@ -52,7 +52,7 @@ public class OutlineInstance extends PrimitiveInstance {
   }
 
   private void getPerimeter() {
-    
+
     if (x == null) {
 
       x = new float[numVerts];
@@ -75,7 +75,7 @@ public class OutlineInstance extends PrimitiveInstance {
         prev = (Point2d) myPoints.get(myPoints.size() - 2);
 
       Point2d next;
-      
+
       Point3d p3 = new Point3d();
 
       Vector3d d = new Vector3d();
@@ -85,7 +85,7 @@ public class OutlineInstance extends PrimitiveInstance {
 
       int i = 0;
       for (Iterator<Point2d> it = myPoints.iterator(); it.hasNext(); ) {
-        
+
         next = it.next();
 
         if ((prev != null) && (p != null)) {
@@ -95,14 +95,14 @@ public class OutlineInstance extends PrimitiveInstance {
 
           d0.normalize();
           d1.normalize();
-          
+
           d.set(0.5*(d0.x+d1.x), 0.5*(d0.y+d1.y), 0.0);
           d.normalize();
           if (d.length() < MIN_D_LENGTH)
             d.cross(d0, Z);
 
           double angle = Util.angleCCW(d1, d0);
-          
+
           if (angle > Math.PI)
             angle = Math.PI*2.0 - angle;
 
@@ -123,14 +123,14 @@ public class OutlineInstance extends PrimitiveInstance {
           p = next;
           d.set(0.0, 0.0, 0.0);
         }
-        
+
         p3.set(p.x+d.x, p.y+d.y, 0.0);
-        
+
         t3d.transform(p3);
-        
+
         x[i] = (float) p3.x;
         y[i] = (float) p3.y;
-        
+
         i++;
 
         prev = p;
@@ -147,25 +147,25 @@ public class OutlineInstance extends PrimitiveInstance {
   }
 
   protected void makeGeometries() {
-    
+
     getPerimeter();
 
     geometries = new LinkedList<GeometryArray>();
-    
+
     GeometryInfo gi = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
-    
+
     float[] coords = new float[3*numVerts];
-    
+
     int j = 0;
     for (int i = 0; i < numVerts; i++) {
       coords[j++] = x[i];
       coords[j++] = y[i];
       coords[j++] = 0.0f;
     }
-    
+
     gi.setCoordinates(coords);
     gi.setStripCounts(new int[] {numVerts});
-    
+
     geometries.add(gi.getGeometryArray(true, false, false));
   }
 
@@ -173,14 +173,14 @@ public class OutlineInstance extends PrimitiveInstance {
     super.offsetChanged();
     x = y = null;
   }
-                                   
+
   protected void inverseChanged() {
     super.inverseChanged();
     x = y = null;
   }
 
 //  private int myN;
-  
+
   private List<Point2d> myPoints;
 
   private int numVerts;

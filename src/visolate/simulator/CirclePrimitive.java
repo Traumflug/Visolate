@@ -43,7 +43,7 @@ public class CirclePrimitive extends MacroPrimitive {
 
     return new CircleInstance(diameter, x, y);
   }
-  
+
   public String getName() {
     return "circle";
   }

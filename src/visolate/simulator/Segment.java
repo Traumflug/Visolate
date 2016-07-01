@@ -73,7 +73,7 @@ public class Segment extends Stroke {
 
     return lengthInches;
   }
-  
+
   public double getWidth() {
     return aperture.getWidth(forwardDirection);
   }
@@ -97,22 +97,22 @@ public class Segment extends Stroke {
   protected void makeBounds() {
 
     bounds = new Rect();
-    
+
     Point2f s = start.getInchCoordinates();
     Point2f e = end.getInchCoordinates();
-    
+
     Rect apBounds = aperture.getBounds();
-    
+
     bounds.add(new Rect(apBounds.x + s.x,
                         apBounds.y + s.y,
                         apBounds.width,
                         apBounds.height));
-    
+
     bounds.add(new Rect(apBounds.x + e.x,
                         apBounds.y + e.y,
                         apBounds.width,
                         apBounds.height));
-    
+
     getBodyRect();
 
     //body rect is null if segment is 0 length
@@ -121,11 +121,11 @@ public class Segment extends Stroke {
         bounds.add(bodyRect[i].x, bodyRect[i].y);
     }
   }
-  
+
   protected Point2d[] getBodyRect() {
 
     if (bodyRect == null) {
-      
+
       if (getLength() < MIN_LENGTH)
         return null;
 
@@ -163,15 +163,15 @@ public class Segment extends Stroke {
     double ry = getLength() / 2 + rx;
     double radius = Math.min(rx, ry);
     double halfLength = Math.abs(ry - rx);
-    
+
     if (rx == 0.0 || ry == 0.0) {
       return;
     }
-    
+
     geometries = new LinkedList<GeometryArray>();
     int i = 0;
     float[] coords = new float[3*(SEGMENTS + 4)];
-    
+
     // center
     coords[i++] = 0.0f;
     coords[i++] = 0.0f;
@@ -205,7 +205,7 @@ public class Segment extends Stroke {
     }
 
     TriangleFanArray tfa = makeTFA(coords);
-    
+
     // Please don't ask why this PI thing is needed!
     rotateGeometry(tfa, forwardDirection - Math.PI / 2);
 
@@ -213,7 +213,7 @@ public class Segment extends Stroke {
     Point2f e = end.getInchCoordinates();
     Vector2f center = new Vector2f((s.x + e.x) / 2, (s.y + e.y) / 2);
     translateGeometry(tfa, center);
-    
+
     geometries.add(tfa);
 
   }
@@ -226,7 +226,7 @@ public class Segment extends Stroke {
     super.offsetChanged();
     bodyRect = null;
   }
-                                   
+
   protected void inverseChanged() {
     super.inverseChanged();
     bodyRect = null;

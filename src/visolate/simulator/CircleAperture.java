@@ -40,13 +40,13 @@ public class CircleAperture extends StandardAperture {
 
   public CircleAperture(int number, double diameter, double hole) {
     super(number, hole);
-    
+
     this.diameter = diameter;
   }
 
   public CircleAperture(int number, double diameter) {
     super(number);
-    
+
     this.diameter = diameter;
   }
 
@@ -80,32 +80,32 @@ public class CircleAperture extends StandardAperture {
                                                 double radius) {
 
     Collection<GeometryArray> geometries = new LinkedList<GeometryArray>();
-    
+
     float[] coords = new float[3*(SEGMENTS + 2)];
-    
+
     int i = 0;
-    
+
     coords[i++] = (float) xCenter;
     coords[i++] = (float) yCenter;
     coords[i++] = 0.0f;
-    
+
     double x, y;
     double angle = 0.0;
-    
+
     for (int j = 0; j <= SEGMENTS; j++) {
-      
+
       x = radius*Math.cos(angle);
       y = radius*Math.sin(angle);
-      
+
       coords[i++] = (float) (x+xCenter);
       coords[i++] = (float) (y+yCenter);
       coords[i++] = 0.0f;
-      
+
       angle += SECTOR;
     }
-    
+
     geometries.add(makeTFA(coords));
-    
+
     return geometries;
   }
 

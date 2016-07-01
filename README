@@ -49,7 +49,7 @@ NEW in 3.0:
 
 - Toolspaths now respect the thickness of elements. Earlier, only the centers
   of tracks/pads were taken for calculation, now the entire perimeters are.
-  
+
 - Path junctions are now kept accurately.
 
 - Much faster path optimisation. So fast one of the progress bars went useless.
@@ -63,7 +63,7 @@ Visolate it's self needs no installation, but it requires some dependencies:
   sudo apt-get install --no-install-recommends libjava3d-java
   sudo apt-get install --no-install-recommends libjava3d-jni
   sudo apt-get install --no-install-recommends libvecmath-java
-  
+
 Getting this to work on Ubuntu 11.10 and earlier requires a few additional tweaks:
 
   sudo update-java-alternatives -s java-6-openjdk

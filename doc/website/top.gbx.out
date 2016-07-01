@@ -3,32 +3,32 @@ class:  visolate.Main
 args:  ../gerber/examples/top.gbx
 graphics device: :0.0
 pixel format 8:8:8 24-bit depth
-Comment at line 1:  Title: (unknown), layergroup #2 
-Comment at line 2:  Creator: pcb 1.6.3 
-Comment at line 3:  CreationDate: Sat Jun  1 04:16:29 2002 UTC 
-Comment at line 4:  For: dan 
-Comment at line 5:  Format: Gerber/RS-274X 
-Comment at line 6:  PCB-Dimensions: 3359 2107 
-Comment at line 7:  PCB-Coordinate-Origin: lower left 
-Comment at line 8:  Color: R0 G0 B0 
+Comment at line 1:  Title: (unknown), layergroup #2
+Comment at line 2:  Creator: pcb 1.6.3
+Comment at line 3:  CreationDate: Sat Jun  1 04:16:29 2002 UTC
+Comment at line 4:  For: dan
+Comment at line 5:  Format: Gerber/RS-274X
+Comment at line 6:  PCB-Dimensions: 3359 2107
+Comment at line 7:  PCB-Coordinate-Origin: lower left
+Comment at line 8:  Color: R0 G0 B0
 macro "THERM1"
   thermal 0.0, 0.0, 0.09, 0.06, 0.015, 45.0
-Aperture 19: macro name = THERM1; modifiers: 
+Aperture 19: macro name = THERM1; modifiers:
 macro "THERM2"
   thermal 0.0, 0.0, 0.13, 0.1, 0.015, 45.0
-Aperture 26: macro name = THERM2; modifiers: 
+Aperture 26: macro name = THERM2; modifiers:
 macro "THERM3"
   thermal 0.0, 0.0, 0.09, 0.06, 0.015, 45.0
-Aperture 36: macro name = THERM3; modifiers: 
+Aperture 36: macro name = THERM3; modifiers:
 layer name: component
-Comment at line 45:  LayerGroup: 2 
-Comment at line 46:  Layer: "component" (4) 
-Comment at line 198:  Text: TERM 
-Comment at line 216:  Text: OUT 
-Comment at line 232:  Text: IN 
-Comment at line 240:  Text: +9V 
-Comment at line 255:  Text: 2002-05-31 
-Comment at line 317:  Text: DRM011 REV 001 
+Comment at line 45:  LayerGroup: 2
+Comment at line 46:  Layer: "component" (4)
+Comment at line 198:  Text: TERM
+Comment at line 216:  Text: OUT
+Comment at line 232:  Text: IN
+Comment at line 240:  Text: +9V
+Comment at line 255:  Text: 2002-05-31
+Comment at line 317:  Text: DRM011 REV 001
 computing inch coords...
 making nets...
 164 nets

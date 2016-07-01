@@ -39,7 +39,7 @@ public class FatnessProcessor extends Processor {
 
 //    System.out.println("processTile: " +
 //                       "(row, col) = (" + r + ", " + c + "); " +
-//                       "ul = (" + ulx + ", " + uly + "); " + 
+//                       "ul = (" + ulx + ", " + uly + "); " +
 //                       "dimensions = (" + width + ", " + height  + "); " +
 //                       "lbrt = " +
 //                       left + ", " + bottom + ", " + right + ", " + top + ")");
@@ -72,7 +72,7 @@ public class FatnessProcessor extends Processor {
             return;
         }
       }
-      
+
     } catch (InterruptedException e) {
       thread.interrupt(); //reset interrupt status
     }
@@ -123,7 +123,7 @@ public class FatnessProcessor extends Processor {
 
       if (net.getArea() <= 0.0)
         continue;
-        
+
       avg += net.getFatness();
       n++;
 

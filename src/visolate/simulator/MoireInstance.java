@@ -70,7 +70,7 @@ public class MoireInstance extends PrimitiveInstance {
 
     double spokeDiameter = Math.max(0.0, xHairLength + 2*signedOffset);
     double spokeWidth = Math.max(0.0, xHairThickness + 2*signedOffset);
-                       
+
 
     for (int i = 0; i < 2; i++)
       geometries.addAll(makeSpokeGeometries(x, y,
@@ -82,11 +82,11 @@ public class MoireInstance extends PrimitiveInstance {
     double o = getOD();
     double i = od - 2*(circleThickness + signedOffset);
     double diff = 2*(circleThickness + gap);
-    
+
     for (int j = 0; (j < n) && (i >= 0); j++) {
-      
+
       geometries.addAll(makeDonutGeometries(x, y, o/2, i/2));
-      
+
       o -= diff;
       i -= diff;
     }
@@ -119,16 +119,16 @@ public class MoireInstance extends PrimitiveInstance {
 
         x = rad*Math.cos(angle);
         y = rad*Math.sin(angle);
-      
+
         coords[i++] = (float) (x+xCenter);
         coords[i++] = (float) (y+yCenter);
         coords[i++] = 0.0f;
-      
+
         angle += segment;
       }
       angle = angle + Math.PI - segments*segment;
     }
-    
+
     GeometryInfo gi = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
     gi.setCoordinates(coords);
     gi.setStripCounts(new int[] {2*(segments + 1)});
@@ -148,33 +148,33 @@ public class MoireInstance extends PrimitiveInstance {
     double segment = (Math.PI*2.0)/segments;
 
     float[] coords = new float[2*3*segments];
-    
+
     double xo, yo;
     double xi, yi;
     double angle = 0.0;
-   
+
     int i = 0;
     int k = 3*segments;
 
     for (int j = 0; j < segments; j++) {
-      
+
       xo = ro*Math.cos(angle);
       yo = ro*Math.sin(angle);
-      
+
       xi = ri*Math.cos(-angle);
       yi = ri*Math.sin(-angle);
 
       coords[i++] = (float) (xo+xCenter);
       coords[i++] = (float) (yo+yCenter);
       coords[i++] = 0.0f;
-      
+
       coords[k++] = (float) (xi+xCenter);
       coords[k++] = (float) (yi+yCenter);
       coords[k++] = 0.0f;
 
       angle += segment;
     }
-   
+
     GeometryInfo gi = new GeometryInfo(GeometryInfo.POLYGON_ARRAY);
     gi.setCoordinates(coords);
     gi.setStripCounts(new int[] {segments, segments});
@@ -184,15 +184,15 @@ public class MoireInstance extends PrimitiveInstance {
 
     return geometries;
   }
-  
+
   private double x, y;
 
   private double od;
-  
+
   private double circleThickness;
-  
+
   private double gap;
-  
+
   private int n;
 
   private double xHairThickness;

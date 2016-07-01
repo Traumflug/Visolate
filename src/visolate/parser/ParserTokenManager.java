@@ -181,7 +181,7 @@ private final int jjMoveStringLiteralDfa1_0(long active0, long active1)
 private final int jjMoveStringLiteralDfa2_0(long old0, long active0, long old1, long active1)
 {
    if (((active0 &= old0) | (active1 &= old1)) == 0L)
-      return jjStartNfa_0(0, old0, old1); 
+      return jjStartNfa_0(0, old0, old1);
    try { curChar = input_stream.readChar(); }
    catch(java.io.IOException e) {
       jjStopStringLiteralDfa_0(1, active0, active1);
@@ -269,7 +269,7 @@ private final int jjMoveStringLiteralDfa2_0(long old0, long active0, long old1, 
 private final int jjMoveStringLiteralDfa3_0(long old0, long active0, long old1, long active1)
 {
    if (((active0 &= old0) | (active1 &= old1)) == 0L)
-      return jjStartNfa_0(1, old0, old1); 
+      return jjStartNfa_0(1, old0, old1);
    try { curChar = input_stream.readChar(); }
    catch(java.io.IOException e) {
       jjStopStringLiteralDfa_0(2, 0L, active1);
@@ -563,31 +563,31 @@ private final int jjMoveNfa_2(int startState, int curPos)
 static final int[] jjnextStates = {
 };
 public static final String[] jjstrLiteralImages = {
-"", null, null, null, null, "\45", "\52", null, null, null, "\111\116", 
-"\114\116", "\101\104\104", "\101\115", "\107\60\64", null, null, null, null, null, 
-"\116", "\107\60\60", "\107\60\61", "\107\60\62", "\107\60\63", "\107\63\66", 
-"\107\63\67", "\107\65\64", "\107\67\60", "\107\67\61", "\107\67\64", "\107\67\65", 
-"\107\71\60", "\107\71\61", "\104\60\61", "\104\60\62", "\104\60\63", "\104", "\130", 
-"\131", "\111", "\112", "\56", "\115\60\60", "\115\60\61", "\115\60\62", "\111\103", 
-"\101\123", "\105\102", "\102\103", "\111\123", "\105\111", "\101", "\102", "\106\123", 
-"\114", "\124", "\107", "\132", "\115", "\111\120", "\120\117\123", "\116\105\107", 
-"\114\120", "\103", "\115\117\111\116", "\115\117\115\115", "\117\106", "\123\106", 
+"", null, null, null, null, "\45", "\52", null, null, null, "\111\116",
+"\114\116", "\101\104\104", "\101\115", "\107\60\64", null, null, null, null, null,
+"\116", "\107\60\60", "\107\60\61", "\107\60\62", "\107\60\63", "\107\63\66",
+"\107\63\67", "\107\65\64", "\107\67\60", "\107\67\61", "\107\67\64", "\107\67\65",
+"\107\71\60", "\107\71\61", "\104\60\61", "\104\60\62", "\104\60\63", "\104", "\130",
+"\131", "\111", "\112", "\56", "\115\60\60", "\115\60\61", "\115\60\62", "\111\103",
+"\101\123", "\105\102", "\102\103", "\111\123", "\105\111", "\101", "\102", "\106\123",
+"\114", "\124", "\107", "\132", "\115", "\111\120", "\120\117\123", "\116\105\107",
+"\114\120", "\103", "\115\117\111\116", "\115\117\115\115", "\117\106", "\123\106",
 "\123\122", "\54", "\170", "\57", "\44", };
 public static final String[] lexStateNames = {
-   "DEFAULT", 
-   "TEXT_EXPECTED", 
-   "ALNUMS_EXPECTED", 
+   "DEFAULT",
+   "TEXT_EXPECTED",
+   "ALNUMS_EXPECTED",
 };
 public static final int[] jjnewLexState = {
-   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 2, 1, 1, 0, -1, -1, 0, -1, -1, -1, -1, -1, -1, 
-   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
-   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 
+   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 2, 1, 1, 0, -1, -1, 0, -1, -1, -1, -1, -1, -1,
+   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+   -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 };
 static final long[] jjtoToken = {
-   0xffffffffffffffe1L, 0x3ffL, 
+   0xffffffffffffffe1L, 0x3ffL,
 };
 static final long[] jjtoSkip = {
-   0x1eL, 0x0L, 
+   0x1eL, 0x0L,
 };
 protected SimpleCharStream input_stream;
 private final int[] jjrounds = new int[3];
@@ -664,20 +664,20 @@ int jjround;
 int jjmatchedPos;
 int jjmatchedKind;
 
-public Token getNextToken() 
+public Token getNextToken()
 {
   Token matchedToken;
   int curPos = 0;
 
   EOFLoop :
   for (;;)
-  {   
-   try   
-   {     
+  {
+   try
+   {
       curChar = input_stream.BeginToken();
-   }     
+   }
    catch(java.io.IOException e)
-   {        
+   {
       jjmatchedKind = 0;
       matchedToken = jjFillToken();
       return matchedToken;
@@ -755,7 +755,7 @@ void TokenLexicalActions(Token matchedToken)
 {
    switch(jjmatchedKind)
    {
-      default : 
+      default :
          break;
    }
 }

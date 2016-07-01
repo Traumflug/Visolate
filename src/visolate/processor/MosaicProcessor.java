@@ -40,7 +40,7 @@ public class MosaicProcessor extends Processor {
 
 //    System.out.println("processTile: " +
 //                       "(row, col) = (" + r + ", " + c + "); " +
-//                       "ul = (" + ulx + ", " + uly + "); " + 
+//                       "ul = (" + ulx + ", " + uly + "); " +
 //                       "dimensions = (" + width + ", " + height  + "); " +
 //                       "lbrt = " +
 //                       left + ", " + bottom + ", " + right + ", " + top + ")");

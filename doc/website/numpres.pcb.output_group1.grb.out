@@ -3,15 +3,15 @@ class:  visolate.Main
 args:  ../gerber/examples/numpres.pcb.output_group1.grb
 graphics device: :0.0
 pixel format 8:8:8 24-bit depth
-Comment at line 1:  Title: test, layergroup #1 
-Comment at line 2:  Creator: pcb 1.7.1.ALPHA 
-Comment at line 3:  CreationDate: Tue Jul 17 09:58:54 2001 UTC 
-Comment at line 4:  For: spe 
-Comment at line 5:  Format: Gerber/RS-274X 
-Comment at line 6:  PCB-Dimensions: 6000 5000 
-Comment at line 7:  PCB-Coordinate-Origin: lower left 
+Comment at line 1:  Title: test, layergroup #1
+Comment at line 2:  Creator: pcb 1.7.1.ALPHA
+Comment at line 3:  CreationDate: Tue Jul 17 09:58:54 2001 UTC
+Comment at line 4:  For: spe
+Comment at line 5:  Format: Gerber/RS-274X
+Comment at line 6:  PCB-Dimensions: 6000 5000
+Comment at line 7:  PCB-Coordinate-Origin: lower left
 layer name: GROUP_0
-Comment at line 11:  contains layers solder (0) GND-sldr (1) Vcc-sldr (2) 
+Comment at line 11:  contains layers solder (0) GND-sldr (1) Vcc-sldr (2)
 computing inch coords...
 making nets...
 77 nets

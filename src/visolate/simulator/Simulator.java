@@ -112,7 +112,7 @@ public class Simulator {
     metric = DEF_METRIC;
 
     arc360 = DEF_ARC360;
-    
+
     xWidth = DEF_X_BEFORE + DEF_X_AFTER;
     yWidth = DEF_Y_BEFORE + DEF_Y_AFTER;
   }
@@ -181,7 +181,7 @@ public class Simulator {
 
     if ((mode < 0) || (mode > 4))
       throw new SimulatorException("unknown mode: " + mode);
-    
+
     this.mode = mode;
   }
 
@@ -226,7 +226,7 @@ public class Simulator {
 
     if ((mode == RAPID) && (exposure != CLOSED))
       System.out.println("WARNING: rapid move with exposure open or flash");
-         
+
     if (mode == POLYGON) {
 
       throw new UnsupportedOperationException("TBD polygon mode");
@@ -241,12 +241,12 @@ public class Simulator {
 
       case RAPID:
       case LINEAR: actions.add(new Segment(aperture, p, newP)); break;
-        
+
       case CCW: addArc(newP, 1); break;
       case CW: addArc(newP, -1); break;
       }
     }
-    
+
     p = newP;
   }
 
@@ -255,7 +255,7 @@ public class Simulator {
   }
 
   public void addArc(Vertex end, int dir) {
-   
+
 //    System.err.println(((arc360) ? "360 " : "quadrant ") +
 //                       ((dir > 0) ? "CCW" : "CW") +
 //                       " arc from " + p + " to " + end);
@@ -349,7 +349,7 @@ public class Simulator {
   }
 
   private int parseX(String coord) {
-   
+
     int x = 0;
 
     if (!ignoreTrailing) {
@@ -357,13 +357,13 @@ public class Simulator {
       x = Integer.parseInt(coord);
 
     } else {
-      
+
       StringBuffer buf = new StringBuffer();
       buf.append(coord);
-      
+
       for (int pad = xWidth - coord.length(); pad > 0; pad--)
         buf.append("0");
-      
+
       x = Integer.parseInt(buf.toString());
     }
 
@@ -383,10 +383,10 @@ public class Simulator {
 
       StringBuffer buf = new StringBuffer();
       buf.append(coord);
-      
+
       for (int pad = yWidth - coord.length(); pad > 0; pad--)
         buf.append("0");
-      
+
       y = Integer.parseInt(buf.toString());
     }
 

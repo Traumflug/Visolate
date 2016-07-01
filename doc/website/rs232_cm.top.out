@@ -3,11 +3,11 @@ class:  visolate.Main
 args:  ../gerber/examples/rs232_cm.top
 graphics device: :0.0
 pixel format 8:8:8 24-bit depth
-Comment at line 2:  Mass Parameters 
-Comment at line 4:  Image 
+Comment at line 2:  Mass Parameters
+Comment at line 4:  Image
 image name: \\NCC1701LEONARDO\DINO\PANNE~DQ\RS232~CM.TOP
-Comment at line 13:  Aperture Definitions 
-Comment at line 40:  Plot Data 
+Comment at line 13:  Aperture Definitions
+Comment at line 40:  Plot Data
 computing inch coords...
 making nets...
 21 nets

@@ -49,7 +49,7 @@ public class PolygonAperture extends StandardAperture {
       x = new float[sides];
       y = new float[sides];
       angle = new double[sides];
-      
+
       computeXYAngle(x, y, angle,
                      getRadius(),
                      sides,
@@ -77,7 +77,7 @@ public class PolygonAperture extends StandardAperture {
     for (int i = 0; i < sides; i++) {
 
       double theta = Util.canonicalizeAngle(rotation + i*sector);
-      
+
       if (angle != null)
         angle[i] = theta;
 
@@ -144,27 +144,27 @@ public class PolygonAperture extends StandardAperture {
     rotation = rotation*(Math.PI/180);
 
     Collection<GeometryArray> geometries = new LinkedList<GeometryArray>();
-    
+
     float[] coords = new float[3*(sides + 2)];
-    
+
     int i = 0;
-    
+
     coords[i++] = (float) xCenter;
     coords[i++] = (float) yCenter;
     coords[i++] = 0.0f;
-    
+
     for (int j = 0; j < sides; j++) {
       coords[i++] = (float) (x[j] + xCenter);
       coords[i++] = (float) (y[j] + yCenter);
       coords[i++] = 0.0f;
     }
-    
+
     coords[i++] = (float) (x[0] + xCenter);
     coords[i++] = (float) (y[0] + yCenter);
     coords[i++] = 0.0f;
-    
+
     geometries.add(makeTFA(coords));
-  
+
     return geometries;
   }
 
@@ -173,7 +173,7 @@ public class PolygonAperture extends StandardAperture {
     x = y = null;
     angle = null;
   }
-                                   
+
   protected void inverseChanged() {
     super.inverseChanged();
     x = y = null;

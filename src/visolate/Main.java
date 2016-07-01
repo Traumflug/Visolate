@@ -32,7 +32,7 @@ import org.apache.commons.cli.*;
 public class Main extends JApplet {
 
   private static final long serialVersionUID = 1L;
-  
+
   public static final String APPNAME = "Visolate 3.1.1";
   public static final int DEF_LOC_X = 100;
   public static final int DEF_LOC_Y = 100;
@@ -53,9 +53,9 @@ public class Main extends JApplet {
             visolate.loadDemo();
           }
         });
-    
+
   }
- 
+
   // This is needed when Visolate is run as an applet.
   public void destroy() {
     visolate.destroy();
@@ -107,7 +107,7 @@ public class Main extends JApplet {
             System.err.println("Error: Too many arguments.");
             System.exit(1);
     }
-  
+
     final JFrame frame = new JFrame(APPNAME);
 
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -122,7 +122,7 @@ public class Main extends JApplet {
     newForwardKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
     frame.setFocusTraversalKeys(
         KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, newForwardKeys);
-    
+
     final Visolate visolate = new Visolate();
     visolate.commandline = commandline;
 

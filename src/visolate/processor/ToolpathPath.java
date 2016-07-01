@@ -114,7 +114,7 @@ public class ToolpathPath {
   public void setStraightTolerance(final double tolerance) {
     straightTol = tolerance;
   }
-  
+
   private boolean extendTail() {
 
     ToolpathNode next = getNext((ToolpathNode) path.getLast(), TAIL);
@@ -182,7 +182,7 @@ public class ToolpathPath {
 
     return next;
   }
-  
+
   private int oppositeDir(int d) {
     switch(d) {
     case ToolpathNode.N:
@@ -274,10 +274,10 @@ public class ToolpathPath {
   // and a red dot for each fixed node. Swap it against getGeometry() in
   // ToolpathsProcessor.getSceneGraph().
   public Geometry getPointGeometry() {
-    
+
     final float[] normalColor = { 1.0f, 1.0f, 1.0f };
     final float[] fixedColor = { 1.0f, 0.0f, 0.0f };
-    
+
     int vertexCount = path.size();
     float[] coords = new float[vertexCount*6];
 
@@ -312,19 +312,19 @@ public class ToolpathPath {
   public ToolpathNode getStartNode() {
     return (ToolpathNode) path.getFirst();
   }
-  
+
   public ToolpathNode getEndNode() {
     return (ToolpathNode) path.getLast();
   }
-  
+
   public void lockNode(ToolpathNode nodeToLock) {
-    
+
     for (ToolpathNode node : path) {
       if (node.equals(nodeToLock))
         node.setIsLocked(true);
     }
   }
-  
+
   public Point2d getStartPoint() {
 
     ToolpathNode start = (ToolpathNode) path.getFirst();
@@ -352,7 +352,7 @@ public class ToolpathPath {
   }
 
   public void optimize() {
-    
+
     // TODO: Pre-optimize by removing nodes which are on a straight line.
     //       Pretty simple, as such straight lines can be on X and Y only,
     //       so if three consecutive nodes have the same X or the same Y value,
@@ -360,10 +360,10 @@ public class ToolpathPath {
     //
     //       Start and end of longer straight lines should be fixed at start
     //       and end, so no almost-horizontal and almost-vertical lines appear?
-    
+
     LinkedList<ToolpathNode> optimizedPath = new LinkedList<ToolpathNode>();
     optimizedPath.add(path.get(0));
-    
+
     // Proceed until there are no nodes left.
     while (path.size() > 1) {
       int end = 0;
@@ -375,9 +375,9 @@ public class ToolpathPath {
       }
 
       while (end > 0) {
-        
+
         int segmentEnd = end;
-        
+
         // This algorithm is known as Douglas-Peucker Line Approximation.
         // It first lays a single path/segment from start to end, then
         // looks wether this is within tolerance. If not, it shortens the next
@@ -412,17 +412,17 @@ public class ToolpathPath {
                                     processor.toModelX(path.get(segmentEnd).x),
                                     processor.toModelY(path.get(segmentEnd).y));
           }
-          
+
           for (i = 1; i < segmentEnd; i++) {
             double deviation;
-            
+
             if (point != null)
               deviation = point.distance(processor.toModelX(path.get(i).x),
                                          processor.toModelY(path.get(i).y));
             else
               deviation = line.ptLineDist(processor.toModelX(path.get(i).x),
                                           processor.toModelY(path.get(i).y));
-            
+
             // Here we deal with the case several pixels have the about
             // same deviation. In this case, we want the middle pixel.
             if (Math.abs(deviation - maxDeviation) < straightTol / 100) {
@@ -440,16 +440,16 @@ public class ToolpathPath {
               }
             }
           }
-          
+
           if (maxDeviation <= straightTol) {
             // No intermediate node was out of tolerance -> make the segment.
             optimizedPath.add(path.get(segmentEnd));
-            
+
             // Remove processed nodes.
             for ( ; segmentEnd > 0; segmentEnd--, end--) {
               path.removeFirst();
             }
-            
+
             break;
           }
           else {
@@ -459,12 +459,12 @@ public class ToolpathPath {
         }
       }
     }
-    
+
     path = optimizedPath;
   }
 
   private ToolpathsProcessor processor = null;
-  
+
   int[] dir = new int[2];
 
   final int HEAD = 0;
@@ -473,7 +473,7 @@ public class ToolpathPath {
   private LinkedList<ToolpathNode> path = new LinkedList<ToolpathNode>();
 
   GeometryArray geometry;
-  
+
   private double straightTol;
 
 }

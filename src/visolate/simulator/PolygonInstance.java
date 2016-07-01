@@ -42,10 +42,10 @@ public class PolygonInstance extends PrimitiveInstance {
   private void getPerimeter() {
 
     if (xCoord == null) {
-      
+
       xCoord = new float[n];
       yCoord = new float[n];
-      
+
       PolygonAperture.computeXYAngle(xCoord, yCoord,
                                      null,
                                      getRadius(),
@@ -78,7 +78,7 @@ public class PolygonInstance extends PrimitiveInstance {
     super.offsetChanged();
     xCoord = yCoord = null;
   }
-                                   
+
   protected void inverseChanged() {
     super.inverseChanged();
     xCoord = yCoord = null;

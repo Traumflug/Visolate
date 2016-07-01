@@ -136,7 +136,7 @@ public abstract class Processor {
         double right = left + canvasWidth;
         if (right > mosaicBounds.width)
           right = mosaicBounds.width;
-          
+
         double bottom = top - canvasHeight;
         if (bottom < 0.0)
           bottom = 0.0;
@@ -200,7 +200,7 @@ public abstract class Processor {
     }
 
     processCompleted();
-    
+
     model.setToolDiameter(toolDiameterWas);
     model.setTranslucent2D(wasTranslucent);
     model.enableGCodeGeometry(gcodeGeometryWas);
@@ -213,13 +213,13 @@ public abstract class Processor {
     model.enableControls(true);
     display.processFinished();
     visolate.processFinished();
-    
+
     long endTime = System.currentTimeMillis();
     System.out.println((new Date(endTime)).toString() +
                        ": " + processName + " finished (" +
                        (endTime-startTime) + "ms)");
   }
- 
+
   protected void processStarted() {}
 
   protected void processInterrupted() {}
@@ -257,7 +257,7 @@ public abstract class Processor {
 
   protected int canvasWidthPels;
   protected int canvasHeightPels;
-  
+
   protected double rows;
   protected double cols;
 

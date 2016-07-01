@@ -42,7 +42,7 @@ import java.text.*;
 public class Model extends JPanel {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 214293510166172826L;
 

@@ -42,7 +42,7 @@ public class MacroAperture extends Aperture {
   public String toString() {
 
     StringBuffer buf = new StringBuffer();
-    
+
     buf.append("Aperture ");
     buf.append(Integer.toString(number));
     buf.append(": macro");

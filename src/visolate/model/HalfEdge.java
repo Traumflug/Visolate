@@ -76,12 +76,12 @@ public class HalfEdge {
   }
 
   public double angleTo(HalfEdge he) {
-    
+
     double myDir = getEndDirection();
     double hisDir = he.getStartDirection();
 
     double himToMe;
-    
+
     if (myDir >= hisDir)
       himToMe = myDir - hisDir;
     else

@@ -41,24 +41,24 @@ public class SaveMosaic extends MosaicProcessor {
     this.individualTiles = individualTiles;
 
     fileName = mosaicFile.toString();
-    
+
     int dot = fileName.lastIndexOf(".");
-    
+
     if ((dot < 0) || (dot == fileName.length()-1)) {
       System.err.println("unspecified format (give a suffix like \".png\")");
       return;
     }
-    
+
     fileNameBase = fileName.substring(0, dot);
     fileNameSuffix = fileName.substring(dot+1, fileName.length());
-    
+
     Iterator<ImageWriter> it = ImageIO.getImageWritersBySuffix(fileNameSuffix);
-    
+
     if (!it.hasNext()) {
       System.err.println("cannot write format \"" + fileNameSuffix + "\"");
       return;
     }
-    
+
     imageWriter = (ImageWriter) it.next();
   }
 
@@ -83,16 +83,16 @@ public class SaveMosaic extends MosaicProcessor {
     for (int i = 0; i < 3; i++)
       if (rText.length() < 3)
         rText = "0" + rText;
-    
+
     String cText = Integer.toString(c);
     for (int i = 0; i < 3; i++)
       if (cText.length() < 3)
         cText = "0" + cText;
-    
+
     File file = new File(fileNameBase +
                          "-" + rText + "-" + cText +
                          "." + fileNameSuffix);
-    
+
     if ((width == tile.getWidth()) && (height == tile.getHeight())) {
       saveFile(file, tile);
     } else {
