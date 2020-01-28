@@ -30,6 +30,7 @@ import java.awt.event.*;
 import java.text.*;
 import javax.media.j3d.*;
 import javax.vecmath.*;
+import com.sun.j3d.utils.universe.SimpleUniverse;
 
 public class Display extends JPanel {
 
@@ -62,13 +63,9 @@ public class Display extends JPanel {
   public static final int MAX_DPI = 10000;
 
   public static final int ZOOM_FIELD_WIDTH = 6;
-
   public static final int LOC_FRACTION_DIGITS = 4;
-
   public static final int MIN_FRAME_TIME = 1000 / 50;
-
-  public static final BoundingSphere BOUNDS = 
-      new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.MAX_VALUE);
+  public static final BoundingSphere BOUNDS = new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.MAX_VALUE);
 
   public static final boolean IMMEDIATE_MODE = false;
 
@@ -83,6 +80,7 @@ public class Display extends JPanel {
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
     panel3D = new JPanel();
+
     panel3D.setMinimumSize(new Dimension(0, 0));
     panel3D.setPreferredSize(new Dimension(DEF_WIDTH, DEF_3D_HEIGHT));
     panel3D.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
@@ -207,8 +205,44 @@ public class Display extends JPanel {
       locale.addBranchGraph(rootBG);
 
     locale.addBranchGraph(viewBG);
+    
+    // Graphics Configuration setup    
+    GraphicsConfiguration gc = SimpleUniverse.getPreferredConfiguration();
+    if (gc == null)
+      throw new RuntimeException("FATAL ERROR: failed to initialize 3D graphics");
 
-    // nav controls
+//  Exception in thread "main" java.lang.RuntimeException: Unimplemented
+//  at javax.media.j3d.JoglGraphicsConfiguration.getColorModel(JoglGraphicsConfiguration.java:119)
+//    rBits = gc.getColorModel().getComponentSize(0);
+//    gBits = gc.getColorModel().getComponentSize(1);
+//    bBits = gc.getColorModel().getComponentSize(2);
+    rBits = 4;
+    gBits = 4;
+    bBits = 4;
+
+//  dBits = gct.getDepthSize();
+
+    rCeil = 1 << rBits;
+    gCeil = 1 << gBits;
+    bCeil = 1 << bBits;
+
+//    System.out.println("ceilings: " +
+//                       rCeil + ", " + gCeil + ", " + bCeil);
+
+    rSpread = 256 / rCeil;
+    gSpread = 256 / gCeil;
+    bSpread = 256 / bCeil;
+
+//    System.out.println("spreads: " +
+//                       rSpread + ", " + gSpread + ", " + bSpread);
+
+//    System.out.println("pixel format " + rBits + ":" + gBits + ":" + bBits + " " + dBits + "-bit depth");
+    
+    canvas3D = new MyCanvas3D(gc);
+    view.addCanvas3D(canvas3D);
+    panel3D.add(canvas3D, "Center");
+
+    // navigation controls
 
     Box navBox = Box.createVerticalBox();
     navBox.setBorder(BorderFactory.createTitledBorder("Navigation"));
@@ -379,13 +413,13 @@ public class Display extends JPanel {
     view.repaint();
   }
 
-  public void addNotify() {
-    super.addNotify();
-
-    canvas3D = new MyCanvas3D(getGC(getParent()));
-    view.addCanvas3D(canvas3D);
-    panel3D.add(canvas3D, "Center");
-  }
+//  public void addNotify() {
+//    super.addNotify();
+//
+//    canvas3D = new MyCanvas3D(getGC(getParent()));
+//    view.addCanvas3D(canvas3D);
+//    panel3D.add(canvas3D, "Center");
+//  }
 
   private class RenderThread extends Thread {
 

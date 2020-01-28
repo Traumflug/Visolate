@@ -53,8 +53,11 @@ public class Visolate extends JPanel implements SimulatorUI {
    * kept here so it is available in the invokeLater Runnable in Main
    */
   public CommandLine commandline;
-  public int processstatus;
   public boolean auto_mode;
+  public int processstatus;
+  public static final int STATUS_INIT = 0;
+  public static final int STATUS_AUTOMATED_TOPOLOGY_FIXING = 1;
+  public static final int STATUS_AUTOMATED_TOOLPATH_CREATION = 2;
 
   public Visolate() {
     this(null);
@@ -62,7 +65,8 @@ public class Visolate extends JPanel implements SimulatorUI {
 
   public Visolate(File file) {
 
-    processstatus = 0;
+    processstatus = STATUS_INIT;
+
     display = new Display(this);
     simulator = new Simulator(this);
     model = new Model(this);
@@ -989,10 +993,12 @@ public class Visolate extends JPanel implements SimulatorUI {
 
     processor = null;
 
-    if (processstatus == 1) { // returning from automated topology fixing
+    if (processstatus == STATUS_AUTOMATED_TOPOLOGY_FIXING) {
+      // returning from automated topology fixing
       processstatus = 2;
       computeToolpaths();
-    } else if (processstatus == 2) { // returning from automated toolpath creation
+    } else if (processstatus == STATUS_AUTOMATED_TOOLPATH_CREATION) {
+      // returning from automated toolpath creation
       System.out.println("Writing to gcode file: " + gcodeField.getText().trim());
       saveGCode();
       System.out.println("Exiting, all work done");

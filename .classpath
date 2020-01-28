@@ -4,8 +4,8 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Java3d"/>
 	<classpathentry kind="lib" path="lib/commons-cli-1.2.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/usr/share/java/vecmath.jar"/>
-	<classpathentry kind="lib" path="/usr/share/java/j3dcore.jar"/>
-	<classpathentry kind="lib" path="/usr/share/java/j3dutils.jar"/>
+	<classpathentry kind="lib" path="/Users/johan/Documents/Programmeren/Diverse_GIT_repositories/Visolate/lib/vecmath.jar"/>
+	<classpathentry kind="lib" path="/Users/johan/Documents/Programmeren/Diverse_GIT_repositories/Visolate/lib/j3dcore.jar"/>
+	<classpathentry kind="lib" path="/Users/johan/Documents/Programmeren/Diverse_GIT_repositories/Visolate/lib/j3dutils.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
