@@ -31,11 +31,8 @@ public class FatnessProcessor extends Processor {
     super(visolate);
   }
 
-  public void processTile(int r, int c,
-                          int ulx, int uly,
-                          int width, int height,
-                          double left, double bottom,
-                          double right, double top) {
+  public void processTile(int r, int c, int ulx, int uly, int width, int height, double left, double bottom,
+      double right, double top) {
 
 //    System.out.println("processTile: " +
 //                       "(row, col) = (" + r + ", " + c + "); " +
@@ -50,8 +47,8 @@ public class FatnessProcessor extends Processor {
     try {
 
 //      display.getStill(tile);
-      tile = display.getStill(); //work around j3d bug
-      buffer = tile.getRaster().getDataBuffer(); //work around j3d bug
+      tile = display.getStill(); // work around j3d bug
+      buffer = tile.getRaster().getDataBuffer(); // work around j3d bug
 
       for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
@@ -72,14 +69,14 @@ public class FatnessProcessor extends Processor {
             return;
         }
       }
-      
+
     } catch (InterruptedException e) {
-      thread.interrupt(); //reset interrupt status
+      thread.interrupt(); // reset interrupt status
     }
   }
 
   private int getPixel(int x, int y) {
-    return buffer.getElem(y*canvasWidthPels + x);
+    return buffer.getElem(y * canvasWidthPels + x);
   }
 
   protected void processStarted() {
@@ -96,7 +93,7 @@ public class FatnessProcessor extends Processor {
 
     Collection<Net> nets = model.getNets();
 
-    for (Net net :nets) {
+    for (Net net : nets) {
       net.resetArea(dpi);
     }
   }
@@ -114,7 +111,7 @@ public class FatnessProcessor extends Processor {
 
     double avg = 0.0;
     int n = 0;
-    for (Iterator<Net> it = nets.iterator(); it.hasNext(); ) {
+    for (Iterator<Net> it = nets.iterator(); it.hasNext();) {
 
       Net net = (Net) it.next();
 
@@ -123,7 +120,7 @@ public class FatnessProcessor extends Processor {
 
       if (net.getArea() <= 0.0)
         continue;
-        
+
       avg += net.getFatness();
       n++;
 

@@ -32,46 +32,38 @@ import visolate.*;
 
 public class SaveMosaic extends MosaicProcessor {
 
-  public SaveMosaic(Visolate visolate,
-                    File mosaicFile,
-                    boolean individualTiles) {
+  public SaveMosaic(Visolate visolate, File mosaicFile, boolean individualTiles) {
     super(visolate);
 
     this.mosaicFile = mosaicFile;
     this.individualTiles = individualTiles;
 
     fileName = mosaicFile.toString();
-    
+
     int dot = fileName.lastIndexOf(".");
-    
-    if ((dot < 0) || (dot == fileName.length()-1)) {
+
+    if ((dot < 0) || (dot == fileName.length() - 1)) {
       System.err.println("unspecified format (give a suffix like \".png\")");
       return;
     }
-    
+
     fileNameBase = fileName.substring(0, dot);
-    fileNameSuffix = fileName.substring(dot+1, fileName.length());
-    
+    fileNameSuffix = fileName.substring(dot + 1, fileName.length());
+
     Iterator<ImageWriter> it = ImageIO.getImageWritersBySuffix(fileNameSuffix);
-    
+
     if (!it.hasNext()) {
       System.err.println("cannot write format \"" + fileNameSuffix + "\"");
       return;
     }
-    
+
     imageWriter = (ImageWriter) it.next();
   }
 
-  public void processTile(int r, int c,
-                          int ulx, int uly,
-                          int width, int height,
-                          double left, double bottom,
-                          double right, double top) {
+  public void processTile(int r, int c, int ulx, int uly, int width, int height, double left, double bottom,
+      double right, double top) {
 
-    super.processTile(r, c,
-                      ulx, uly,
-                      width, height,
-                      left, bottom, right, top);
+    super.processTile(r, c, ulx, uly, width, height, left, bottom, right, top);
 
     if (!individualTiles)
       return;
@@ -83,20 +75,18 @@ public class SaveMosaic extends MosaicProcessor {
     for (int i = 0; i < 3; i++)
       if (rText.length() < 3)
         rText = "0" + rText;
-    
+
     String cText = Integer.toString(c);
     for (int i = 0; i < 3; i++)
       if (cText.length() < 3)
         cText = "0" + cText;
-    
-    File file = new File(fileNameBase +
-                         "-" + rText + "-" + cText +
-                         "." + fileNameSuffix);
-    
+
+    File file = new File(fileNameBase + "-" + rText + "-" + cText + "." + fileNameSuffix);
+
     if ((width == tile.getWidth()) && (height == tile.getHeight())) {
       saveFile(file, tile);
     } else {
-      BufferedImage cropTile  = display.makeBufferedImage(width, height);
+      BufferedImage cropTile = display.makeBufferedImage(width, height);
       Graphics2D cropG2D = (Graphics2D) (cropTile.getGraphics());
       cropG2D.drawRenderedImage(tile, new AffineTransform());
       cropG2D.dispose();
@@ -125,8 +115,7 @@ public class SaveMosaic extends MosaicProcessor {
       imageWriter.write(bufferedImage);
       outputStream.close();
     } catch (IOException e) {
-      System.err.println("I/O Exception writing \"" + file + "\": " +
-                         e.getMessage());
+      System.err.println("I/O Exception writing \"" + file + "\": " + e.getMessage());
     }
   }
 

@@ -36,387 +36,378 @@ import visolate.processor.GCodeFileWriter;
 import visolate.processor.GCodeFileWriter.GCodeStroke;
 
 /**
- * The ToolpathsProcessor generates the content for a  g-code file.
+ * The ToolpathsProcessor generates the content for a g-code file.
  */
 public class ToolpathsProcessor extends MosaicProcessor {
 
-	public static final Color3f ORIGIN_COLOR = new Color3f(1.0f, 0.0f, 1.0f);
-	public static final float ORIGIN_TICK = 0.1f;
+  public static final Color3f ORIGIN_COLOR = new Color3f(1.0f, 0.0f, 1.0f);
+  public static final float ORIGIN_TICK = 0.1f;
 
-	public static final int VORONOI_MODE = 0;
-	public static final int OUTLINE_MODE = 1;
+  public static final int VORONOI_MODE = 0;
+  public static final int OUTLINE_MODE = 1;
 
-	public ToolpathsProcessor(final Visolate visolate, final int mode) {
-		super(visolate);
-		this.mode = mode;
-	}
+  public ToolpathsProcessor(final Visolate visolate, final int mode) {
+    super(visolate);
+    this.mode = mode;
+  }
 
-	public void processTile(int r, int c,
-			int ulx, int uly,
-			int width, int height,
-			double left, double bottom,
-			double right, double top) {
+  public void processTile(int r, int c, int ulx, int uly, int width, int height, double left, double bottom,
+      double right, double top) {
 
-		super.processTile(r, c,
-				ulx, uly,
-				width, height,
-				left, bottom, right, top);
-	}
+    super.processTile(r, c, ulx, uly, width, height, left, bottom, right, top);
+  }
 
-	protected void processStarted() {
-		super.processStarted();
+  protected void processStarted() {
+    super.processStarted();
 
-		java.awt.image.Raster raster = mosaic.getRaster();
-		buffer = raster.getDataBuffer();
+    java.awt.image.Raster raster = mosaic.getRaster();
+    buffer = raster.getDataBuffer();
 
-		switch (mode) {
+    switch (mode) {
     // The sender will restore these when done.
-		case VORONOI_MODE:
-			System.out.println("generating voronoi toolpaths");
-			model.enableBorderGeometry(true);
-			model.enableLineGeometry(false);
-			model.enableVoronoiGeometry(true);
-			model.enableFlatGeometry(true);
-			model.enableGCodeGeometry(false);
-			break;
-		case OUTLINE_MODE:
-			System.out.println("generating outline toolpaths");
-			model.enableBorderGeometry(false);
-			model.enableLineGeometry(false);
-			model.enableVoronoiGeometry(false);
-			model.enableFlatGeometry(true);
-			model.enableGCodeGeometry(false);
-			break;
-		default:
-			 System.out.println("no mode!");
-			 return;
-		}
+    case VORONOI_MODE:
+      System.out.println("generating voronoi toolpaths");
+      model.enableBorderGeometry(true);
+      model.enableLineGeometry(false);
+      model.enableVoronoiGeometry(true);
+      model.enableFlatGeometry(true);
+      model.enableGCodeGeometry(false);
+      break;
+    case OUTLINE_MODE:
+      System.out.println("generating outline toolpaths");
+      model.enableBorderGeometry(false);
+      model.enableLineGeometry(false);
+      model.enableVoronoiGeometry(false);
+      model.enableFlatGeometry(true);
+      model.enableGCodeGeometry(false);
+      break;
+    default:
+      System.out.println("no mode!");
+      return;
+    }
 
-		model.setTranslucent2D(false);
+    model.setTranslucent2D(false);
 
-		model.clearPaths();
-		model.clearGCode();
-	}
+    model.clearPaths();
+    model.clearGCode();
+  }
 
-	protected void processCompleted() {
+  protected void processCompleted() {
 
-		super.processCompleted();
+    super.processCompleted();
 
-		tile = null;
+    tile = null;
 
-		extractNodes();
+    extractNodes();
 
-		if (thread.isInterrupted())
-			return;
+    if (thread.isInterrupted())
+      return;
 
-		makePaths();
+    makePaths();
 
-		if (thread.isInterrupted())
-			return;
-		
-		lockCrossingNodes();
-		
-		if (thread.isInterrupted())
-		  return;
+    if (thread.isInterrupted())
+      return;
 
-		optimizePaths();
+    lockCrossingNodes();
 
-		if (thread.isInterrupted())
-			return;
+    if (thread.isInterrupted())
+      return;
 
-		model.setPaths(getSceneGraph());
-	}
+    optimizePaths();
 
-	private void extractNodes() {
+    if (thread.isInterrupted())
+      return;
 
-		System.out.println("extracting nodes...");
+    model.setPaths(getSceneGraph());
+  }
 
-		for (int y = 0; y < mosaicHeight; y++) {
+  private void extractNodes() {
 
-			for (int x = 0; x < mosaicWidth; x++) {
+    System.out.println("extracting nodes...");
 
-				int color = getColor(x, y);
-				int lColor = getColor(x-1, y);
-				int uColor = getColor(x, y-1);
+    for (int y = 0; y < mosaicHeight; y++) {
 
-				ToolpathNode n = null;
+      for (int x = 0; x < mosaicWidth; x++) {
 
-				if ((x > 0) && (lColor != color)) {
+        int color = getColor(x, y);
+        int lColor = getColor(x - 1, y);
+        int uColor = getColor(x, y - 1);
 
-					if (n == null)
-						n = getNode(x, y);
+        ToolpathNode n = null;
 
-					ToolpathNode o = getNode(x, y+1);
+        if ((x > 0) && (lColor != color)) {
 
-					n.south = o;
+          if (n == null)
+            n = getNode(x, y);
 
-					if (o != null)
-						o.north = n;
-				}
+          ToolpathNode o = getNode(x, y + 1);
 
-				if ((y > 0) && (uColor != color)) {
+          n.south = o;
 
-					if (n == null)
-						n = getNode(x, y);
+          if (o != null)
+            o.north = n;
+        }
 
-					ToolpathNode o = getNode(x+1, y);
+        if ((y > 0) && (uColor != color)) {
 
-					n.east = o;
+          if (n == null)
+            n = getNode(x, y);
 
-					if (o != null)
-						o.west = n;
-				}
-			}
+          ToolpathNode o = getNode(x + 1, y);
 
-			if (thread.isInterrupted())
-				return;
-		}
+          n.east = o;
 
-		System.out.println(nodes.size() + " nodes");
+          if (o != null)
+            o.west = n;
+        }
+      }
 
-		mosaic = null;
-	}
+      if (thread.isInterrupted())
+        return;
+    }
 
-	private void makePaths() {
+    System.out.println(nodes.size() + " nodes");
 
-		System.out.println("making paths...");
+    mosaic = null;
+  }
 
-		Set<ToolpathNode> nodes = this.nodes.keySet();
+  private void makePaths() {
 
-		while (!nodes.isEmpty()) {
-		  
-			paths.add(new ToolpathPath(this, nodes.iterator().next()));
+    System.out.println("making paths...");
 
-			if (thread.isInterrupted()) {
-				return;
-			}
-		}
+    Set<ToolpathNode> nodes = this.nodes.keySet();
 
-		System.out.println(paths.size() + " paths");
+    while (!nodes.isEmpty()) {
 
-		reportPathStats();
-	}
+      paths.add(new ToolpathPath(this, nodes.iterator().next()));
 
-	private void lockCrossingNodes() {
-	  
-	   for (ToolpathPath pathToLock : paths) {
-	     // Don't exclude pathToFix == path, as paths can be self-intersecting.
-	     for (ToolpathPath path : paths) {
-	       pathToLock.lockNode(path.getStartNode());
-	       pathToLock.lockNode(path.getEndNode());
-	     }
-	   }
-	}
-	
-	private void reportPathStats() {
+      if (thread.isInterrupted()) {
+        return;
+      }
+    }
 
-		double length = 0;
-		int segments = 0;
-		for (ToolpathPath path : paths) {
-			length += path.length();
-			segments += path.numPathNodes();
-		}
+    System.out.println(paths.size() + " paths");
 
-		System.out.println("total length: " + length);
-		System.out.println("total segments: " + segments);
-	}
+    reportPathStats();
+  }
 
-	private void optimizePaths() {
+  private void lockCrossingNodes() {
 
-		System.out.println("optimizing paths...");
+    for (ToolpathPath pathToLock : paths) {
+      // Don't exclude pathToFix == path, as paths can be self-intersecting.
+      for (ToolpathPath path : paths) {
+        pathToLock.lockNode(path.getStartNode());
+        pathToLock.lockNode(path.getEndNode());
+      }
+    }
+  }
 
-		for (ToolpathPath path : paths) {
-		  
+  private void reportPathStats() {
+
+    double length = 0;
+    int segments = 0;
+    for (ToolpathPath path : paths) {
+      length += path.length();
+      segments += path.numPathNodes();
+    }
+
+    System.out.println("total length: " + length);
+    System.out.println("total segments: " + segments);
+  }
+
+  private void optimizePaths() {
+
+    System.out.println("optimizing paths...");
+
+    for (ToolpathPath path : paths) {
+
       // TODO: This "straightTolerance" is actually an very important value,
-      //       it tells the optimizer how close the optimized path should
-      //       match the original, exact path. At such importance,
-      //       it should definitely be user-configurable by a GUI text field.
-		  path.setStraightTolerance(2.0/((double) dpi));
-			path.optimize();
+      // it tells the optimizer how close the optimized path should
+      // match the original, exact path. At such importance,
+      // it should definitely be user-configurable by a GUI text field.
+      path.setStraightTolerance(2.0 / ((double) dpi));
+      path.optimize();
 
-			if (thread.isInterrupted())
-				return;
-		}
+      if (thread.isInterrupted())
+        return;
+    }
 
-		reportPathStats();
-	}
+    reportPathStats();
+  }
 
-	private int getColor(int x, int y) {
+  private int getColor(int x, int y) {
 
-		if (x < 0)
-			return 0;
+    if (x < 0)
+      return 0;
 
-		if (y < 0)
-			return 0;
+    if (y < 0)
+      return 0;
 
-		if (x >= mosaicWidth)
-			return 0;
+    if (x >= mosaicWidth)
+      return 0;
 
-		if (y >= mosaicHeight)
-			return 0;
+    if (y >= mosaicHeight)
+      return 0;
 
-		return buffer.getElem(y*mosaicWidth + x) & 0xffffff;
-	}
+    return buffer.getElem(y * mosaicWidth + x) & 0xffffff;
+  }
 
-	private ToolpathNode getNode(int x, int y) {
+  private ToolpathNode getNode(int x, int y) {
 
-		if (x < 0)
-			return null;
+    if (x < 0)
+      return null;
 
-		if (y < 0)
-			return null;
+    if (y < 0)
+      return null;
 
-		if (x >= mosaicWidth)
-			return null;
+    if (x >= mosaicWidth)
+      return null;
 
-		if (y >= mosaicHeight)
-			return null;
+    if (y >= mosaicHeight)
+      return null;
 
-		ToolpathNode key = new ToolpathNode(x, y);
+    ToolpathNode key = new ToolpathNode(x, y);
 
-		ToolpathNode node = (ToolpathNode) nodes.get(key);
+    ToolpathNode node = (ToolpathNode) nodes.get(key);
 
-		if (node == null) {
-			node = key;
-			nodes.put(key, node);
-		}
+    if (node == null) {
+      node = key;
+      nodes.put(key, node);
+    }
 
-		return node;
-	}
-	
-	public BranchGroup getSceneGraph() {
+    return node;
+  }
 
-		if (sceneBG == null) {
+  public BranchGroup getSceneGraph() {
 
-			Shape3D shape = new Shape3D();
-			shape.setPickable(false);
+    if (sceneBG == null) {
 
-			for (Iterator<ToolpathPath> it = paths.iterator(); it.hasNext(); ) {
-				shape.addGeometry(it.next().getGeometry());
+      Shape3D shape = new Shape3D();
+      shape.setPickable(false);
+
+      for (Iterator<ToolpathPath> it = paths.iterator(); it.hasNext();) {
+        shape.addGeometry(it.next().getGeometry());
 //				shape.addGeometry(it.next().getPointGeometry()); // nomally commented out
-			}
+      }
 
-			sceneBG = new BranchGroup();
-			sceneBG.setPickable(false);
-			sceneBG.setCapability(BranchGroup.ALLOW_DETACH);
-			sceneBG.addChild(shape);
-		}
+      sceneBG = new BranchGroup();
+      sceneBG.setPickable(false);
+      sceneBG.setCapability(BranchGroup.ALLOW_DETACH);
+      sceneBG.addChild(shape);
+    }
 
-		return sceneBG;
-	}
+    return sceneBG;
+  }
 
-	public float toModelX(int x) {
-		return (float) (mosaicBounds.x + x/((float) dpi));
-	}
+  public float toModelX(int x) {
+    return (float) (mosaicBounds.x + x / ((float) dpi));
+  }
 
-	public float toModelY(int y) {
-		return (float) (mosaicBounds.y + modelHeight-y/((float) dpi));
-	}
+  public float toModelY(int y) {
+    return (float) (mosaicBounds.y + modelHeight - y / ((float) dpi));
+  }
 
-	private ToolpathPath getClosestPath(Collection<ToolpathPath> paths, Point3d p) {
+  private ToolpathPath getClosestPath(Collection<ToolpathPath> paths, Point3d p) {
 
-		double minDist = Double.POSITIVE_INFINITY;
-		ToolpathPath closest = null;
+    double minDist = Double.POSITIVE_INFINITY;
+    ToolpathPath closest = null;
 
-		for (ToolpathPath path : paths) {
+    for (ToolpathPath path : paths) {
 
-			double dist = new Point2d(p.x, p.y).distance(path.getStartPoint());
+      double dist = new Point2d(p.x, p.y).distance(path.getStartPoint());
 
-			if (dist < minDist) {
-				minDist = dist;
-				closest = path;
-			}
-		}
+      if (dist < minDist) {
+        minDist = dist;
+        closest = path;
+      }
+    }
 
-		return closest;
-	}
+    return closest;
+  }
 
-	public void writeGCode(GCodeFileWriter w) throws IOException {
+  public void writeGCode(GCodeFileWriter w) throws IOException {
 
-		model.clearGCode();
+    model.clearGCode();
 
     w.preAmble();
 
-		Collection<ToolpathPath> paths = new LinkedList<ToolpathPath>();
-		paths.addAll(this.paths);
+    Collection<ToolpathPath> paths = new LinkedList<ToolpathPath>();
+    paths.addAll(this.paths);
 
     while (!paths.isEmpty()) {
-      
+
       ToolpathPath closestPath = getClosestPath(paths, w.getCurrentPosition());
-      
+
       closestPath.writeGCode(w);
       paths.remove(closestPath);
     }
-		
-		w.postAmble();
-		
-		List<GCodeStroke>gCodeStrokes = w.getGCodeStrokes();
 
-		int vertexCount = 2*gCodeStrokes.size() + 4;
-		float[] coords = new float[6*vertexCount];
+    w.postAmble();
 
-		Point3f p3f = new Point3f(0.0f, 0.0f, Net.GCODE_Z_MIN);
+    List<GCodeStroke> gCodeStrokes = w.getGCodeStrokes();
 
-		int i = 0;
+    int vertexCount = 2 * gCodeStrokes.size() + 4;
+    float[] coords = new float[6 * vertexCount];
 
-		for (GCodeStroke stroke : gCodeStrokes) {
+    Point3f p3f = new Point3f(0.0f, 0.0f, Net.GCODE_Z_MIN);
 
-			coords[i++] = stroke.color.x;
-			coords[i++] = stroke.color.y;
-			coords[i++] = stroke.color.z;
+    int i = 0;
 
-			coords[i++] = p3f.x;
-			coords[i++] = p3f.y;
-			coords[i++] = p3f.z;
+    for (GCodeStroke stroke : gCodeStrokes) {
 
-			p3f = stroke.target;
+      coords[i++] = stroke.color.x;
+      coords[i++] = stroke.color.y;
+      coords[i++] = stroke.color.z;
 
-			coords[i++] = stroke.color.x;
-			coords[i++] = stroke.color.y;
-			coords[i++] = stroke.color.z;
+      coords[i++] = p3f.x;
+      coords[i++] = p3f.y;
+      coords[i++] = p3f.z;
 
-			coords[i++] = p3f.x;
-			coords[i++] = p3f.y;
-			coords[i++] = p3f.z;
-		}
+      p3f = stroke.target;
 
-		float[] h = new float[] {-1, 1, 0, 0};
-		float[] v = new float[] {0, 0, -1, 1};
+      coords[i++] = stroke.color.x;
+      coords[i++] = stroke.color.y;
+      coords[i++] = stroke.color.z;
 
-		for (int j = 0; j < 4; j++) {
-			coords[i++] = ORIGIN_COLOR.x;
-			coords[i++] = ORIGIN_COLOR.y;
-			coords[i++] = ORIGIN_COLOR.z;
+      coords[i++] = p3f.x;
+      coords[i++] = p3f.y;
+      coords[i++] = p3f.z;
+    }
 
-			coords[i++] = h[j]*ORIGIN_TICK;
-			coords[i++] = v[j]*ORIGIN_TICK;
-			coords[i++] = Net.GCODE_Z_MIN;
-		}
+    float[] h = new float[] { -1, 1, 0, 0 };
+    float[] v = new float[] { 0, 0, -1, 1 };
 
-		GeometryArray gCodeGeometry = new LineArray(vertexCount,
-				GeometryArray.COORDINATES |
-				GeometryArray.COLOR_3 |
-				GeometryArray.INTERLEAVED |
-				GeometryArray.BY_REFERENCE);
-		gCodeGeometry.setInterleavedVertices(coords);
+    for (int j = 0; j < 4; j++) {
+      coords[i++] = ORIGIN_COLOR.x;
+      coords[i++] = ORIGIN_COLOR.y;
+      coords[i++] = ORIGIN_COLOR.z;
 
-		Shape3D gCodeS3D = new Shape3D();
-		gCodeS3D.setGeometry(gCodeGeometry);
+      coords[i++] = h[j] * ORIGIN_TICK;
+      coords[i++] = v[j] * ORIGIN_TICK;
+      coords[i++] = Net.GCODE_Z_MIN;
+    }
 
-		BranchGroup gCodeBG = new BranchGroup();
-		gCodeBG.setPickable(false);
-		gCodeBG.setCapability(BranchGroup.ALLOW_DETACH);
-		gCodeBG.addChild(gCodeS3D);
+    GeometryArray gCodeGeometry = new LineArray(vertexCount,
+        GeometryArray.COORDINATES | GeometryArray.COLOR_3 | GeometryArray.INTERLEAVED | GeometryArray.BY_REFERENCE);
+    gCodeGeometry.setInterleavedVertices(coords);
 
-		model.setGCode(gCodeBG);
-	}
+    Shape3D gCodeS3D = new Shape3D();
+    gCodeS3D.setGeometry(gCodeGeometry);
 
-	public Map<ToolpathNode, ToolpathNode> nodes = new LinkedHashMap<ToolpathNode, ToolpathNode>();
-	private List<ToolpathPath> paths = new LinkedList<ToolpathPath>();
+    BranchGroup gCodeBG = new BranchGroup();
+    gCodeBG.setPickable(false);
+    gCodeBG.setCapability(BranchGroup.ALLOW_DETACH);
+    gCodeBG.addChild(gCodeS3D);
 
-	private DataBuffer buffer;
+    model.setGCode(gCodeBG);
+  }
 
-	private BranchGroup sceneBG = null;
-	
-	private int mode;
+  public Map<ToolpathNode, ToolpathNode> nodes = new LinkedHashMap<ToolpathNode, ToolpathNode>();
+  private List<ToolpathPath> paths = new LinkedList<ToolpathPath>();
+
+  private DataBuffer buffer;
+
+  private BranchGroup sceneBG = null;
+
+  private int mode;
 }
