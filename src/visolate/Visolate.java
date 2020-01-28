@@ -48,1066 +48,1055 @@ public class Visolate extends JPanel implements SimulatorUI {
 
   private static final long serialVersionUID = 1L;
 
-	public static final String DEMO_FILE = "example.grb";
-	/**
-	 * kept here so it is available in the invokeLater Runnable in Main
-	 */
-	public CommandLine commandline;
-	public int processstatus;
-	public boolean auto_mode;
+  public static final String DEMO_FILE = "example.grb";
+  /**
+   * kept here so it is available in the invokeLater Runnable in Main
+   */
+  public CommandLine commandline;
+  public int processstatus;
+  public boolean auto_mode;
 
-	public Visolate() {
-		this(null);
-	}
+  public Visolate() {
+    this(null);
+  }
 
-	public Visolate(File file) {
+  public Visolate(File file) {
 
-		processstatus=0;
-		display = new Display(this);
-		simulator = new Simulator(this);
-		model = new Model(this);
-		// TODO: get a toolpathsProcessor here, too, and get rid of myToolpathsProcessor.
-		gCodeWriter = new GCodeFileWriter();
+    processstatus = 0;
+    display = new Display(this);
+    simulator = new Simulator(this);
+    model = new Model(this);
+    // TODO: get a toolpathsProcessor here, too, and get rid of
+    // myToolpathsProcessor.
+    gCodeWriter = new GCodeFileWriter();
 
-		setBackground(Color.WHITE);
-		setOpaque(true);
+    setBackground(Color.WHITE);
+    setOpaque(true);
 
-		Dimension d;
+    Dimension d;
 
+    Box processingBox = getProcessingBox();
 
-		Box processingBox = getProcessingBox();
+    Box box = Box.createVerticalBox();
 
+    box.add(getLoadFileBox());
+    box.add(display);
+    box.add(model);
+    box.add(getGCodeOptionsBox());
+    box.add(processingBox);
 
-		Box box = Box.createVerticalBox();
+    setLayout(new BorderLayout());
+    add(box, "Center");
 
-		box.add(getLoadFileBox());
-		box.add(display);
-		box.add(model);
-		box.add(getGCodeOptionsBox());
-		box.add(processingBox);
+    // make display take up max available space
 
-		setLayout(new BorderLayout());
-		add(box, "Center");
+    Dimension orig = getPreferredSize();
 
-		//make display take up max available space
+    d = getLoadFileBox().getPreferredSize();
+    getLoadFileBox().setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
 
-		Dimension orig = getPreferredSize();
+    d = model.getPreferredSize();
+    model.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
 
-		d = getLoadFileBox().getPreferredSize();
-		getLoadFileBox().setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+    d = processingBox.getPreferredSize();
+    processingBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
 
-		d = model.getPreferredSize();
-		model.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+    display.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+    setPreferredSize(orig);
 
-		d = processingBox.getPreferredSize();
-		processingBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+    if (file != null)
+      loadFile(file);
+  }
 
-		display.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
-		setPreferredSize(orig);
+  private Box getLoadFileBox() {
+    if (myLoadFileBox == null) {
+      myLoadFileBox = Box.createHorizontalBox();
 
-		if (file != null)
-			loadFile(file);
-	}
+      loadButton = new JButton("Load");
+      loadButton.setEnabled(false);
+      loadButton.setBackground(Color.WHITE);
+      loadButton.setVerticalAlignment(AbstractButton.CENTER);
+      loadButton.setHorizontalAlignment(AbstractButton.CENTER);
+      Dimension d = loadButton.getPreferredSize();
+      loadButton.setMaximumSize(new Dimension(d.width, d.height));
+      loadButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent event) {
+          loadFile();
+        }
+      });
+      myLoadFileBox.add(loadButton);
 
-	private Box getLoadFileBox() {
-		if (myLoadFileBox == null) {
-			myLoadFileBox = Box.createHorizontalBox();
+      loadField = new JTextField();
+      d = loadField.getPreferredSize();
+      loadField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+      myLoadFileBox.add(loadField);
 
-			loadButton = new JButton("Load");
-			loadButton.setEnabled(false);
-			loadButton.setBackground(Color.WHITE);
-			loadButton.setVerticalAlignment(AbstractButton.CENTER);
-			loadButton.setHorizontalAlignment(AbstractButton.CENTER);
-			Dimension d = loadButton.getPreferredSize();
-			loadButton.setMaximumSize(new Dimension(d.width, d.height));
-			loadButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent event) {
-					loadFile();
-				}});
-			myLoadFileBox.add(loadButton);
-			
-			loadField = new JTextField();
-			d = loadField.getPreferredSize();
-			loadField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
-			myLoadFileBox.add(loadField);
+      browseButton = new JButton("Browse...");
+      browseButton.setBackground(Color.WHITE);
+      browseButton.setVerticalAlignment(AbstractButton.CENTER);
+      browseButton.setHorizontalAlignment(AbstractButton.CENTER);
+      d = browseButton.getPreferredSize();
+      browseButton.setMaximumSize(new Dimension(d.width, d.height));
+      browseButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent event) {
+          File file = browse();
+          if (file != null)
+            loadFile(file);
+          loadButton.setEnabled(true);
+        }
+      });
+      myLoadFileBox.add(browseButton);
 
-			browseButton = new JButton("Browse...");
-			browseButton.setBackground(Color.WHITE);
-			browseButton.setVerticalAlignment(AbstractButton.CENTER);
-			browseButton.setHorizontalAlignment(AbstractButton.CENTER);
-			d = browseButton.getPreferredSize();
-			browseButton.setMaximumSize(new Dimension(d.width, d.height));
-			browseButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent event) {
-					File file = browse();
-					if (file != null)
-						loadFile(file);
-					loadButton.setEnabled(true);
-				}});
-			myLoadFileBox.add(browseButton);
+      myLoadFileBox.setBorder(BorderFactory.createTitledBorder("Input File"));
+    }
+    return myLoadFileBox;
+  }
 
-			myLoadFileBox.setBorder(BorderFactory.createTitledBorder("Input File"));
-		}
-		return myLoadFileBox;
-	}
+  private Box getGcodeBox() {
+    if (myGcodeBox == null) {
+      Dimension d;
+      myGcodeBox = Box.createHorizontalBox();
 
-	private Box getGcodeBox() {
-		if (myGcodeBox == null) {
-			Dimension d;
-			myGcodeBox = Box.createHorizontalBox();
+      gcodeButton = new JButton("Save G-Code");
+      gcodeButton.setEnabled(false);
+      gcodeButton.setBackground(Color.WHITE);
+      gcodeButton.setVerticalAlignment(AbstractButton.CENTER);
+      gcodeButton.setHorizontalAlignment(AbstractButton.CENTER);
+      d = gcodeButton.getPreferredSize();
+      gcodeButton.setMaximumSize(new Dimension(d.width, d.height));
+      gcodeButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent event) {
+          saveGCode();
+        }
+      });
+      myGcodeBox.add(gcodeButton);
 
-			gcodeButton = new JButton("Save G-Code");
-			gcodeButton.setEnabled(false);
-			gcodeButton.setBackground(Color.WHITE);
-			gcodeButton.setVerticalAlignment(AbstractButton.CENTER);
-			gcodeButton.setHorizontalAlignment(AbstractButton.CENTER);
-			d = gcodeButton.getPreferredSize();
-			gcodeButton.setMaximumSize(new Dimension(d.width, d.height));
-			gcodeButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent event) {
-					saveGCode();
-				}});
-			myGcodeBox.add(gcodeButton);
+      gcodeField = new JTextField();
+      gcodeField.setEnabled(false);
+      d = gcodeField.getPreferredSize();
+      gcodeField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+      myGcodeBox.add(gcodeField);
 
-			gcodeField = new JTextField();
-			gcodeField.setEnabled(false);
-			d = gcodeField.getPreferredSize();
-			gcodeField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
-			myGcodeBox.add(gcodeField);
+      gcodeBrowseButton = new JButton("Browse...");
+      gcodeBrowseButton.setEnabled(false);
+      gcodeBrowseButton.setBackground(Color.WHITE);
+      gcodeBrowseButton.setVerticalAlignment(AbstractButton.CENTER);
+      gcodeBrowseButton.setHorizontalAlignment(AbstractButton.CENTER);
+      d = gcodeBrowseButton.getPreferredSize();
+      gcodeBrowseButton.setMaximumSize(new Dimension(d.width, d.height));
+      gcodeBrowseButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent event) {
+          File file = browse();
+          if (file != null)
+            saveGCode(file);
+        }
+      });
+      myGcodeBox.add(gcodeBrowseButton);
 
-			gcodeBrowseButton = new JButton("Browse...");
-			gcodeBrowseButton.setEnabled(false);
-			gcodeBrowseButton.setBackground(Color.WHITE);
-			gcodeBrowseButton.setVerticalAlignment(AbstractButton.CENTER);
-			gcodeBrowseButton.setHorizontalAlignment(AbstractButton.CENTER);
-			d = gcodeBrowseButton.getPreferredSize();
-			gcodeBrowseButton.setMaximumSize(new Dimension(d.width, d.height));
-			gcodeBrowseButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent event) {
-					File file = browse();
-					if (file != null)
-						saveGCode(file);
-				}});
-			myGcodeBox.add(gcodeBrowseButton);
+      stopButton = new JButton("Stop");
+      stopButton.setBackground(Color.WHITE);
+      // stopButton.setVerticalAlignment(AbstractButton.CENTER);
+      // stopButton.setHorizontalAlignment(AbstractButton.CENTER);
+      stopButton.setAlignmentX(0.5f);
+      d = stopButton.getPreferredSize();
+      stopButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+      stopButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent event) {
+          stopProcess();
+        }
+      });
+      stopButton.setEnabled(false);
 
-			stopButton = new JButton("Stop");
-			stopButton.setBackground(Color.WHITE);
-			//    stopButton.setVerticalAlignment(AbstractButton.CENTER);
-			//    stopButton.setHorizontalAlignment(AbstractButton.CENTER);
-			stopButton.setAlignmentX(0.5f);
-			d = stopButton.getPreferredSize();
-			stopButton.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
-			stopButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent event) { stopProcess(); } });
-			stopButton.setEnabled(false);
+      progressBar = new JProgressBar();
+      progressBar.setBackground(Color.WHITE);
+    }
+    return myGcodeBox;
+  }
 
-			progressBar = new JProgressBar();
-			progressBar.setBackground(Color.WHITE);
-		}
-		return myGcodeBox;
-	}
+  private Box getTopologyAndToolpathsBox() {
+    Box topologyAndToolpathsBox = Box.createHorizontalBox();
+    topologyAndToolpathsBox.add(getTopologyBox());
+    topologyAndToolpathsBox.add(Box.createHorizontalGlue());
+    topologyAndToolpathsBox.add(getToolpathBox());
+    return topologyAndToolpathsBox;
+  }
 
-	private Box getTopologyAndToolpathsBox() {
-		Box topologyAndToolpathsBox = Box.createHorizontalBox();
-		topologyAndToolpathsBox.add(getTopologyBox());
-		topologyAndToolpathsBox.add(Box.createHorizontalGlue());
-		topologyAndToolpathsBox.add(getToolpathBox());
-		return topologyAndToolpathsBox;
-	}
+  private Box getToolpathBox() {
+    Dimension d;
+    Box toolpathsBox = Box.createHorizontalBox();
 
-	private Box getToolpathBox() {
-		Dimension d;
-		Box toolpathsBox = Box.createHorizontalBox();
+    toolpathsButton = new JButton("Make Toolpaths");
+    toolpathsButton.setBackground(Color.WHITE);
+    toolpathsButton.setVerticalAlignment(AbstractButton.CENTER);
+    toolpathsButton.setHorizontalAlignment(AbstractButton.CENTER);
+    d = toolpathsButton.getPreferredSize();
+    toolpathsButton.setMaximumSize(new Dimension(d.width, d.height));
+    toolpathsButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        computeToolpaths();
+      }
+    });
+    toolpathsBox.add(toolpathsButton);
 
-		toolpathsButton = new JButton("Make Toolpaths");
-		toolpathsButton.setBackground(Color.WHITE);
-		toolpathsButton.setVerticalAlignment(AbstractButton.CENTER);
-		toolpathsButton.setHorizontalAlignment(AbstractButton.CENTER);
-		d = toolpathsButton.getPreferredSize();
-		toolpathsButton.setMaximumSize(new Dimension(d.width, d.height));
-		toolpathsButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				computeToolpaths();
-			}});
-		toolpathsBox.add(toolpathsButton);
+    // toolpathsBox.add(Box.createHorizontalStrut(16));
 
-		//    toolpathsBox.add(Box.createHorizontalStrut(16));
+    ButtonGroup modeGroup = new ButtonGroup();
 
-		ButtonGroup modeGroup = new ButtonGroup();
-
-		voronoiButton = new JRadioButton("voronoi");
-		modeGroup.add(voronoiButton);
-		voronoiButton.setBackground(Color.WHITE);
-		// VORONOI_MODE is the default mode.
-		voronoiButton.setSelected(true);
-		toolpathsBox.add(voronoiButton);
-
-		outlineButton = new JRadioButton("outline");
-		modeGroup.add(outlineButton);
-		outlineButton.setBackground(Color.WHITE);
+    voronoiButton = new JRadioButton("voronoi");
+    modeGroup.add(voronoiButton);
+    voronoiButton.setBackground(Color.WHITE);
     // VORONOI_MODE is the default mode.
-		outlineButton.setSelected(false);
-		toolpathsBox.add(outlineButton);
+    voronoiButton.setSelected(true);
+    toolpathsBox.add(voronoiButton);
 
-		return toolpathsBox;
-	}
+    outlineButton = new JRadioButton("outline");
+    modeGroup.add(outlineButton);
+    outlineButton.setBackground(Color.WHITE);
+    // VORONOI_MODE is the default mode.
+    outlineButton.setSelected(false);
+    toolpathsBox.add(outlineButton);
 
-	private Box getTopologyBox() {
-		Dimension d;
-		Box topologyBox = Box.createHorizontalBox();
+    return toolpathsBox;
+  }
 
-		topologyButton = new JButton("Fix Topology");
-		topologyButton.setBackground(Color.WHITE);
-		topologyButton.setVerticalAlignment(AbstractButton.CENTER);
-		topologyButton.setHorizontalAlignment(AbstractButton.CENTER);
-		d = topologyButton.getPreferredSize();
-		topologyButton.setMaximumSize(new Dimension(d.width, d.height));
-		topologyButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent event) {
-				fixTopology();
-			}});
-		topologyBox.add(topologyButton);
+  private Box getTopologyBox() {
+    Dimension d;
+    Box topologyBox = Box.createHorizontalBox();
 
-		//    topologyBox.add(Box.createHorizontalStrut(16));
+    topologyButton = new JButton("Fix Topology");
+    topologyButton.setBackground(Color.WHITE);
+    topologyButton.setVerticalAlignment(AbstractButton.CENTER);
+    topologyButton.setHorizontalAlignment(AbstractButton.CENTER);
+    d = topologyButton.getPreferredSize();
+    topologyButton.setMaximumSize(new Dimension(d.width, d.height));
+    topologyButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent event) {
+        fixTopology();
+      }
+    });
+    topologyBox.add(topologyButton);
 
-		manualTopology = new JCheckBox("manual");
-		manualTopology.setBackground(Color.WHITE);
-		manualTopology.setSelected(false);
-		topologyBox.add(manualTopology);
-		return topologyBox;
-	}
+    // topologyBox.add(Box.createHorizontalStrut(16));
 
-	private Box getMosaicBox() {
-		Dimension d;
-		if (myMosaicBox == null) {
-			myMosaicBox = Box.createHorizontalBox();
+    manualTopology = new JCheckBox("manual");
+    manualTopology.setBackground(Color.WHITE);
+    manualTopology.setSelected(false);
+    topologyBox.add(manualTopology);
+    return topologyBox;
+  }
 
-			mosaicButton = new JButton("Save High-Res");
-			mosaicButton.setBackground(Color.WHITE);
-			mosaicButton.setVerticalAlignment(AbstractButton.CENTER);
-			mosaicButton.setHorizontalAlignment(AbstractButton.CENTER);
-			d = mosaicButton.getPreferredSize();
-			mosaicButton.setMaximumSize(new Dimension(d.width, d.height));
-			mosaicButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent event) {
-					saveMosaic();
-				}});
-			myMosaicBox.add(mosaicButton);
+  private Box getMosaicBox() {
+    Dimension d;
+    if (myMosaicBox == null) {
+      myMosaicBox = Box.createHorizontalBox();
 
-			mosaicField = new JTextField();
-			d = mosaicField.getPreferredSize();
-			mosaicField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
-			mosaicField.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) { saveMosaic(); } });
-			//    mosaicField.addFocusListener(new FocusAdapter() {
-			//        public void focusLost(FocusEvent e) { saveMosaic(); } });
-			myMosaicBox.add(mosaicField);
+      mosaicButton = new JButton("Save High-Res");
+      mosaicButton.setBackground(Color.WHITE);
+      mosaicButton.setVerticalAlignment(AbstractButton.CENTER);
+      mosaicButton.setHorizontalAlignment(AbstractButton.CENTER);
+      d = mosaicButton.getPreferredSize();
+      mosaicButton.setMaximumSize(new Dimension(d.width, d.height));
+      mosaicButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent event) {
+          saveMosaic();
+        }
+      });
+      myMosaicBox.add(mosaicButton);
 
-			mosaicBrowseButton = new JButton("Browse...");
-			mosaicBrowseButton.setBackground(Color.WHITE);
-			mosaicBrowseButton.setVerticalAlignment(AbstractButton.CENTER);
-			mosaicBrowseButton.setHorizontalAlignment(AbstractButton.CENTER);
-			d = mosaicBrowseButton.getPreferredSize();
-			mosaicBrowseButton.setMaximumSize(new Dimension(d.width, d.height));
-			mosaicBrowseButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent event) {
-					File file = browse();
-					if (file != null)
-						saveMosaic(file);
-				}});
-			myMosaicBox.add(mosaicBrowseButton);
+      mosaicField = new JTextField();
+      d = mosaicField.getPreferredSize();
+      mosaicField.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+      mosaicField.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+          saveMosaic();
+        }
+      });
+      // mosaicField.addFocusListener(new FocusAdapter() {
+      // public void focusLost(FocusEvent e) { saveMosaic(); } });
+      myMosaicBox.add(mosaicField);
 
-			mosaicTilesButton = new JCheckBox("individual tiles");
-			mosaicTilesButton.setBackground(Color.WHITE);
-			mosaicTilesButton.setSelected(false);
-			myMosaicBox.add(mosaicTilesButton);
-		}
-		return myMosaicBox;
-	}
+      mosaicBrowseButton = new JButton("Browse...");
+      mosaicBrowseButton.setBackground(Color.WHITE);
+      mosaicBrowseButton.setVerticalAlignment(AbstractButton.CENTER);
+      mosaicBrowseButton.setHorizontalAlignment(AbstractButton.CENTER);
+      d = mosaicBrowseButton.getPreferredSize();
+      mosaicBrowseButton.setMaximumSize(new Dimension(d.width, d.height));
+      mosaicBrowseButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent event) {
+          File file = browse();
+          if (file != null)
+            saveMosaic(file);
+        }
+      });
+      myMosaicBox.add(mosaicBrowseButton);
 
-	private Box getProcessingBox() {
-		if (myProcessingBox == null) {
-			myProcessingBox = Box.createVerticalBox();
-			myProcessingBox.setBorder(BorderFactory.createTitledBorder("Processing"));
-			myProcessingBox.add(getMosaicBox());
-			myProcessingBox.add(getTopologyAndToolpathsBox());
-			myProcessingBox.add(getGcodeBox());
-			//    processingBox.add(Box.createVerticalStrut(8));
-			myProcessingBox.add(stopButton);
-			//    processingBox.add(Box.createVerticalStrut(8));
-			myProcessingBox.add(progressBar);
-		}
-		return myProcessingBox;
-	}
+      mosaicTilesButton = new JCheckBox("individual tiles");
+      mosaicTilesButton.setBackground(Color.WHITE);
+      mosaicTilesButton.setSelected(false);
+      myMosaicBox.add(mosaicTilesButton);
+    }
+    return myMosaicBox;
+  }
 
-	private Box getGCodeOptionsBox() {
-		if (myGCodeOptionsBox == null) {
-			myGCodeOptionsBox = Box.createVerticalBox();
-			myGCodeOptionsBox.setBorder(BorderFactory.createTitledBorder("G-Code"));
-			JPanel panel = new JPanel();
-			panel.setLayout(new GridLayout(3, 4));
+  private Box getProcessingBox() {
+    if (myProcessingBox == null) {
+      myProcessingBox = Box.createVerticalBox();
+      myProcessingBox.setBorder(BorderFactory.createTitledBorder("Processing"));
+      myProcessingBox.add(getMosaicBox());
+      myProcessingBox.add(getTopologyAndToolpathsBox());
+      myProcessingBox.add(getGcodeBox());
+      // processingBox.add(Box.createVerticalStrut(8));
+      myProcessingBox.add(stopButton);
+      // processingBox.add(Box.createVerticalStrut(8));
+      myProcessingBox.add(progressBar);
+    }
+    return myProcessingBox;
+  }
 
-			panel.add(new JLabel("Coordinates"));
-			panel.add(new JLabel("Z-coordinates"));
-			panel.add(new JLabel("left upper coordinates"));
-			panel.add(new JLabel("Metric"));
-			panel.add(new JLabel("Feedrates"));
+  private Box getGCodeOptionsBox() {
+    if (myGCodeOptionsBox == null) {
+      myGCodeOptionsBox = Box.createVerticalBox();
+      myGCodeOptionsBox.setBorder(BorderFactory.createTitledBorder("G-Code"));
+      JPanel panel = new JPanel();
+      panel.setLayout(new GridLayout(3, 4));
 
-			panel.add(getRelativeCoordinatesButton());
-			panel.add(getZCuttingHeightPanel());
-			panel.add(getInitialXPanel());
-			panel.add(getMetricButton());
-			panel.add(getMillingSpeedPanel());
+      panel.add(new JLabel("Coordinates"));
+      panel.add(new JLabel("Z-coordinates"));
+      panel.add(new JLabel("left upper coordinates"));
+      panel.add(new JLabel("Metric"));
+      panel.add(new JLabel("Feedrates"));
 
-			panel.add(getAbsoluteCoordinatesButton());
-			panel.add(getZDownMovementPanel());
-			panel.add(getInitialYPanel());
-			panel.add(getImperialButton());
-			panel.add(getPlungeSpeedPanel());
+      panel.add(getRelativeCoordinatesButton());
+      panel.add(getZCuttingHeightPanel());
+      panel.add(getInitialXPanel());
+      panel.add(getMetricButton());
+      panel.add(getMillingSpeedPanel());
 
-			myGCodeOptionsBox.add(panel);
-		}
-		return myGCodeOptionsBox;
-	}
+      panel.add(getAbsoluteCoordinatesButton());
+      panel.add(getZDownMovementPanel());
+      panel.add(getInitialYPanel());
+      panel.add(getImperialButton());
+      panel.add(getPlungeSpeedPanel());
 
-	private JPanel getInitialXPanel() {
-		if (myInitialXPanel == null) {
-			myInitialXPanel = new JPanel();
-			myInitialXPanel.setLayout(new BorderLayout());
-			myInitialXPanel.add(new JLabel("X"), BorderLayout.WEST);
-			myInitialXPanel.setToolTipText("Left side is at this coordinate (mm or inch).");
-			myInitialXPanel.setEnabled(gCodeWriter.getIsAbsolute());
+      myGCodeOptionsBox.add(panel);
+    }
+    return myGCodeOptionsBox;
+  }
+
+  private JPanel getInitialXPanel() {
+    if (myInitialXPanel == null) {
+      myInitialXPanel = new JPanel();
+      myInitialXPanel.setLayout(new BorderLayout());
+      myInitialXPanel.add(new JLabel("X"), BorderLayout.WEST);
+      myInitialXPanel.setToolTipText("Left side is at this coordinate (mm or inch).");
+      myInitialXPanel.setEnabled(gCodeWriter.getIsAbsolute());
       final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getXOffset()));
-			myInitialXPanel.add(field, BorderLayout.CENTER);
-			myInitialXPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
-				public void propertyChange(PropertyChangeEvent evt) {
-					field.setEnabled(myInitialXPanel.isEnabled());
-				}
-			});
+      myInitialXPanel.add(field, BorderLayout.CENTER);
+      myInitialXPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
+        public void propertyChange(PropertyChangeEvent evt) {
+          field.setEnabled(myInitialXPanel.isEnabled());
+        }
+      });
       field.setEnabled(myInitialXPanel.isEnabled());
       field.addFocusListener(new FocusAdapter() {
         public void focusLost(FocusEvent evt) {
-					try {
+          try {
             gCodeWriter.setXOffset(NumberFormat.getInstance().parse(field.getText()).doubleValue());
-          } catch (ParseException e) { }
+          } catch (ParseException e) {
+          }
           field.setText(NumberFormat.getInstance().format(gCodeWriter.getXOffset()));
-				}
-			});
-		}
-		return myInitialXPanel;
-	}
-	
-	private JPanel getInitialYPanel() {
-		if (myInitialYPanel == null) {
-			myInitialYPanel = new JPanel();
-			myInitialYPanel.setLayout(new BorderLayout());
-			myInitialYPanel.add(new JLabel("Y"), BorderLayout.WEST);
-			myInitialYPanel.setToolTipText("Upper side is at this coordinates (mm or inch).");
-			myInitialYPanel.setEnabled(gCodeWriter.getIsAbsolute());
+        }
+      });
+    }
+    return myInitialXPanel;
+  }
+
+  private JPanel getInitialYPanel() {
+    if (myInitialYPanel == null) {
+      myInitialYPanel = new JPanel();
+      myInitialYPanel.setLayout(new BorderLayout());
+      myInitialYPanel.add(new JLabel("Y"), BorderLayout.WEST);
+      myInitialYPanel.setToolTipText("Upper side is at this coordinates (mm or inch).");
+      myInitialYPanel.setEnabled(gCodeWriter.getIsAbsolute());
       final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getYOffset()));
-			myInitialYPanel.add(field, BorderLayout.CENTER);
-			myInitialYPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
-				public void propertyChange(PropertyChangeEvent evt) {
-					field.setEnabled(myInitialYPanel.isEnabled());
-				}
-			});
+      myInitialYPanel.add(field, BorderLayout.CENTER);
+      myInitialYPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
+        public void propertyChange(PropertyChangeEvent evt) {
+          field.setEnabled(myInitialYPanel.isEnabled());
+        }
+      });
       field.setEnabled(myInitialYPanel.isEnabled());
       field.addFocusListener(new FocusAdapter() {
         public void focusLost(FocusEvent evt) {
-					try {
+          try {
             gCodeWriter.setYOffset(NumberFormat.getInstance().parse(field.getText()).doubleValue());
-          } catch (ParseException e) { }
+          } catch (ParseException e) {
+          }
           field.setText(NumberFormat.getInstance().format(gCodeWriter.getYOffset()));
-				}
-			});
-		}
-		return myInitialYPanel;
-	}
-	
-	private Component getZDownMovementPanel() {
-		if (myZDownMovementPanel == null) {
-			myZDownMovementPanel = new JPanel();
-			myZDownMovementPanel.setLayout(new BorderLayout());
-			myZDownMovementPanel.add(new JLabel("travel clearance"), BorderLayout.WEST);
-			myZDownMovementPanel.setToolTipText("When not cutting, lift the cutter to this above origin, in mm or inch. Decimals in native language (point or comma).");
-			final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getZClearance()));
-			myZDownMovementPanel.add(field, BorderLayout.CENTER);
+        }
+      });
+    }
+    return myInitialYPanel;
+  }
+
+  private Component getZDownMovementPanel() {
+    if (myZDownMovementPanel == null) {
+      myZDownMovementPanel = new JPanel();
+      myZDownMovementPanel.setLayout(new BorderLayout());
+      myZDownMovementPanel.add(new JLabel("travel clearance"), BorderLayout.WEST);
+      myZDownMovementPanel.setToolTipText(
+          "When not cutting, lift the cutter to this above origin, in mm or inch. Decimals in native language (point or comma).");
+      final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getZClearance()));
+      myZDownMovementPanel.add(field, BorderLayout.CENTER);
       field.addFocusListener(new FocusAdapter() {
         public void focusLost(FocusEvent evt) {
-					try {
-						gCodeWriter.setZClearance(NumberFormat.getInstance().parse(field.getText()).doubleValue());
-          } catch (ParseException e) { }
+          try {
+            gCodeWriter.setZClearance(NumberFormat.getInstance().parse(field.getText()).doubleValue());
+          } catch (ParseException e) {
+          }
           field.setText(NumberFormat.getInstance().format(gCodeWriter.getZClearance()));
-				}
-			});
-		}
-		return myZDownMovementPanel;
-	}
+        }
+      });
+    }
+    return myZDownMovementPanel;
+  }
 
-	private JPanel getMillingSpeedPanel() {
-		if (myMillingSpeedPanel == null) {
-			myMillingSpeedPanel = new JPanel();
-			myMillingSpeedPanel.setLayout(new BorderLayout());
-			myMillingSpeedPanel.add(new JLabel("cutting feedrate"), BorderLayout.WEST);
-			myMillingSpeedPanel.setToolTipText("Feedrate during cutting in mm or inch per minute.");
-			final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getMillingFeedrate()));
-			myMillingSpeedPanel.add(field, BorderLayout.CENTER);
-	    field.addFocusListener(new FocusAdapter() {
-	      public void focusLost(FocusEvent evt) {
-	        try {
-	          gCodeWriter.setMillingFeedrate(NumberFormat.getInstance().parse(field.getText()).doubleValue());
-	        } catch (ParseException e) { }
-	        field.setText(NumberFormat.getInstance().format(gCodeWriter.getMillingFeedrate()));
-	      }
-	    });
-		}
-		return myMillingSpeedPanel;
-	}
+  private JPanel getMillingSpeedPanel() {
+    if (myMillingSpeedPanel == null) {
+      myMillingSpeedPanel = new JPanel();
+      myMillingSpeedPanel.setLayout(new BorderLayout());
+      myMillingSpeedPanel.add(new JLabel("cutting feedrate"), BorderLayout.WEST);
+      myMillingSpeedPanel.setToolTipText("Feedrate during cutting in mm or inch per minute.");
+      final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getMillingFeedrate()));
+      myMillingSpeedPanel.add(field, BorderLayout.CENTER);
+      field.addFocusListener(new FocusAdapter() {
+        public void focusLost(FocusEvent evt) {
+          try {
+            gCodeWriter.setMillingFeedrate(NumberFormat.getInstance().parse(field.getText()).doubleValue());
+          } catch (ParseException e) {
+          }
+          field.setText(NumberFormat.getInstance().format(gCodeWriter.getMillingFeedrate()));
+        }
+      });
+    }
+    return myMillingSpeedPanel;
+  }
 
-	private JPanel getPlungeSpeedPanel() {
-		if (myPlungeSpeedPanel == null) {
-			myPlungeSpeedPanel = new JPanel();
-			myPlungeSpeedPanel.setLayout(new BorderLayout());
-			myPlungeSpeedPanel.add(new JLabel("plunge feedrate"), BorderLayout.WEST);
-			myPlungeSpeedPanel.setToolTipText("Feedrate when moving vertically into the workpiece in mm or inch per minute.");
-			final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getPlungeFeedrate()));
-			myPlungeSpeedPanel.add(field, BorderLayout.CENTER);
+  private JPanel getPlungeSpeedPanel() {
+    if (myPlungeSpeedPanel == null) {
+      myPlungeSpeedPanel = new JPanel();
+      myPlungeSpeedPanel.setLayout(new BorderLayout());
+      myPlungeSpeedPanel.add(new JLabel("plunge feedrate"), BorderLayout.WEST);
+      myPlungeSpeedPanel.setToolTipText("Feedrate when moving vertically into the workpiece in mm or inch per minute.");
+      final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getPlungeFeedrate()));
+      myPlungeSpeedPanel.add(field, BorderLayout.CENTER);
       field.addFocusListener(new FocusAdapter() {
         public void focusLost(FocusEvent evt) {
           try {
             gCodeWriter.setPlungeFeedrate(NumberFormat.getInstance().parse(field.getText()).doubleValue());
-          } catch (ParseException e) { }
+          } catch (ParseException e) {
+          }
           field.setText(NumberFormat.getInstance().format(gCodeWriter.getPlungeFeedrate()));
-				}
-			});
-		}
-		return myPlungeSpeedPanel;
-	}
+        }
+      });
+    }
+    return myPlungeSpeedPanel;
+  }
 
-	private JPanel getZCuttingHeightPanel() {
-		if (myZCuttingHeightPanel == null) {
-			myZCuttingHeightPanel = new JPanel();
-			myZCuttingHeightPanel.setLayout(new BorderLayout());
-			myZCuttingHeightPanel.add(new JLabel("cutting height"), BorderLayout.WEST);
-			myZCuttingHeightPanel.setToolTipText("When cutting, the head should have this z-coordinate, in mm or inch. Likely a negative value, decimals in native language (point or comma)");
+  private JPanel getZCuttingHeightPanel() {
+    if (myZCuttingHeightPanel == null) {
+      myZCuttingHeightPanel = new JPanel();
+      myZCuttingHeightPanel.setLayout(new BorderLayout());
+      myZCuttingHeightPanel.add(new JLabel("cutting height"), BorderLayout.WEST);
+      myZCuttingHeightPanel.setToolTipText(
+          "When cutting, the head should have this z-coordinate, in mm or inch. Likely a negative value, decimals in native language (point or comma)");
       myZCuttingHeightPanel.setEnabled(gCodeWriter.getIsAbsolute());
-			final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getZCuttingHeight()));
-			myZCuttingHeightPanel.add(field, BorderLayout.CENTER);
-			myZCuttingHeightPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
-				public void propertyChange(PropertyChangeEvent evt) {
-					field.setEnabled(myZCuttingHeightPanel.isEnabled());
-				}
-			});
+      final JTextField field = new JTextField(NumberFormat.getInstance().format(gCodeWriter.getZCuttingHeight()));
+      myZCuttingHeightPanel.add(field, BorderLayout.CENTER);
+      myZCuttingHeightPanel.addPropertyChangeListener("enabled", new PropertyChangeListener() {
+        public void propertyChange(PropertyChangeEvent evt) {
+          field.setEnabled(myZCuttingHeightPanel.isEnabled());
+        }
+      });
       field.setEnabled(myZCuttingHeightPanel.isEnabled());
       field.addFocusListener(new FocusAdapter() {
         public void focusLost(FocusEvent evt) {
           try {
             gCodeWriter.setZCuttingHeight(NumberFormat.getInstance().parse(field.getText()).doubleValue());
-          } catch (ParseException e) { }
+          } catch (ParseException e) {
+          }
           field.setText(NumberFormat.getInstance().format(gCodeWriter.getZCuttingHeight()));
-				}
-			});
-		}
-		return myZCuttingHeightPanel;
-	}
+        }
+      });
+    }
+    return myZCuttingHeightPanel;
+  }
 
-	private JRadioButton getAbsoluteCoordinatesButton() {
-		if (myAbsoluteCoordinatesButton == null) {
-			myAbsoluteCoordinatesButton = new JRadioButton("absolute");
-			myAbsoluteCoordinatesButton.setSelected(gCodeWriter.getIsAbsolute());
-      myAbsoluteCoordinatesButton.setToolTipText("Output absolute G-code coordinates. For the starting point, set X, Y and cutting height.");
-			myAbsoluteCoordinatesButton.addActionListener(new ActionListener() {
-				public void actionPerformed(final ActionEvent e) {
-					setAbsoluteCoordinates(myAbsoluteCoordinatesButton.isSelected());
-				}
-			});
-		}
-		return myAbsoluteCoordinatesButton;
-	}
+  private JRadioButton getAbsoluteCoordinatesButton() {
+    if (myAbsoluteCoordinatesButton == null) {
+      myAbsoluteCoordinatesButton = new JRadioButton("absolute");
+      myAbsoluteCoordinatesButton.setSelected(gCodeWriter.getIsAbsolute());
+      myAbsoluteCoordinatesButton
+          .setToolTipText("Output absolute G-code coordinates. For the starting point, set X, Y and cutting height.");
+      myAbsoluteCoordinatesButton.addActionListener(new ActionListener() {
+        public void actionPerformed(final ActionEvent e) {
+          setAbsoluteCoordinates(myAbsoluteCoordinatesButton.isSelected());
+        }
+      });
+    }
+    return myAbsoluteCoordinatesButton;
+  }
 
-	private JRadioButton getRelativeCoordinatesButton() {
-		if (myRelativeCoordinatesButton == null) {
-			myRelativeCoordinatesButton = new JRadioButton("relative");
-			myRelativeCoordinatesButton.setSelected( ! gCodeWriter.getIsAbsolute());
-			myRelativeCoordinatesButton.setToolTipText("Output relative G-code coordinates, starting at { 0.0, 0.0, 0.0 }.");
-			myRelativeCoordinatesButton.addActionListener(new ActionListener() {
-				public void actionPerformed(final ActionEvent e) {
-					setAbsoluteCoordinates( ! myRelativeCoordinatesButton.isSelected());
-				}
-			});
-		}
-		return myRelativeCoordinatesButton;
-	}
+  private JRadioButton getRelativeCoordinatesButton() {
+    if (myRelativeCoordinatesButton == null) {
+      myRelativeCoordinatesButton = new JRadioButton("relative");
+      myRelativeCoordinatesButton.setSelected(!gCodeWriter.getIsAbsolute());
+      myRelativeCoordinatesButton.setToolTipText("Output relative G-code coordinates, starting at { 0.0, 0.0, 0.0 }.");
+      myRelativeCoordinatesButton.addActionListener(new ActionListener() {
+        public void actionPerformed(final ActionEvent e) {
+          setAbsoluteCoordinates(!myRelativeCoordinatesButton.isSelected());
+        }
+      });
+    }
+    return myRelativeCoordinatesButton;
+  }
 
-	public void setAbsoluteCoordinates(final boolean newValue) {
-		getAbsoluteCoordinatesButton().setSelected(newValue);
-		getRelativeCoordinatesButton().setSelected(!newValue);
-		getZCuttingHeightPanel().setEnabled(newValue);
-		getInitialXPanel().setEnabled(newValue);
-		getInitialYPanel().setEnabled(newValue);
-		gCodeWriter.setIsAbsolute(newValue);
-	}
+  public void setAbsoluteCoordinates(final boolean newValue) {
+    getAbsoluteCoordinatesButton().setSelected(newValue);
+    getRelativeCoordinatesButton().setSelected(!newValue);
+    getZCuttingHeightPanel().setEnabled(newValue);
+    getInitialXPanel().setEnabled(newValue);
+    getInitialYPanel().setEnabled(newValue);
+    gCodeWriter.setIsAbsolute(newValue);
+  }
 
-	private JRadioButton getMetricButton() {
-		if (myMetricButton == null) {
-			myMetricButton = new JRadioButton("metric");
-			myMetricButton.setSelected(gCodeWriter.getIsMetric());
-			myMetricButton.setToolTipText("Output G-code in mm. Coordinates entered here are in mm, too.");
-			myMetricButton.addActionListener(new ActionListener() {
-				public void actionPerformed(final ActionEvent e) {
-					if (myMetricButton.isSelected()) {
-						getImperialButton().setSelected(false);
-						gCodeWriter.setIsMetric(true);
-					}
-				}
-			});
-		}
-		return myMetricButton;
-	}
+  private JRadioButton getMetricButton() {
+    if (myMetricButton == null) {
+      myMetricButton = new JRadioButton("metric");
+      myMetricButton.setSelected(gCodeWriter.getIsMetric());
+      myMetricButton.setToolTipText("Output G-code in mm. Coordinates entered here are in mm, too.");
+      myMetricButton.addActionListener(new ActionListener() {
+        public void actionPerformed(final ActionEvent e) {
+          if (myMetricButton.isSelected()) {
+            getImperialButton().setSelected(false);
+            gCodeWriter.setIsMetric(true);
+          }
+        }
+      });
+    }
+    return myMetricButton;
+  }
 
-	private JRadioButton getImperialButton() {
-		if (myImperialButton == null) {
-			myImperialButton = new JRadioButton("imperial");
-			myImperialButton.setSelected( ! gCodeWriter.getIsMetric());
-			myImperialButton.setToolTipText("Output G-code in inches. Coordinates entered here are in inches, too.");
-			myImperialButton.addActionListener(new ActionListener() {
-				public void actionPerformed(final ActionEvent e) {
-					if (myImperialButton.isSelected()) {
-						getMetricButton().setSelected(false);
-						gCodeWriter.setIsMetric(false);
-					}
-				}
-			});
-		}
-		return myImperialButton;
-	}
+  private JRadioButton getImperialButton() {
+    if (myImperialButton == null) {
+      myImperialButton = new JRadioButton("imperial");
+      myImperialButton.setSelected(!gCodeWriter.getIsMetric());
+      myImperialButton.setToolTipText("Output G-code in inches. Coordinates entered here are in inches, too.");
+      myImperialButton.addActionListener(new ActionListener() {
+        public void actionPerformed(final ActionEvent e) {
+          if (myImperialButton.isSelected()) {
+            getMetricButton().setSelected(false);
+            gCodeWriter.setIsMetric(false);
+          }
+        }
+      });
+    }
+    return myImperialButton;
+  }
 
-	public void saveMosaic() {
-		saveMosaic(new File(mosaicField.getText().trim()));
-	}
+  public void saveMosaic() {
+    saveMosaic(new File(mosaicField.getText().trim()));
+  }
 
-	public void saveMosaic(File file) {
-		saveMosaic(file, mosaicTilesButton.isSelected());
-	}
+  public void saveMosaic(File file) {
+    saveMosaic(file, mosaicTilesButton.isSelected());
+  }
 
-	public void saveMosaic(File file, boolean tiles) {
+  public void saveMosaic(File file, boolean tiles) {
 
-		try {
+    try {
 
-			mosaicField.setText(file.toString());
+      mosaicField.setText(file.toString());
 
-			if (file.exists() &&
-					!(JOptionPane.
-							showConfirmDialog(this,
-									"Overwrite existing mosaic file " + file + "?",
-									"Overwrite?",
-									JOptionPane.YES_NO_OPTION) ==
-										JOptionPane.YES_OPTION))
-				return;
+      if (file.exists() && !(JOptionPane.showConfirmDialog(this, "Overwrite existing mosaic file " + file + "?",
+          "Overwrite?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION))
+        return;
 
-			startProcess(new SaveMosaic(this, file, tiles));
+      startProcess(new SaveMosaic(this, file, tiles));
 
-		} catch (AccessControlException e1) {
-			accessControlError();
-		}
-	}
+    } catch (AccessControlException e1) {
+      accessControlError();
+    }
+  }
 
-	public void fixTopology() {
-		startProcess(new TopologyProcessor(this));
-	}
+  public void fixTopology() {
+    startProcess(new TopologyProcessor(this));
+  }
 
-	private void computeToolpaths() {
+  private void computeToolpaths() {
 
-		int mode = -1;
+    int mode = -1;
 
-		if (voronoiButton.isSelected())
-			mode = ToolpathsProcessor.VORONOI_MODE;
-		else
-			mode = ToolpathsProcessor.OUTLINE_MODE;
+    if (voronoiButton.isSelected())
+      mode = ToolpathsProcessor.VORONOI_MODE;
+    else
+      mode = ToolpathsProcessor.OUTLINE_MODE;
 
-		myToolpathsProcessor = new ToolpathsProcessor(this, mode);
+    myToolpathsProcessor = new ToolpathsProcessor(this, mode);
 
-		startProcess(myToolpathsProcessor);
-	}
+    startProcess(myToolpathsProcessor);
+  }
 
-	private File browse() {
+  private File browse() {
 
-		try {
+    try {
 
-			String dir = System.getProperty("user.dir");
-			if (currentFile != null)
-				dir = (currentFile.getParent()).toString();
+      String dir = System.getProperty("user.dir");
+      if (currentFile != null)
+        dir = (currentFile.getParent()).toString();
 
-			JFileChooser chooser = new JFileChooser(dir);
+      JFileChooser chooser = new JFileChooser(dir);
 
-			//chooser.setFileFilter(fileFilter);
+      // chooser.setFileFilter(fileFilter);
 
-			if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
-				return chooser.getSelectedFile();
-			else
-				return null;
+      if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION)
+        return chooser.getSelectedFile();
+      else
+        return null;
 
-		} catch (AccessControlException e1) {
-			accessControlError();
-			return null;
-		}
-	}
+    } catch (AccessControlException e1) {
+      accessControlError();
+      return null;
+    }
+  }
 
-	private void accessControlError() {
-		JOptionPane.
-		showMessageDialog(this,
-				"Cannot load or save from an applet.  You must " +
-				"either change your browser's security policy or " +
-				"download the application and run it directly.",
-				"Access Denied",
-				JOptionPane.ERROR_MESSAGE);
-	}
+  private void accessControlError() {
+    JOptionPane.showMessageDialog(this, "Cannot load or save from an applet.  You must "
+        + "either change your browser's security policy or " + "download the application and run it directly.",
+        "Access Denied", JOptionPane.ERROR_MESSAGE);
+  }
 
-	public void destroy() {
-		display.destroy();
-	}
+  public void destroy() {
+    display.destroy();
+  }
 
-	public void loadFile() {
-		loadFile(new File(loadField.getText().trim()));
-	}
+  public void loadFile() {
+    loadFile(new File(loadField.getText().trim()));
+  }
 
-	public void loadDemo() {
-		loadURL(getClass().getResource(DEMO_FILE));
-		loadField.setText("[built-in demo]");
-	}
+  public void loadDemo() {
+    loadURL(getClass().getResource(DEMO_FILE));
+    loadField.setText("[built-in demo]");
+  }
 
-	public void loadURL(URL url) {
-		try {
-			load(url.openStream());
-		} catch (IOException e) {
-			JOptionPane.
-			showMessageDialog(this,
-					"I/O Error: " + e.getMessage(),
-					"I/O Error",
-					JOptionPane.ERROR_MESSAGE);
-		}
-	}
+  public void loadURL(URL url) {
+    try {
+      load(url.openStream());
+    } catch (IOException e) {
+      JOptionPane.showMessageDialog(this, "I/O Error: " + e.getMessage(), "I/O Error", JOptionPane.ERROR_MESSAGE);
+    }
+  }
 
-	public void loadFile(File file) {
+  public void loadFile(File file) {
 
-		currentFile = file;
-		loadField.setText(file.toString());
-		setGcodeFile(file.toString()+".ngc");
+    currentFile = file;
+    loadField.setText(file.toString());
+    setGcodeFile(file.toString() + ".ngc");
 
-		try {
-			load(new FileInputStream(file));
-		} catch (FileNotFoundException e) {
-		  loadDemo();
-			JOptionPane.
-			showMessageDialog(this,
-					"File Not Found: " + e.getMessage() +
-					"\nLoaded Demo file instead.",
-					"File Not Found",
-					JOptionPane.ERROR_MESSAGE);
-		}
-	}
+    try {
+      load(new FileInputStream(file));
+    } catch (FileNotFoundException e) {
+      loadDemo();
+      JOptionPane.showMessageDialog(this, "File Not Found: " + e.getMessage() + "\nLoaded Demo file instead.",
+          "File Not Found", JOptionPane.ERROR_MESSAGE);
+    }
+  }
 
-	private void load(InputStream inputStream) {
+  private void load(InputStream inputStream) {
 
-		stopProcess();
-    
+    stopProcess();
+
     enableControls(false);
     myToolpathsProcessor = null;
 
-		simulator.reset();
-
-		try {
-			Parser parser = new Parser(inputStream);
-			parser.setSimulator(simulator);
-			parser.Input();
-		} catch (visolate.parser.ParseException e) {
-			JOptionPane.
-			showMessageDialog(this,
-					"Parse Error: " + e.getMessage(),
-					"Parse Error",
-					JOptionPane.ERROR_MESSAGE);
-		}
-
-		model.rebuild();
-		enableControls(true);
-	}
-
-	public void setGcodeFile(String filename) {
-		gcodeField.setText(filename);
-	}
-
-	public void saveGCode() {
-		saveGCode(new File(gcodeField.getText().trim()));
-	}
+    simulator.reset();
 
-	public void saveGCode(final File file) {
+    try {
+      Parser parser = new Parser(inputStream);
+      parser.setSimulator(simulator);
+      parser.Input();
+    } catch (visolate.parser.ParseException e) {
+      JOptionPane.showMessageDialog(this, "Parse Error: " + e.getMessage(), "Parse Error", JOptionPane.ERROR_MESSAGE);
+    }
 
-		gcodeField.setText(file.toString());
+    model.rebuild();
+    enableControls(true);
+  }
 
-		if (myToolpathsProcessor == null) {
-			return;
-		}
+  public void setGcodeFile(String filename) {
+    gcodeField.setText(filename);
+  }
 
-		try {
+  public void saveGCode() {
+    saveGCode(new File(gcodeField.getText().trim()));
+  }
 
-			if (file.exists()&& (!auto_mode)) {
-				int yesno = JOptionPane.
-				showConfirmDialog(this,
-						"Overwrite existing G-Code file " + file + "?",
-						"Overwrite?",
-						JOptionPane.YES_NO_OPTION);
-				if (yesno != JOptionPane.YES_OPTION) {					
-					return;
-				}
-			}
+  public void saveGCode(final File file) {
 
-			try {
-				gCodeWriter.open(file);
-				myToolpathsProcessor.writeGCode(gCodeWriter);
-				gCodeWriter.close();
-			} catch (IOException e) {
-				JOptionPane.
-				showMessageDialog(this,
-						"I/O Error writing G-Code: " + e.getMessage(),
-						"I/O Error",
-						JOptionPane.ERROR_MESSAGE);
-			}
+    gcodeField.setText(file.toString());
 
-		} catch (AccessControlException e1) {
+    if (myToolpathsProcessor == null) {
+      return;
+    }
 
-			accessControlError();
+    try {
 
-			try {
-				myToolpathsProcessor.writeGCode(null);
-			} catch (IOException e2) {
-				//nope
-			}
-		}
-	}
+      if (file.exists() && (!auto_mode)) {
+        int yesno = JOptionPane.showConfirmDialog(this, "Overwrite existing G-Code file " + file + "?", "Overwrite?",
+            JOptionPane.YES_NO_OPTION);
+        if (yesno != JOptionPane.YES_OPTION) {
+          return;
+        }
+      }
 
-	public void mouseClicked(double x, double y, int modifiers) {
+      try {
+        gCodeWriter.open(file);
+        myToolpathsProcessor.writeGCode(gCodeWriter);
+        gCodeWriter.close();
+      } catch (IOException e) {
+        JOptionPane.showMessageDialog(this, "I/O Error writing G-Code: " + e.getMessage(), "I/O Error",
+            JOptionPane.ERROR_MESSAGE);
+      }
 
-		SortedSet<Net> clickedNets = new TreeSet<Net>();
+    } catch (AccessControlException e1) {
 
-		model.getNetsAtPoint(x, y, 1.0/display.getDPI(), clickedNets);
+      accessControlError();
 
-		if (manualTopology.isSelected()) {
-			clearSelection();
-			TopologyProcessor.mergeNets(clickedNets);
-			return;
-		}
+      try {
+        myToolpathsProcessor.writeGCode(null);
+      } catch (IOException e2) {
+        // nope
+      }
+    }
+  }
 
-		if ((selectedNet != null) && clickedNets.contains(selectedNet)) {
+  public void mouseClicked(double x, double y, int modifiers) {
 
-			Iterator<Net> it = (clickedNets.tailSet(selectedNet)).iterator();
+    SortedSet<Net> clickedNets = new TreeSet<Net>();
 
-			it.next();
+    model.getNetsAtPoint(x, y, 1.0 / display.getDPI(), clickedNets);
 
-			if (it.hasNext()) {
-				selectedNet = it.next();
-			} else {
-				selectedNet = clickedNets.iterator().next();
-			}
+    if (manualTopology.isSelected()) {
+      clearSelection();
+      TopologyProcessor.mergeNets(clickedNets);
+      return;
+    }
 
-		} else {
+    if ((selectedNet != null) && clickedNets.contains(selectedNet)) {
 
-			selectedNet = null;
+      Iterator<Net> it = (clickedNets.tailSet(selectedNet)).iterator();
 
-			if (!clickedNets.isEmpty()) {
-				selectedNet = clickedNets.iterator().next();
-			}
-		}
+      it.next();
 
-		Net selectedNetSave = selectedNet;
+      if (it.hasNext()) {
+        selectedNet = it.next();
+      } else {
+        selectedNet = clickedNets.iterator().next();
+      }
 
-		if (!((modifiers & MouseEvent.CTRL_DOWN_MASK) != 0))
-			clearSelection();
+    } else {
 
-		selectedNet = selectedNetSave;
+      selectedNet = null;
 
-		if (selectedNet != null) {
-			selectedNets.add(selectedNet);
-			selectedNet.setHighlighted(true);
-		}
-	}
+      if (!clickedNets.isEmpty()) {
+        selectedNet = clickedNets.iterator().next();
+      }
+    }
 
-	public void clearSelection() {
+    Net selectedNetSave = selectedNet;
 
-		for (Iterator<Net> it = selectedNets.iterator(); it.hasNext(); ) {
-			it.next().setHighlighted(false);
-		}
+    if (!((modifiers & MouseEvent.CTRL_DOWN_MASK) != 0))
+      clearSelection();
 
-		selectedNets.clear();
+    selectedNet = selectedNetSave;
 
-		selectedNet = null;
-	}
+    if (selectedNet != null) {
+      selectedNets.add(selectedNet);
+      selectedNet.setHighlighted(true);
+    }
+  }
 
-	public void keyReleased(KeyEvent e) {
+  public void clearSelection() {
 
-		switch (e.getKeyCode()) {
+    for (Iterator<Net> it = selectedNets.iterator(); it.hasNext();) {
+      it.next().setHighlighted(false);
+    }
 
-		case KeyEvent.VK_F: startProcess(new FatnessProcessor(this)); break;
+    selectedNets.clear();
 
-		case KeyEvent.VK_D: model.dump(); break;
+    selectedNet = null;
+  }
 
-		case KeyEvent.VK_I: {
+  public void keyReleased(KeyEvent e) {
 
-			System.out.println(selectedNets.size() + " selected nets:");
+    switch (e.getKeyCode()) {
 
-			for (Net net : selectedNets) {
-				net.dump();
-			}
+    case KeyEvent.VK_F:
+      startProcess(new FatnessProcessor(this));
+      break;
 
-			break;
-		}
+    case KeyEvent.VK_D:
+      model.dump();
+      break;
 
-		case KeyEvent.VK_DELETE: {
+    case KeyEvent.VK_I: {
 
-			for (Net net : selectedNets) {
+      System.out.println(selectedNets.size() + " selected nets:");
 
-				Set<Net> superNet = net.getSuperNet();
+      for (Net net : selectedNets) {
+        net.dump();
+      }
 
-				if (superNet == null) {
-					model.deleteNet(net);
-				} else {
-					for (Iterator<Net> jt = superNet.iterator(); jt.hasNext(); ) {
-						model.deleteNet(jt.next());
-					}
-				}
-			}
+      break;
+    }
 
-			undoHistory.add(0, new UndoDelete(selectedNets));
+    case KeyEvent.VK_DELETE: {
 
-			clearSelection();
+      for (Net net : selectedNets) {
 
-			break;
-		}
+        Set<Net> superNet = net.getSuperNet();
 
-		case KeyEvent.VK_U: {
+        if (superNet == null) {
+          model.deleteNet(net);
+        } else {
+          for (Iterator<Net> jt = superNet.iterator(); jt.hasNext();) {
+            model.deleteNet(jt.next());
+          }
+        }
+      }
 
-			if (!undoHistory.isEmpty()) {
+      undoHistory.add(0, new UndoDelete(selectedNets));
 
-				Iterator<UndoTask> it = undoHistory.iterator();
+      clearSelection();
 
-				UndoTask undoTask = it.next();
-				it.remove();
+      break;
+    }
 
-				undoTask.undo();
-			}
+    case KeyEvent.VK_U: {
 
-			break;
-		}
-		}
-	}
+      if (!undoHistory.isEmpty()) {
 
-	public boolean askContinue(int line, int seq) {
-		return
-		JOptionPane.
-		showConfirmDialog(this,
-				"Continue after line " + line +
-				((seq >= 0) ? ("(sequence number " + seq + ")") : "") +
-				"?",
-				"Continue?",
-				JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
-	}
+        Iterator<UndoTask> it = undoHistory.iterator();
 
-	public Simulator getSimulator() {
-		return simulator;
-	}
+        UndoTask undoTask = it.next();
+        it.remove();
 
-	public Model getModel() {
-		return model;
-	}
+        undoTask.undo();
+      }
 
-	public Display getDisplay() {
-		return display;
-	}
+      break;
+    }
+    }
+  }
 
-	public void enableControls(boolean enable) {
+  public boolean askContinue(int line, int seq) {
+    return JOptionPane.showConfirmDialog(this,
+        "Continue after line " + line + ((seq >= 0) ? ("(sequence number " + seq + ")") : "") + "?", "Continue?",
+        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+  }
 
-		if (enable == true &&
-		    loadField.getText() != null &&
-		    ! loadField.getText().endsWith("]")) {
-		  loadButton.setEnabled(true);
-		}
-		else {
-		  loadButton.setEnabled(false);
-		}
-		loadField.setEnabled(enable);
-		browseButton.setEnabled(enable);
+  public Simulator getSimulator() {
+    return simulator;
+  }
 
-		mosaicButton.setEnabled(enable);
-		mosaicField.setEnabled(enable);
-		mosaicBrowseButton.setEnabled(enable);
-		mosaicTilesButton.setEnabled(enable);
+  public Model getModel() {
+    return model;
+  }
 
-		topologyButton.setEnabled(enable);
-		manualTopology.setEnabled(enable);
+  public Display getDisplay() {
+    return display;
+  }
 
-		toolpathsButton.setEnabled(enable);
-		voronoiButton.setEnabled(enable);
-		outlineButton.setEnabled(enable);
+  public void enableControls(boolean enable) {
 
-		if (myToolpathsProcessor != null) {
-			gcodeButton.setEnabled(enable);
-			gcodeField.setEnabled(enable);
-			gcodeBrowseButton.setEnabled(enable);
-		}
+    if (enable == true && loadField.getText() != null && !loadField.getText().endsWith("]")) {
+      loadButton.setEnabled(true);
+    } else {
+      loadButton.setEnabled(false);
+    }
+    loadField.setEnabled(enable);
+    browseButton.setEnabled(enable);
 
-	}
+    mosaicButton.setEnabled(enable);
+    mosaicField.setEnabled(enable);
+    mosaicBrowseButton.setEnabled(enable);
+    mosaicTilesButton.setEnabled(enable);
 
-	public void resetProgressBar(int numSteps) {
-		progressBar.setMaximum(numSteps);
-		progressBar.setValue(0);
-	}
+    topologyButton.setEnabled(enable);
+    manualTopology.setEnabled(enable);
 
-	public void tickProgressBar() {
-		progressBar.setValue(progressBar.getValue()+1);
-	}
+    toolpathsButton.setEnabled(enable);
+    voronoiButton.setEnabled(enable);
+    outlineButton.setEnabled(enable);
 
-	public void startProcess(Processor processor) {
+    if (myToolpathsProcessor != null) {
+      gcodeButton.setEnabled(enable);
+      gcodeField.setEnabled(enable);
+      gcodeBrowseButton.setEnabled(enable);
+    }
 
-		stopProcess();
+  }
 
-		this.processor = processor;
+  public void resetProgressBar(int numSteps) {
+    progressBar.setMaximum(numSteps);
+    progressBar.setValue(0);
+  }
 
-		stopButton.setEnabled(true);
+  public void tickProgressBar() {
+    progressBar.setValue(progressBar.getValue() + 1);
+  }
 
-		processor.start();
-	}
+  public void startProcess(Processor processor) {
 
-	public void stopProcess() {
+    stopProcess();
 
-		if (processor == null)
-			return;
+    this.processor = processor;
 
-		try {
-			processor.stop();
-		} catch (InterruptedException e) {
-			System.err.println("WARNING: interrupted while stopping process");
-		}
+    stopButton.setEnabled(true);
 
-		processFinished();
-	}
+    processor.start();
+  }
 
-	public void processFinished() {
+  public void stopProcess() {
 
-		progressBar.setValue(0);
+    if (processor == null)
+      return;
 
-		stopButton.setEnabled(false);
+    try {
+      processor.stop();
+    } catch (InterruptedException e) {
+      System.err.println("WARNING: interrupted while stopping process");
+    }
 
-		processor = null;
+    processFinished();
+  }
 
-		if (processstatus == 1) {  //returning from automated topology fixing
-		  processstatus=2;
-		  computeToolpaths();
-		} else if (processstatus==2) { //returning from automated toolpath creation
-		  System.out.println("Writing to gcode file: "+gcodeField.getText().trim());
-		  saveGCode();
-		  System.out.println("Exiting, all work done");
-		  System.exit(0);
-		}
+  public void processFinished() {
 
-	}
+    progressBar.setValue(0);
 
-	public void addFrameTask(Runnable task) {
-		if (display != null)
-			display.addFrameTask(task);
-		else
-			task.run();
-	}
+    stopButton.setEnabled(false);
 
-	private interface UndoTask {
-		public void undo();
-	}
+    processor = null;
 
-	private class UndoDelete implements UndoTask {
+    if (processstatus == 1) { // returning from automated topology fixing
+      processstatus = 2;
+      computeToolpaths();
+    } else if (processstatus == 2) { // returning from automated toolpath creation
+      System.out.println("Writing to gcode file: " + gcodeField.getText().trim());
+      saveGCode();
+      System.out.println("Exiting, all work done");
+      System.exit(0);
+    }
 
-		private UndoDelete(Collection<Net> nets) {
+  }
 
-			for (Net net : nets) {
+  public void addFrameTask(Runnable task) {
+    if (display != null)
+      display.addFrameTask(task);
+    else
+      task.run();
+  }
 
-				Set<Net> superNet = net.getSuperNet();
+  private interface UndoTask {
+    public void undo();
+  }
 
-				if (superNet == null) {
-					this.nets.add(net);
-				} else {
-					this.nets.addAll(superNet);
-				}
-			}
-		}
+  private class UndoDelete implements UndoTask {
 
-		public void undo() {
-			//      System.out.println("undeleting " + nets.size() + " nets");
-			for (Net net : nets) {
-				model.undeleteNet(net);
-			}
-		}
+    private UndoDelete(Collection<Net> nets) {
 
-		private Collection<Net> nets = new LinkedHashSet<Net>();
-	}
+      for (Net net : nets) {
 
+        Set<Net> superNet = net.getSuperNet();
 
-	private Simulator simulator = null;
-	public Model model = null;
-	private Display display = null;
-	private Processor processor = null;
-	private ToolpathsProcessor myToolpathsProcessor = null;
-	public GCodeFileWriter gCodeWriter = null;
+        if (superNet == null) {
+          this.nets.add(net);
+        } else {
+          this.nets.addAll(superNet);
+        }
+      }
+    }
 
-	private JButton loadButton;
-	private JTextField loadField;
-	private JButton browseButton;
+    public void undo() {
+      // System.out.println("undeleting " + nets.size() + " nets");
+      for (Net net : nets) {
+        model.undeleteNet(net);
+      }
+    }
 
-	private File currentFile = null;
+    private Collection<Net> nets = new LinkedHashSet<Net>();
+  }
 
-	private JButton mosaicButton;
-	private JTextField mosaicField;
-	private JButton mosaicBrowseButton;
-	private JCheckBox mosaicTilesButton;
+  private Simulator simulator = null;
+  public Model model = null;
+  private Display display = null;
+  private Processor processor = null;
+  private ToolpathsProcessor myToolpathsProcessor = null;
+  public GCodeFileWriter gCodeWriter = null;
 
-	private JProgressBar progressBar;
+  private JButton loadButton;
+  private JTextField loadField;
+  private JButton browseButton;
 
+  private File currentFile = null;
 
-	private JButton stopButton;
+  private JButton mosaicButton;
+  private JTextField mosaicField;
+  private JButton mosaicBrowseButton;
+  private JCheckBox mosaicTilesButton;
 
-	private JButton topologyButton;
-	private JCheckBox manualTopology;
+  private JProgressBar progressBar;
 
-	private JButton toolpathsButton;
-	private JRadioButton voronoiButton;
-	private JRadioButton outlineButton;
+  private JButton stopButton;
 
-	private JButton gcodeButton;
-	private JTextField gcodeField;
-	private JButton gcodeBrowseButton;
+  private JButton topologyButton;
+  private JCheckBox manualTopology;
 
-	/**
-	 * The ToolpathsProcessor generates the g-code that we write to a file.
-	 */
+  private JButton toolpathsButton;
+  private JRadioButton voronoiButton;
+  private JRadioButton outlineButton;
 
-	private Set<Net> selectedNets = new LinkedHashSet<Net>();
-	private Net selectedNet = null;
+  private JButton gcodeButton;
+  private JTextField gcodeField;
+  private JButton gcodeBrowseButton;
 
-	private List<UndoTask> undoHistory = new LinkedList<UndoTask>();
+  /**
+   * The ToolpathsProcessor generates the g-code that we write to a file.
+   */
 
-	private Box myProcessingBox;
-	private Box myGCodeOptionsBox;
+  private Set<Net> selectedNets = new LinkedHashSet<Net>();
+  private Net selectedNet = null;
 
-	private Box myMosaicBox;
+  private List<UndoTask> undoHistory = new LinkedList<UndoTask>();
 
-	private Box myLoadFileBox;
+  private Box myProcessingBox;
+  private Box myGCodeOptionsBox;
 
-	private Box myGcodeBox;
+  private Box myMosaicBox;
 
-	private JRadioButton myRelativeCoordinatesButton;
-	private JRadioButton myAbsoluteCoordinatesButton;
-	private JRadioButton myImperialButton;
-	private JRadioButton myMetricButton;
-	private JPanel myZCuttingHeightPanel;
-	private JPanel myZDownMovementPanel;
-	private JPanel myMillingSpeedPanel;
-	private JPanel myPlungeSpeedPanel;
-	private JPanel myInitialXPanel;
-	private JPanel myInitialYPanel;
+  private Box myLoadFileBox;
+
+  private Box myGcodeBox;
+
+  private JRadioButton myRelativeCoordinatesButton;
+  private JRadioButton myAbsoluteCoordinatesButton;
+  private JRadioButton myImperialButton;
+  private JRadioButton myMetricButton;
+  private JPanel myZCuttingHeightPanel;
+  private JPanel myZDownMovementPanel;
+  private JPanel myMillingSpeedPanel;
+  private JPanel myPlungeSpeedPanel;
+  private JPanel myInitialXPanel;
+  private JPanel myInitialYPanel;
 }
