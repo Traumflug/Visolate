@@ -43,7 +43,7 @@ public abstract class SimObject {
     if (geometries == null) {
       makeGeometries();
     }
-    
+
     return geometries;
   }
 
@@ -57,7 +57,7 @@ public abstract class SimObject {
     return offset;
   }
 
- public void setOffset(double offset) {
+  public void setOffset(double offset) {
 
     boolean changed = (this.offset != offset);
 
@@ -77,7 +77,7 @@ public abstract class SimObject {
   public boolean getInverse() {
     return inverse;
   }
- 
+
   public void setInverse(boolean inverse) {
 
     boolean changed = (this.inverse != inverse);
@@ -97,20 +97,18 @@ public abstract class SimObject {
 
   protected static TriangleArray makeTA(float[] vertices) {
 
-   if (vertices == null)
+    if (vertices == null)
       return null;
 
-    int numVertices = vertices.length/3;
+    int numVertices = vertices.length / 3;
 
     if (numVertices < 3)
       return null;
 
-    TriangleArray geometry = new MyTriangleArray(numVertices,
-                                                 GeometryArray.COORDINATES |
-                                                 GeometryArray.BY_REFERENCE);
-    
+    TriangleArray geometry = new MyTriangleArray(numVertices, GeometryArray.COORDINATES | GeometryArray.BY_REFERENCE);
+
     geometry.setCoordRefFloat(vertices);
-    
+
     return geometry;
   }
 
@@ -118,29 +116,25 @@ public abstract class SimObject {
     return makeTA(null);
   }
 
-  protected static TriangleFanArray makeTFA(final float[] vertices,
-                                            int[] stripVertexCounts) {
+  protected static TriangleFanArray makeTFA(final float[] vertices, int[] stripVertexCounts) {
 
     if (vertices == null) {
       return null;
     }
 
-    int numVertices = vertices.length/3;
+    int numVertices = vertices.length / 3;
 
     if (numVertices < 3) {
       return null;
     }
 
     if (stripVertexCounts == null) {
-      stripVertexCounts = new int[] {numVertices};
+      stripVertexCounts = new int[] { numVertices };
     }
 
-    TriangleFanArray geometry = 
-      new MyTriangleFanArray(numVertices,
-                             GeometryArray.COORDINATES |
-                             GeometryArray.BY_REFERENCE,
-                             stripVertexCounts);
-   
+    TriangleFanArray geometry = new MyTriangleFanArray(numVertices,
+        GeometryArray.COORDINATES | GeometryArray.BY_REFERENCE, stripVertexCounts);
+
     geometry.setCoordRefFloat(vertices);
 
     return geometry;
@@ -154,19 +148,16 @@ public abstract class SimObject {
     return makeTFA(null);
   }
 
-  protected static GeometryArray dupGeometry(final GeometryArray geometry,
-                                             final float[] newCoords) {
+  protected static GeometryArray dupGeometry(final GeometryArray geometry, final float[] newCoords) {
 
-    float[] coords =
-    	(newCoords != null) ? newCoords : geometry.getCoordRefFloat();
+    float[] coords = (newCoords != null) ? newCoords : geometry.getCoordRefFloat();
 
     if (geometry instanceof TriangleArray) {
-    	return makeTA(coords);
+      return makeTA(coords);
     } else if (geometry instanceof TriangleFanArray) {
-    	return makeTFA(coords);
+      return makeTFA(coords);
     } else {
-    	throw new UnsupportedOperationException(geometry.getClass() +
-    			" unhandled");
+      throw new UnsupportedOperationException(geometry.getClass() + " unhandled");
     }
   }
 
@@ -174,25 +165,23 @@ public abstract class SimObject {
     return dupGeometry(geometry, null);
   }
 
-  protected static void translateGeometry(final GeometryArray geometry,
-                                                   final Vector2f t) {
+  protected static void translateGeometry(final GeometryArray geometry, final Vector2f t) {
 
     float[] coords = geometry.getCoordRefFloat();
-    
+
     float[] newCoords = new float[coords.length];
-    
-    for (int i = 0; i < coords.length/3; i++) {
-      newCoords[3*i+0] = coords[3*i+0] + t.x;
-      newCoords[3*i+1] = coords[3*i+1] + t.y;
-      newCoords[3*i+2] = coords[3*i+2];
+
+    for (int i = 0; i < coords.length / 3; i++) {
+      newCoords[3 * i + 0] = coords[3 * i + 0] + t.x;
+      newCoords[3 * i + 1] = coords[3 * i + 1] + t.y;
+      newCoords[3 * i + 2] = coords[3 * i + 2];
     }
-    
+
     geometry.setCoordRefFloat(newCoords);
   }
-  
+
   // This rotates a geometry around (0.0, 0.0).
-  protected static void rotateGeometry(final GeometryArray geometry,
-      final double angle) {
+  protected static void rotateGeometry(final GeometryArray geometry, final double angle) {
 
     float[] coords = geometry.getCoordRefFloat();
 
@@ -202,17 +191,17 @@ public abstract class SimObject {
     t.rotZ(angle);
 
     Point3f p = new Point3f();
-    
+
     for (int i = 0; i < coords.length; i += 3) {
       p.x = coords[i];
-      p.y = coords[i+1];
-      p.z = coords[i+2];
-      
+      p.y = coords[i + 1];
+      p.z = coords[i + 2];
+
       t.transform(p);
-      
+
       newCoords[i] = p.x;
-      newCoords[i+1] = p.y;
-      newCoords[i+2] = p.z;
+      newCoords[i + 1] = p.y;
+      newCoords[i + 2] = p.z;
     }
 
     geometry.setCoordRefFloat(newCoords);
@@ -221,7 +210,7 @@ public abstract class SimObject {
   public static int hashCode(final int[] a) {
     int c = 0;
     for (int i = 0; i < a.length; i++) {
-      c = 31*c + a[i];
+      c = 31 * c + a[i];
     }
     return c;
   }
@@ -229,7 +218,7 @@ public abstract class SimObject {
   public static int hashCode(float[] a) {
     int c = 0;
     for (int i = 0; i < a.length; i++) {
-      c = 31*c + Float.floatToRawIntBits(a[i]);
+      c = 31 * c + Float.floatToRawIntBits(a[i]);
     }
     return c;
   }
@@ -246,16 +235,13 @@ class MyTriangleArray extends TriangleArray {
 
   public MyTriangleArray(int vertexCount, int vertexFormat) {
     super(vertexCount, vertexFormat);
-    setupHash = vertexCount^(vertexFormat*31);
+    setupHash = vertexCount ^ (vertexFormat * 31);
     hashCode = setupHash;
   }
 
-  public MyTriangleArray(int vertexCount,
-                         int vertexFormat,
-                         int texCoordSetCount,
-                         int[] texCoordSetMap) {
+  public MyTriangleArray(int vertexCount, int vertexFormat, int texCoordSetCount, int[] texCoordSetMap) {
     super(vertexCount, vertexFormat, texCoordSetCount, texCoordSetMap);
-    setupHash = vertexCount^(vertexFormat*31);
+    setupHash = vertexCount ^ (vertexFormat * 31);
     hashCode = setupHash;
   }
 
@@ -270,18 +256,17 @@ class MyTriangleArray extends TriangleArray {
 
     MyTriangleArray other = (MyTriangleArray) o;
 
-    boolean ret = ((other.getVertexCount() == getVertexCount()) &&
-                   (other.getVertexFormat() == getVertexFormat()) &&
-                   Arrays.equals(myCoords, other.myCoords));
+    boolean ret = ((other.getVertexCount() == getVertexCount()) && (other.getVertexFormat() == getVertexFormat())
+        && Arrays.equals(myCoords, other.myCoords));
 
 //    System.out.println((ret) ? "eq" : "neq");
-    
+
     return ret;
   }
 
   public void setCoordRefFloat(float[] coords) {
     myCoords = coords;
-    hashCode = SimObject.hashCode(myCoords)^(setupHash*31);
+    hashCode = SimObject.hashCode(myCoords) ^ (setupHash * 31);
     super.setCoordRefFloat(coords);
   }
 
@@ -292,28 +277,19 @@ class MyTriangleArray extends TriangleArray {
 
 class MyTriangleFanArray extends TriangleFanArray {
 
-  public MyTriangleFanArray(int vertexCount,
-                            int vertexFormat,
-                            int[] stripVertexCounts) {
+  public MyTriangleFanArray(int vertexCount, int vertexFormat, int[] stripVertexCounts) {
     super(vertexCount, vertexFormat, stripVertexCounts);
-    setupHash = vertexCount^(vertexFormat*31);
-    setupHash = setupHash^(SimObject.hashCode(stripVertexCounts)*31);
+    setupHash = vertexCount ^ (vertexFormat * 31);
+    setupHash = setupHash ^ (SimObject.hashCode(stripVertexCounts) * 31);
     hashCode = setupHash;
     myStripVertexCounts = stripVertexCounts;
   }
 
-  public MyTriangleFanArray(int vertexCount,
-                            int vertexFormat,
-                            int texCoordSetCount,
-                            int[] texCoordSetMap,
-                            int[] stripVertexCounts) {
-    super(vertexCount,
-          vertexFormat,
-          texCoordSetCount,
-          texCoordSetMap,
-          stripVertexCounts);
-    setupHash = vertexCount^(vertexFormat*31);
-    setupHash = setupHash^(SimObject.hashCode(stripVertexCounts)*31);
+  public MyTriangleFanArray(int vertexCount, int vertexFormat, int texCoordSetCount, int[] texCoordSetMap,
+      int[] stripVertexCounts) {
+    super(vertexCount, vertexFormat, texCoordSetCount, texCoordSetMap, stripVertexCounts);
+    setupHash = vertexCount ^ (vertexFormat * 31);
+    setupHash = setupHash ^ (SimObject.hashCode(stripVertexCounts) * 31);
     hashCode = setupHash;
     myStripVertexCounts = stripVertexCounts;
   }
@@ -330,11 +306,8 @@ class MyTriangleFanArray extends TriangleFanArray {
 
     MyTriangleFanArray other = (MyTriangleFanArray) o;
 
-    boolean ret = ((other.getVertexCount() == getVertexCount()) &&
-                   (other.getVertexFormat() == getVertexFormat()) &&
-                   Arrays.equals(myStripVertexCounts,
-                                 other.myStripVertexCounts) &&
-                   Arrays.equals(myCoords, other.myCoords));
+    boolean ret = ((other.getVertexCount() == getVertexCount()) && (other.getVertexFormat() == getVertexFormat())
+        && Arrays.equals(myStripVertexCounts, other.myStripVertexCounts) && Arrays.equals(myCoords, other.myCoords));
 
 //    System.out.println((ret) ? "eq" : "neq");
 
@@ -343,7 +316,7 @@ class MyTriangleFanArray extends TriangleFanArray {
 
   public void setCoordRefFloat(float[] coords) {
     myCoords = coords;
-    hashCode = SimObject.hashCode(myCoords)^(setupHash*31);
+    hashCode = SimObject.hashCode(myCoords) ^ (setupHash * 31);
     super.setCoordRefFloat(coords);
   }
 
@@ -352,4 +325,3 @@ class MyTriangleFanArray extends TriangleFanArray {
   protected int setupHash;
   protected int hashCode;
 }
-

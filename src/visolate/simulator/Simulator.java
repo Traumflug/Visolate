@@ -25,11 +25,11 @@ import visolate.misc.*;
 
 public class Simulator {
 
-  public static final double ARC_RESOLUTION = Math.PI/128.0;
+  public static final double ARC_RESOLUTION = Math.PI / 128.0;
 
   public static final int MAX_FORMAT = 6;
 
-  //modes
+  // modes
 
   public static final int RAPID = 0;
   public static final int LINEAR = 1;
@@ -39,21 +39,17 @@ public class Simulator {
   public static final int CW = 3;
   public static final int CCW = 4;
 
-  public static final String[] MODE_NAME =
-  new String[] {"rapid", "linear", "polygon", "cw", "ccw"};
+  public static final String[] MODE_NAME = new String[] { "rapid", "linear", "polygon", "cw", "ccw" };
 
-
-  //exposures
+  // exposures
 
   public static final int OPEN = 0;
   public static final int CLOSED = 1;
   public static final int FLASH = 2;
 
-  public static final String[] EXPOSURE_NAME =
-  new String[] {"open", "closed", "flash"};
+  public static final String[] EXPOSURE_NAME = new String[] { "open", "closed", "flash" };
 
-
-  //defaults
+  // defaults
 
   public static final int DEF_MODE = LINEAR;
   public static final Aperture DEF_APERTURE = null;
@@ -112,7 +108,7 @@ public class Simulator {
     metric = DEF_METRIC;
 
     arc360 = DEF_ARC360;
-    
+
     xWidth = DEF_X_BEFORE + DEF_X_AFTER;
     yWidth = DEF_Y_BEFORE + DEF_Y_AFTER;
   }
@@ -181,7 +177,7 @@ public class Simulator {
 
     if ((mode < 0) || (mode > 4))
       throw new SimulatorException("unknown mode: " + mode);
-    
+
     this.mode = mode;
   }
 
@@ -202,7 +198,6 @@ public class Simulator {
 
     this.exposure = exposure;
   }
-
 
   public void setPosition(String x, String y) {
 
@@ -226,7 +221,7 @@ public class Simulator {
 
     if ((mode == RAPID) && (exposure != CLOSED))
       System.out.println("WARNING: rapid move with exposure open or flash");
-         
+
     if (mode == POLYGON) {
 
       throw new UnsupportedOperationException("TBD polygon mode");
@@ -240,13 +235,19 @@ public class Simulator {
       switch (mode) {
 
       case RAPID:
-      case LINEAR: actions.add(new Segment(aperture, p, newP)); break;
-        
-      case CCW: addArc(newP, 1); break;
-      case CW: addArc(newP, -1); break;
+      case LINEAR:
+        actions.add(new Segment(aperture, p, newP));
+        break;
+
+      case CCW:
+        addArc(newP, 1);
+        break;
+      case CW:
+        addArc(newP, -1);
+        break;
       }
     }
-    
+
     p = newP;
   }
 
@@ -255,11 +256,10 @@ public class Simulator {
   }
 
   public void addArc(Vertex end, int dir) {
-   
+
 //    System.err.println(((arc360) ? "360 " : "quadrant ") +
 //                       ((dir > 0) ? "CCW" : "CW") +
 //                       " arc from " + p + " to " + end);
-
 
 //    System.err.println("  (i, j) = (" + ci + ", " + cj + ")");
 
@@ -267,17 +267,17 @@ public class Simulator {
     int cy = p.y + cj;
 
     if (!arc360) {
-      cx = p.x + abs(ci)*sign(p.y-end.y)*dir;
-      cy = p.y + abs(cj)*sign(p.x-end.x)*dir;
+      cx = p.x + abs(ci) * sign(p.y - end.y) * dir;
+      cy = p.y + abs(cj) * sign(p.x - end.x) * dir;
     }
 
 //    System.err.println("  center (" + cx + ", " + cy + ")");
 
-    int dx = p.x-cx;
-    int dy = p.y-cy;
+    int dx = p.x - cx;
+    int dy = p.y - cy;
 
     double startT = Util.canonicalizeAngle(Math.atan2(dy, dx));
-    double radius = Math.sqrt(dx*dx+dy*dy);
+    double radius = Math.sqrt(dx * dx + dy * dy);
 
 //    System.err.println("  start angle: " + Math.toDegrees(startT) + " deg");
 //    System.err.println("  radius: " + radius + " mils");
@@ -285,14 +285,13 @@ public class Simulator {
     double csT = Math.cos(startT);
     double ssT = Math.sin(startT);
 
-    dx = end.x-cx;
-    dy = end.y-cy;
+    dx = end.x - cx;
+    dy = end.y - cy;
 
-    double standardEndX =  dx*csT    - dy*(-ssT);
-    double standardEndY =  dx*(-ssT) + dy*csT;
+    double standardEndX = dx * csT - dy * (-ssT);
+    double standardEndY = dx * (-ssT) + dy * csT;
 
-    double standardEndT =
-      Util.canonicalizeAngle(Math.atan2(standardEndY, standardEndX));
+    double standardEndT = Util.canonicalizeAngle(Math.atan2(standardEndY, standardEndX));
 
 //    System.err.println("  end angle (standard pos): " +
 //                       Math.toDegrees(standardEndT) + " deg");
@@ -303,20 +302,18 @@ public class Simulator {
     Vertex prev = p;
     Vertex current = p;
 
-    for (double t = ((dir > 0 ) ? 0.0 : 2.0*Math.PI);
-         ((dir > 0) ? (t < standardEndT) : (t > standardEndT));
-         t += (ARC_RESOLUTION*dir)) {
+    for (double t = ((dir > 0) ? 0.0 : 2.0 * Math.PI); ((dir > 0) ? (t < standardEndT)
+        : (t > standardEndT)); t += (ARC_RESOLUTION * dir)) {
 
-      x = radius*Math.cos(t);
-      y = radius*Math.sin(t);
+      x = radius * Math.cos(t);
+      y = radius * Math.sin(t);
 
 //      System.err.println("  current angle (standard pos): " +
 //                         Math.toDegrees(t) + " deg");
 
       if (t > 0.0) {
 
-        current = getVertex(cx+((int) Math.round(x*csT - y*ssT)),
-                            cy+((int) Math.round(x*ssT + y*csT)));
+        current = getVertex(cx + ((int) Math.round(x * csT - y * ssT)), cy + ((int) Math.round(x * ssT + y * csT)));
 
 //        System.err.println("  adding segment from " + prev + " to " + current);
 
@@ -349,7 +346,7 @@ public class Simulator {
   }
 
   private int parseX(String coord) {
-   
+
     int x = 0;
 
     if (!ignoreTrailing) {
@@ -357,13 +354,13 @@ public class Simulator {
       x = Integer.parseInt(coord);
 
     } else {
-      
+
       StringBuffer buf = new StringBuffer();
       buf.append(coord);
-      
+
       for (int pad = xWidth - coord.length(); pad > 0; pad--)
         buf.append("0");
-      
+
       x = Integer.parseInt(buf.toString());
     }
 
@@ -383,10 +380,10 @@ public class Simulator {
 
       StringBuffer buf = new StringBuffer();
       buf.append(coord);
-      
+
       for (int pad = yWidth - coord.length(); pad > 0; pad--)
         buf.append("0");
-      
+
       y = Integer.parseInt(buf.toString());
     }
 
@@ -425,9 +422,9 @@ public class Simulator {
   }
 
   public void computeInchCoordinates() {
-	  for (Vertex vertex : vertices.values()) {
-	      vertex.computeInchCoordinates(xScale, yScale, metric);
-	    }
+    for (Vertex vertex : vertices.values()) {
+      vertex.computeInchCoordinates(xScale, yScale, metric);
+    }
   }
 
   public void setCenter(String i, String j) {

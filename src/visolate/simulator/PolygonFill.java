@@ -27,8 +27,7 @@ public class PolygonFill extends Action {
   }
 
   protected void makeGeometries() {
-    throw
-      new UnsupportedOperationException("TBD Polygon geometry not implemented");
+    throw new UnsupportedOperationException("TBD Polygon geometry not implemented");
   }
 
 //  private List<Vertex> vertices = new LinkedList<Vertex>();

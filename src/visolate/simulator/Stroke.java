@@ -38,7 +38,7 @@ public abstract class Stroke extends Action {
   public Vertex getStart() {
     return start;
   }
-                              
+
   public Vertex getEnd() {
     return end;
   }
@@ -48,14 +48,17 @@ public abstract class Stroke extends Action {
   public abstract double getLength();
 
   public abstract double getStartForwardDirection();
+
   public abstract double getStartReverseDirection();
+
   public abstract double getEndForwardDirection();
+
   public abstract double getEndReverseDirection();
 
   protected void offsetChanged() {
     aperture.setOffset(offset);
   }
-                                   
+
   protected void inverseChanged() {
     aperture.setInverse(inverse);
   }

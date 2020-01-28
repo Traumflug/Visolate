@@ -24,10 +24,7 @@ import visolate.misc.*;
 
 public class PolygonInstance extends PrimitiveInstance {
 
-  public PolygonInstance(int n,
-                         double x, double y,
-                         double diameter,
-                         double rotation) {
+  public PolygonInstance(int n, double x, double y, double diameter, double rotation) {
 
     this.n = n;
 
@@ -42,22 +39,16 @@ public class PolygonInstance extends PrimitiveInstance {
   private void getPerimeter() {
 
     if (xCoord == null) {
-      
+
       xCoord = new float[n];
       yCoord = new float[n];
-      
-      PolygonAperture.computeXYAngle(xCoord, yCoord,
-                                     null,
-                                     getRadius(),
-                                     n,
-                                     rotation);
+
+      PolygonAperture.computeXYAngle(xCoord, yCoord, null, getRadius(), n, rotation);
     }
   }
 
   protected double getRadius() {
-    return Math.max(0.0,
-                    diameter/2 +
-                    Util.vertexOffset(signedOffset, Math.PI*2.0/((double) n)));
+    return Math.max(0.0, diameter / 2 + Util.vertexOffset(signedOffset, Math.PI * 2.0 / ((double) n)));
   }
 
   protected void makeBounds() {
@@ -67,18 +58,14 @@ public class PolygonInstance extends PrimitiveInstance {
 
   protected void makeGeometries() {
     getPerimeter();
-    geometries = PolygonAperture.makeGeometriesFromXY(x, y,
-                                                      xCoord, yCoord,
-                                                      n,
-                                                      getRadius(),
-                                                      rotation);
+    geometries = PolygonAperture.makeGeometriesFromXY(x, y, xCoord, yCoord, n, getRadius(), rotation);
   }
 
   protected void offsetChanged() {
     super.offsetChanged();
     xCoord = yCoord = null;
   }
-                                   
+
   protected void inverseChanged() {
     super.inverseChanged();
     xCoord = yCoord = null;

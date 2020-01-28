@@ -28,14 +28,14 @@ import java.util.*;
 
 public class Vertex {
 
-  public static final double MM_TO_IN = 1.0/25.4;
+  public static final double MM_TO_IN = 1.0 / 25.4;
 
   public Vertex(int x, int y) {
 
     this.x = x;
     this.y = y;
 
-    hashCode = x^(y*31);
+    hashCode = x ^ (y * 31);
 
 //    System.out.println(toString());
   }
@@ -43,7 +43,7 @@ public class Vertex {
   public void addIncidentAction(Action action) {
     incidentActions.add(action);
   }
- 
+
   public Set<Action> getIncidentActions() {
     return incidentActions;
   }
@@ -79,8 +79,8 @@ public class Vertex {
 
   public void computeInchCoordinates(int xScale, int yScale, boolean metric) {
 
-    double xi = ((double) x)/((double) xScale);
-    double yi = ((double) y)/((double) yScale);
+    double xi = ((double) x) / ((double) xScale);
+    double yi = ((double) y) / ((double) yScale);
 
     if (metric) {
       xi *= MM_TO_IN;
@@ -111,27 +111,27 @@ public class Vertex {
     } else {
 
       double min = Double.POSITIVE_INFINITY;
-      
+
 //    int dbg = 0;
-      for ( HalfEdge he : outgoingHalfEdges) {
-        
-        //only want to double back when that's the only way out, and would have
-        //caught that above
+      for (HalfEdge he : outgoingHalfEdges) {
+
+        // only want to double back when that's the only way out, and would have
+        // caught that above
         if (he.getStroke() == incomingHalfEdge.getStroke()) {
 //        assert ++dbg <= 1;
           continue;
         }
-        
+
         double angle = incomingHalfEdge.angleTo(he);
-        
+
         if (angle < min) {
           min = angle;
           next = he;
         }
       }
-      
-      //HACK apparrently it's possible to have (only) k > 1 outgoing half
-      //edges which all have the same stroke as incomingHalfEdges
+
+      // HACK apparrently it's possible to have (only) k > 1 outgoing half
+      // edges which all have the same stroke as incomingHalfEdges
       if (next == null)
         next = (HalfEdge) (outgoingHalfEdges.iterator()).next();
     }

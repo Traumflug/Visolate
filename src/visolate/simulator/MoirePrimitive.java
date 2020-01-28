@@ -48,14 +48,7 @@ public class MoirePrimitive extends MacroPrimitive {
 
     double rotation = getParam(i++, actuals);
 
-    return new MoireInstance(x, y,
-                             od,
-                             circleThickness,
-                             gap,
-                             n,
-                             xHairThickness,
-                             xHairLength,
-                             rotation);
+    return new MoireInstance(x, y, od, circleThickness, gap, n, xHairThickness, xHairLength, rotation);
   }
 
   protected String getName() {

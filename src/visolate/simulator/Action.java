@@ -26,9 +26,7 @@ import javax.vecmath.*;
 
 public abstract class Action extends SimObject {
 
-  protected static void addTranslatedAperture(Collection<GeometryArray> geometries,
-                                              Aperture aperture,
-                                              Vertex v) {
+  protected static void addTranslatedAperture(Collection<GeometryArray> geometries, Aperture aperture, Vertex v) {
 
     Collection<GeometryArray> apGeoms = aperture.getGeometries();
 
@@ -38,7 +36,7 @@ public abstract class Action extends SimObject {
 
     Vector2f p = new Vector2f(v.getInchCoordinates());
 
-    for (Iterator<GeometryArray> it = apGeoms.iterator(); it.hasNext(); ) {
+    for (Iterator<GeometryArray> it = apGeoms.iterator(); it.hasNext();) {
       GeometryArray ga = dupGeometry(it.next());
       translateGeometry(ga, p);
       geometries.add(ga);

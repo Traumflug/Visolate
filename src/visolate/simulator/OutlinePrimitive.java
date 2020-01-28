@@ -44,10 +44,10 @@ public class OutlinePrimitive extends MacroPrimitive {
     int n = (int) getParam(i++, actuals);
 
     List<Point2d> pts = new LinkedList<Point2d>();
-    while (i < (actuals.size()-1)) {
+    while (i < (actuals.size() - 1)) {
       pts.add(new Point2d(getParam(i++, actuals), getParam(i++, actuals)));
     }
-           
+
     double rotation = getParam(i++, actuals);
 
     return new OutlineInstance(n, pts, rotation);

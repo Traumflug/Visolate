@@ -29,7 +29,7 @@ public class MacroVariable extends MacroExpression {
   }
 
   public double getValue(final List<Double> actuals) {
-    return actuals.get(index-1).doubleValue();
+    return actuals.get(index - 1).doubleValue();
   }
 
   public String toString() {

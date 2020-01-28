@@ -42,7 +42,7 @@ public class MacroAperture extends Aperture {
   public String toString() {
 
     StringBuffer buf = new StringBuffer();
-    
+
     buf.append("Aperture ");
     buf.append(Integer.toString(number));
     buf.append(": macro");
@@ -50,7 +50,7 @@ public class MacroAperture extends Aperture {
     buf.append(macro.getName());
     buf.append("; modifiers: ");
 
-    for (Iterator<Double> it = modifiers.iterator(); it.hasNext(); ) {
+    for (Iterator<Double> it = modifiers.iterator(); it.hasNext();) {
       buf.append(it.next().toString());
       if (it.hasNext())
         buf.append(", ");

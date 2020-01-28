@@ -22,12 +22,12 @@ package visolate.simulator;
 
 public class LineCenterInstance extends LineVectorInstance {
 
-  public LineCenterInstance(double width, double height,
-                            double xCenter, double yCenter,
-                            double rotation) {
-    super(height,
-          xCenter-width/2, yCenter,
-          xCenter+width/2, yCenter,
-          rotation);
+  public LineCenterInstance(
+      double width, 
+      double height, 
+      double xCenter, 
+      double yCenter, 
+      double rotation) {
+    super(height, xCenter - width / 2, yCenter, xCenter + width / 2, yCenter, rotation);
   }
 }
