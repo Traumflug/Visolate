@@ -40,7 +40,7 @@ public class Display extends JPanel {
   public static final int NUM_UPDATE_FRAMES = 3;
 
   public static final int ACCEL_FACTOR = 10;
-  
+
   public static final boolean DEF_PAN = true;
   public static final boolean DEF_TILT = false;
   public static final boolean DEF_ZOOM = true;
@@ -60,15 +60,15 @@ public class Display extends JPanel {
 
   public static final int MIN_DPI = 10;
   public static final int MAX_DPI = 10000;
-  
+
   public static final int ZOOM_FIELD_WIDTH = 6;
 
   public static final int LOC_FRACTION_DIGITS = 4;
 
-  public static final int MIN_FRAME_TIME = 1000/50;
+  public static final int MIN_FRAME_TIME = 1000 / 50;
 
-  public static final BoundingSphere BOUNDS =
-  new BoundingSphere(new Point3d(0.0,0.0,0.0), Double.MAX_VALUE);
+  public static final BoundingSphere BOUNDS = 
+      new BoundingSphere(new Point3d(0.0, 0.0, 0.0), Double.MAX_VALUE);
 
   public static final boolean IMMEDIATE_MODE = false;
 
@@ -81,12 +81,11 @@ public class Display extends JPanel {
     setBackground(Color.WHITE);
 
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-      
-    panel3D = new JPanel(); 
+
+    panel3D = new JPanel();
     panel3D.setMinimumSize(new Dimension(0, 0));
     panel3D.setPreferredSize(new Dimension(DEF_WIDTH, DEF_3D_HEIGHT));
-    panel3D.setMaximumSize(new Dimension(Integer.MAX_VALUE,
-                                         Integer.MAX_VALUE));
+    panel3D.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
     panel3D.setBackground(Color.WHITE);
     panel3D.setBorder(BorderFactory.createTitledBorder("Model"));
     panel3D.setLayout(new BorderLayout());
@@ -102,23 +101,23 @@ public class Display extends JPanel {
     final WakeupCriterion frameCriterion = new WakeupOnElapsedFrames(0, true);
     Behavior frameBehavior = new Behavior() {
 
-        public void initialize() {
-          wakeupOn(frameCriterion);
+      public void initialize() {
+        wakeupOn(frameCriterion);
+      }
+
+      public void processStimulus(@SuppressWarnings("rawtypes") java.util.Enumeration criteria) {
+
+        synchronized (frameTasks) {
+
+          for (Iterator<Runnable> it = frameTasks.iterator(); it.hasNext();)
+            it.next().run();
+
+          frameTasks.clear();
         }
 
-        public void processStimulus(@SuppressWarnings("rawtypes") java.util.Enumeration criteria) {
-
-          synchronized (frameTasks) {
-
-            for (Iterator<Runnable> it = frameTasks.iterator(); it.hasNext(); )
-              it.next().run();
-
-            frameTasks.clear();
-          }
-
-          wakeupOn(frameCriterion);
-        }
-      };
+        wakeupOn(frameCriterion);
+      }
+    };
     frameBehavior.setSchedulingBounds(BOUNDS);
     rootBG.addChild(frameBehavior);
 
@@ -159,7 +158,7 @@ public class Display extends JPanel {
     viewPlatform.setViewAttachPolicy(View.NOMINAL_SCREEN);
     viewTG.addChild(viewPlatform);
     viewBG.addChild(viewTG);
- 
+
     view = new View();
 
     view.setTrackingEnable(false);
@@ -190,9 +189,9 @@ public class Display extends JPanel {
     else
       rootBG.addChild(background);
 
-    //lights
+    // lights
     // TODO: add useable lighting and offer it to the user,
-    //       with a light switch.
+    // with a light switch.
 //    Color3f lColor1 = new Color3f(0.7f, 0.7f, 0.7f);
 //    Vector3f lDir1  = new Vector3f(-1.0f, -1.0f, -1.0f);
 //    Color3f alColor = new Color3f(0.2f, 0.2f, 0.2f);
@@ -209,7 +208,7 @@ public class Display extends JPanel {
 
     locale.addBranchGraph(viewBG);
 
-    //nav controls
+    // nav controls
 
     Box navBox = Box.createVerticalBox();
     navBox.setBorder(BorderFactory.createTitledBorder("Navigation"));
@@ -220,27 +219,30 @@ public class Display extends JPanel {
     enablePanButton.setBackground(Color.WHITE);
     enablePanButton.setSelected(panEnabled);
     enablePanButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          enablePan(enablePanButton.isSelected());
-        } });
+      public void actionPerformed(ActionEvent e) {
+        enablePan(enablePanButton.isSelected());
+      }
+    });
     navControlsBox.add(enablePanButton);
 
     enableZoomButton = new JCheckBox("zoom [alt]");
     enableZoomButton.setBackground(Color.WHITE);
     enableZoomButton.setSelected(zoomEnabled);
     enableZoomButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          enableZoom(enableZoomButton.isSelected());
-        } });
+      public void actionPerformed(ActionEvent e) {
+        enableZoom(enableZoomButton.isSelected());
+      }
+    });
     navControlsBox.add(enableZoomButton);
 
     enableTiltButton = new JCheckBox("tilt [ctl]");
     enableTiltButton.setBackground(Color.WHITE);
     enableTiltButton.setSelected(panEnabled);
     enableTiltButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          enableTilt(enableTiltButton.isSelected());
-        } });
+      public void actionPerformed(ActionEvent e) {
+        enableTilt(enableTiltButton.isSelected());
+      }
+    });
     navControlsBox.add(enableTiltButton);
 
     navControlsBox.add(Box.createHorizontalGlue());
@@ -250,13 +252,19 @@ public class Display extends JPanel {
 
     nativeDPIField = new JTextField() {
       private static final long serialVersionUID = 1L;
-    { columnWidth = getColumnWidth(); } };
+      {
+        columnWidth = getColumnWidth();
+      }
+    };
     nativeDPIField.setHorizontalAlignment(JTextField.RIGHT);
     d = nativeDPIField.getPreferredSize();
-    nativeDPIField.setMaximumSize(new Dimension(columnWidth*3, d.height));
-    nativeDPIField.setPreferredSize(new Dimension(columnWidth*3, d.height));
+    nativeDPIField.setMaximumSize(new Dimension(columnWidth * 3, d.height));
+    nativeDPIField.setPreferredSize(new Dimension(columnWidth * 3, d.height));
     nativeDPIField.addFocusListener(new FocusAdapter() {
-      public void focusLost(FocusEvent e) { updateNativeDPI(); } });
+      public void focusLost(FocusEvent e) {
+        updateNativeDPI();
+      }
+    });
 
     navControlsBox.add(nativeDPIField);
 
@@ -265,9 +273,10 @@ public class Display extends JPanel {
     fitButton = new JButton("fit");
     fitButton.setBackground(Color.WHITE);
     fitButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          fit();
-        } });
+      public void actionPerformed(ActionEvent e) {
+        fit();
+      }
+    });
     navControlsBox.add(fitButton);
 
     Box zoomBox = Box.createHorizontalBox();
@@ -278,27 +287,31 @@ public class Display extends JPanel {
     dpiField = new JTextField();
     dpiField.setHorizontalAlignment(JTextField.RIGHT);
     d = dpiField.getPreferredSize();
-    dpiField.setMaximumSize(new Dimension(columnWidth*ZOOM_FIELD_WIDTH,
-                                          d.height));
-    dpiField.setPreferredSize(new Dimension(columnWidth*ZOOM_FIELD_WIDTH,
-                                            d.height));
+    dpiField.setMaximumSize(new Dimension(columnWidth * ZOOM_FIELD_WIDTH, d.height));
+    dpiField.setPreferredSize(new Dimension(columnWidth * ZOOM_FIELD_WIDTH, d.height));
     dpiField.addFocusListener(new FocusAdapter() {
-      public void focusLost(FocusEvent e) { updateDPI(); } });
+      public void focusLost(FocusEvent e) {
+        updateDPI();
+      }
+    });
     zoomBox.add(dpiField);
 
     dpiSlider = new JSlider(MIN_DPI, MAX_DPI);
     dpiSlider.setBackground(Color.WHITE);
     dpiSlider.addChangeListener(new ChangeListener() {
-        public void stateChanged(ChangeEvent e) {
-          setDPI(dpiSlider.getValue()); } });
+      public void stateChanged(ChangeEvent e) {
+        setDPI(dpiSlider.getValue());
+      }
+    });
     zoomBox.add(dpiSlider);
 
     oneToOneButton = new JButton("1:1");
     oneToOneButton.setBackground(Color.WHITE);
     oneToOneButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-          setOneToOne();
-        } });
+      public void actionPerformed(ActionEvent e) {
+        setOneToOne();
+      }
+    });
     zoomBox.add(oneToOneButton);
 
     Box locationBox = Box.createHorizontalBox();
@@ -344,8 +357,7 @@ public class Display extends JPanel {
 
     d = navBox.getPreferredSize();
     navBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
-    panel3D.setMaximumSize(new Dimension(Integer.MAX_VALUE,
-                                         Integer.MAX_VALUE));
+    panel3D.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
     setPreferredSize(orig);
 
     setResizable(true);
@@ -392,9 +404,8 @@ public class Display extends JPanel {
 
           long diffTime;
 
-          for (diffTime = System.currentTimeMillis() - lastTime;
-               diffTime < MIN_FRAME_TIME;
-               diffTime = System.currentTimeMillis() - lastTime)
+          for (diffTime = System.currentTimeMillis()
+              - lastTime; diffTime < MIN_FRAME_TIME; diffTime = System.currentTimeMillis() - lastTime)
             Thread.yield();
 
         }
@@ -418,7 +429,7 @@ public class Display extends JPanel {
     }
 
     @SuppressWarnings("unchecked")
-	private void render(Node node) {
+    private void render(Node node) {
 
 //      System.out.println("render: " + System.currentTimeMillis());
 
@@ -433,7 +444,7 @@ public class Display extends JPanel {
           graphicsContext.setModelTransform(cmt);
         }
 
-        for (Enumeration<Node> e = (Enumeration<Node>) group.getAllChildren(); e.hasMoreElements(); ) {
+        for (Enumeration<Node> e = (Enumeration<Node>) group.getAllChildren(); e.hasMoreElements();) {
           render(e.nextElement());
         }
 
@@ -455,7 +466,7 @@ public class Display extends JPanel {
         if (appearance != null)
           graphicsContext.setAppearance(appearance);
 
-        for (Enumeration<Geometry> e = shape.getAllGeometries(); e.hasMoreElements(); ) {
+        for (Enumeration<Geometry> e = shape.getAllGeometries(); e.hasMoreElements();) {
           Geometry geometry = (Geometry) e.nextElement();
 //          assert geometry != null;
           if (geometry != null)
@@ -477,10 +488,11 @@ public class Display extends JPanel {
 
       if ((tmp >= MIN_NATIVE_DPI) && (tmp <= MAX_NATIVE_DPI))
         nativeDPI = tmp;
-    
+
       updateView();
 
-    } catch (NumberFormatException e) { }
+    } catch (NumberFormatException e) {
+    }
   }
 
   private void updateDPI() {
@@ -490,18 +502,19 @@ public class Display extends JPanel {
 
       if ((tmp >= MIN_DPI) && (tmp <= MAX_DPI))
         dpi = tmp;
-      
+
       updateView();
 
-    } catch (NumberFormatException e) { }
+    } catch (NumberFormatException e) {
+    }
   }
 
   public double getVirtualCanvasWidth() {
-    return ((double) canvas3D.getWidth())/dpi;
+    return ((double) canvas3D.getWidth()) / dpi;
   }
 
   public double getVirtualCanvasHeight() {
-    return ((double) canvas3D.getHeight())/dpi;
+    return ((double) canvas3D.getHeight()) / dpi;
   }
 
   public int getCanvasWidth() {
@@ -513,18 +526,18 @@ public class Display extends JPanel {
   }
 
   private void updateView() {
-    
+
     synchronized (view) {
 
       viewUpdatePending = NUM_UPDATE_FRAMES;
 
       centerTG.setTransform(centerT3D);
       uncenterTG.setTransform(uncenterT3D);
-      
+
       tiltT3D.setEuler(new Vector3d(tiltX, tiltY, 0.0));
       tiltTG.setTransform(tiltT3D);
 
-      screenScale = 0.0254*dpi/nativeDPI;
+      screenScale = 0.0254 * dpi / nativeDPI;
 
       viewT3D.setTranslation(new Vector3d(viewCenter.x, viewCenter.y, VIEW_Z));
       viewTG.setTransform(viewT3D);
@@ -553,13 +566,13 @@ public class Display extends JPanel {
 
     Rect bounds = visolate.getModel().getBoardBounds();
 
-    double horizontalDPI = canvas3D.getWidth()/bounds.width;
-    double verticalDPI = canvas3D.getHeight()/bounds.height;
+    double horizontalDPI = canvas3D.getWidth() / bounds.width;
+    double verticalDPI = canvas3D.getHeight() / bounds.height;
 
     dpi = (int) Math.floor(Math.min(horizontalDPI, verticalDPI));
 
-    viewCenter.x = bounds.x + bounds.width/2;
-    viewCenter.y = bounds.y + bounds.height/2;
+    viewCenter.x = bounds.x + bounds.width / 2;
+    viewCenter.y = bounds.y + bounds.height / 2;
 
     centerT3D.setTranslation(new Vector3d(viewCenter.x, viewCenter.y, 0.0));
     uncenterT3D.setTranslation(new Vector3d(-viewCenter.x, -viewCenter.y, 0.0));
@@ -587,7 +600,7 @@ public class Display extends JPanel {
 
     while (viewUpdatePending > 0) {
       Thread.yield();
-      
+
       if ((System.currentTimeMillis() - t) > MAX_UPDATE_FRAME_TIME) {
         view.repaint();
         t = System.currentTimeMillis();
@@ -606,7 +619,7 @@ public class Display extends JPanel {
   }
 
   public void destroy() {
-    //universe.cleanup();
+    // universe.cleanup();
   }
 
   public void reset() {
@@ -617,9 +630,9 @@ public class Display extends JPanel {
       doFit = true;
     else
       modelBG.detach();
-  
+
     modelBG = visolate.getModel().getSceneGraph();
-    
+
     if (doFit)
       fit();
 
@@ -642,7 +655,7 @@ public class Display extends JPanel {
 //    setResizable(true);
   }
 
-  public void processStarted() { 
+  public void processStarted() {
     enableControls(false);
     viewCenterWas.set(viewCenter);
 //    setResizable(false);
@@ -680,7 +693,7 @@ public class Display extends JPanel {
 
     if (enable == zoomEnabled)
       return;
-    
+
     zoomEnabled = enable;
 
     fitButton.setEnabled(enable);
@@ -702,7 +715,7 @@ public class Display extends JPanel {
   }
 
   private void enableTilt(boolean enable) {
-    
+
     if (enableTiltButton.isSelected() != enable)
       enableTiltButton.setSelected(enable);
 
@@ -730,7 +743,7 @@ public class Display extends JPanel {
 
 //    System.out.println("updateZoom: " + delta);
 
-    int newDPI = dpi+delta;
+    int newDPI = dpi + delta;
 
     if (newDPI < MIN_DPI)
       newDPI = MIN_DPI;
@@ -754,9 +767,9 @@ public class Display extends JPanel {
 
 //    System.out.println("updatePan: " + deltaX + ", " + deltaY);
 
-    viewCenter.x -= deltaX/((double) dpi);
-    viewCenter.y -= deltaY/((double) dpi);
-    
+    viewCenter.x -= deltaX / ((double) dpi);
+    viewCenter.y -= deltaY / ((double) dpi);
+
     updateView();
   }
 
@@ -772,9 +785,9 @@ public class Display extends JPanel {
 
 //    System.out.println("updateTilt: " + deltaX + ", " + deltaY);
 
-    tiltY += deltaX/((double) dpi);
-    tiltX += deltaY/((double) dpi);
-    
+    tiltY += deltaX / ((double) dpi);
+    tiltX += deltaY / ((double) dpi);
+
     updateView();
   }
 
@@ -785,28 +798,19 @@ public class Display extends JPanel {
   public BufferedImage makeBufferedImage(int width, int height) {
     return new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
   }
-   
-  public BufferedImage getStill()
-    throws InterruptedException {
-    
+
+  public BufferedImage getStill() throws InterruptedException {
+
 //    return getStill(makeBufferedImage()); //work around j3d bug
 
-    int width = canvas3D.getWidth(); 
+    int width = canvas3D.getWidth();
     int height = canvas3D.getHeight();
-    
-    ImageComponent2D imageComponent =
-      new ImageComponent2D(ImageComponent.FORMAT_RGB,
-                           width, height,
-                           false, //byRef
-                           false); //yUp
-    
-    raster =
-      new javax.media.j3d.Raster(new Point3f(0.0f, 0.0f, 0.0f),
-                                 javax.media.j3d.Raster.RASTER_COLOR, 
-                                 0, 0,
-                                 width, height,
-                                 imageComponent,
-                                 null); 
+
+    ImageComponent2D imageComponent = new ImageComponent2D(ImageComponent.FORMAT_RGB, width, height, false, // byRef
+        false); // yUp
+
+    raster = new javax.media.j3d.Raster(new Point3f(0.0f, 0.0f, 0.0f), javax.media.j3d.Raster.RASTER_COLOR, 0, 0, width,
+        height, imageComponent, null);
 
     waitForViewUpdate();
 
@@ -817,7 +821,7 @@ public class Display extends JPanel {
     while (readRasterPending)
       Thread.yield();
 
-    (canvas3D.getGraphicsContext3D()).readRaster(raster); 
+    (canvas3D.getGraphicsContext3D()).readRaster(raster);
 
     return raster.getImage().getImage();
   }
@@ -861,16 +865,14 @@ public class Display extends JPanel {
    * @return coordinate under the mouse in Inch.
    */
   private double mouseX(final MouseEvent e) {
-    return e.getX() / ((double) dpi) + viewCenter.x - getVirtualCanvasWidth()/2;
+    return e.getX() / ((double) dpi) + viewCenter.x - getVirtualCanvasWidth() / 2;
   }
 
   /**
    * @return coordinate under the mouse in Inch.
    */
   private double mouseY(final MouseEvent e) {
-    return
-      (canvas3D.getHeight() - e.getY()) / ((double) dpi) +
-      viewCenter.y - getVirtualCanvasHeight()/2;
+    return (canvas3D.getHeight() - e.getY()) / ((double) dpi) + viewCenter.y - getVirtualCanvasHeight() / 2;
   }
 
   private class MyCanvas3D extends Canvas3D {
@@ -892,99 +894,109 @@ public class Display extends JPanel {
 
       if (IMMEDIATE_MODE)
         stopRenderer();
-      
+
       addMouseListener(new MouseAdapter() {
-          
-          public void mousePressed(MouseEvent e) {
-            lastX = e.getX();
-            lastY = e.getY();
-          } 
-          
-          public void mouseClicked(MouseEvent e) {
-            visolate.mouseClicked(mouseX(e), mouseY(e), e.getModifiersEx());
-          } });
-      
+
+        public void mousePressed(MouseEvent e) {
+          lastX = e.getX();
+          lastY = e.getY();
+        }
+
+        public void mouseClicked(MouseEvent e) {
+          visolate.mouseClicked(mouseX(e), mouseY(e), e.getModifiersEx());
+        }
+      });
+
       addMouseMotionListener(new MouseMotionAdapter() {
-          
-          private DecimalFormat locFormat = new DecimalFormat();
-          
-            {
-              locFormat.setMaximumFractionDigits(LOC_FRACTION_DIGITS);
-              locFormat.setMinimumFractionDigits(LOC_FRACTION_DIGITS);
-            }
-          
-          public void mouseDragged(MouseEvent e) {
-            int x = e.getX();
-            int y = e.getY();
-            
+
+        private DecimalFormat locFormat = new DecimalFormat();
+
+        {
+          locFormat.setMaximumFractionDigits(LOC_FRACTION_DIGITS);
+          locFormat.setMinimumFractionDigits(LOC_FRACTION_DIGITS);
+        }
+
+        public void mouseDragged(MouseEvent e) {
+          int x = e.getX();
+          int y = e.getY();
+
 //            System.out.println("mouse dragged (" + x + ", " + y +
 //                               ") modifiers: " +
 //                               e.getMouseModifiersText(e.getModifiers()) +
 //                               "; modifiersEx: " +
 //                               e.getModifiersExText(e.getModifiersEx()));
 
-            if ((e.getModifiersEx() & (MouseEvent.ALT_DOWN_MASK | 
-                                       MouseEvent.BUTTON2_DOWN_MASK)) != 0)
-              updateZoom(y-lastY, e.isShiftDown());
-            else if ((e.getModifiersEx() & (MouseEvent.CTRL_DOWN_MASK | 
-                                            MouseEvent.BUTTON3_DOWN_MASK)) != 0)
-              updateTilt(x-lastX, y-lastY, e.isShiftDown());
-            else
-              updatePan(x-lastX, lastY-y, e.isShiftDown());
-            lastX = x;
-            lastY = y;
-          }
-          
-          public void mouseMoved(MouseEvent e) {
-            locationLabelX.setText(locFormat.format(25.4 * mouseX(e)) + "(" + locFormat.format(mouseX(e)) + ")");
-            locationLabelY.setText(locFormat.format(25.4 * mouseY(e)) + "(" + locFormat.format(mouseY(e)) + ")");
-            
-          } });
-      
+          if ((e.getModifiersEx() & (MouseEvent.ALT_DOWN_MASK | MouseEvent.BUTTON2_DOWN_MASK)) != 0)
+            updateZoom(y - lastY, e.isShiftDown());
+          else if ((e.getModifiersEx() & (MouseEvent.CTRL_DOWN_MASK | MouseEvent.BUTTON3_DOWN_MASK)) != 0)
+            updateTilt(x - lastX, y - lastY, e.isShiftDown());
+          else
+            updatePan(x - lastX, lastY - y, e.isShiftDown());
+          lastX = x;
+          lastY = y;
+        }
+
+        public void mouseMoved(MouseEvent e) {
+          locationLabelX.setText(locFormat.format(25.4 * mouseX(e)) + "(" + locFormat.format(mouseX(e)) + ")");
+          locationLabelY.setText(locFormat.format(25.4 * mouseY(e)) + "(" + locFormat.format(mouseY(e)) + ")");
+
+        }
+      });
+
       addMouseWheelListener(new MouseWheelListener() {
-          public void mouseWheelMoved(MouseWheelEvent e) {
-            updateZoom(e.getWheelRotation(), e.isShiftDown());
-          } });
-      
+        public void mouseWheelMoved(MouseWheelEvent e) {
+          updateZoom(e.getWheelRotation(), e.isShiftDown());
+        }
+      });
+
       addKeyListener(new KeyAdapter() {
 
-          public void keyReleased(KeyEvent e) {
+        public void keyReleased(KeyEvent e) {
 
-            if (!e.isAltDown()) {
-              switch (e.getKeyCode()) {
-              case KeyEvent.VK_LEFT:
-                updatePan(-1, 0, e.isShiftDown()); return;
-              case KeyEvent.VK_RIGHT:
-                updatePan(+1, 0, e.isShiftDown()); return;
-              case KeyEvent.VK_UP:
-                updatePan(0, +1, e.isShiftDown()); return;
-              case KeyEvent.VK_DOWN:
-                updatePan(0, -1, e.isShiftDown()); return;
-              }
-            } else {
-              switch (e.getKeyCode()) {
-              case KeyEvent.VK_LEFT:
-                updateTilt(-1, 0, e.isShiftDown()); return;
-              case KeyEvent.VK_RIGHT:
-                updateTilt(+1, 0, e.isShiftDown()); return;
-              case KeyEvent.VK_UP:
-                updateTilt(0, +1, e.isShiftDown()); return;
-              case KeyEvent.VK_DOWN:
-                updateTilt(0, -1, e.isShiftDown()); return;
-              }
+          if (!e.isAltDown()) {
+            switch (e.getKeyCode()) {
+            case KeyEvent.VK_LEFT:
+              updatePan(-1, 0, e.isShiftDown());
+              return;
+            case KeyEvent.VK_RIGHT:
+              updatePan(+1, 0, e.isShiftDown());
+              return;
+            case KeyEvent.VK_UP:
+              updatePan(0, +1, e.isShiftDown());
+              return;
+            case KeyEvent.VK_DOWN:
+              updatePan(0, -1, e.isShiftDown());
+              return;
             }
-
-            visolate.keyReleased(e);
-          } 
-
-          public void keyTyped(KeyEvent e) {
+          } else {
+            switch (e.getKeyCode()) {
+            case KeyEvent.VK_LEFT:
+              updateTilt(-1, 0, e.isShiftDown());
+              return;
+            case KeyEvent.VK_RIGHT:
+              updateTilt(+1, 0, e.isShiftDown());
+              return;
+            case KeyEvent.VK_UP:
+              updateTilt(0, +1, e.isShiftDown());
+              return;
+            case KeyEvent.VK_DOWN:
+              updateTilt(0, -1, e.isShiftDown());
+              return;
+            }
           }
-        });
+
+          visolate.keyReleased(e);
+        }
+
+        public void keyTyped(KeyEvent e) {
+        }
+      });
 
       addComponentListener(new ComponentAdapter() {
-          public void componentResized(ComponentEvent e) {
-            updateView();
-          } });
+        public void componentResized(ComponentEvent e) {
+          updateView();
+        }
+      });
 
     }
 
@@ -1003,9 +1015,9 @@ public class Display extends JPanel {
       }
 
       long newTime = System.currentTimeMillis();
-      
+
       if (lastTime >= 0) {
-        double fps = 1000.0/(newTime-lastTime);
+        double fps = 1000.0 / (newTime - lastTime);
 //        System.out.println("FPS: " + fps);
         fpsLabel.setText(fpsFormat.format(fps) + " FPS");
       }
@@ -1016,15 +1028,10 @@ public class Display extends JPanel {
     private long lastTime = -1;
   }
 
-
   private GraphicsConfiguration getGC(Container container) {
 
-    GraphicsDevice graphicsDevice =
-      (container != null) ?
-      container.getGraphicsConfiguration().getDevice() :
-      GraphicsEnvironment.
-      getLocalGraphicsEnvironment().
-      getDefaultScreenDevice();
+    GraphicsDevice graphicsDevice = (container != null) ? container.getGraphicsConfiguration().getDevice()
+        : GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
 
     try {
 
@@ -1032,19 +1039,18 @@ public class Display extends JPanel {
 
     } catch (RuntimeException e) {
 
-      GraphicsDevice[] gs = 
-        GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+      GraphicsDevice[] gs = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
 
       RuntimeException ex = null;
 
-      for (int j = 0; j < gs.length; j++) { 
+      for (int j = 0; j < gs.length; j++) {
         try {
           return getGC(gs[j]);
         } catch (RuntimeException e2) {
           ex = e2;
         }
       }
-      
+
       throw ex;
     }
   }
@@ -1053,10 +1059,10 @@ public class Display extends JPanel {
 
     System.out.println("graphics device: " + graphicsDevice.getIDstring());
 
-    int[][] format = new int[][] {{8, 8, 8}, {5, 6, 5}};
-    int[] depth = new int[] {24, 16, 8};
+    int[][] format = new int[][] { { 8, 8, 8 }, { 5, 6, 5 } };
+    int[] depth = new int[] { 24, 16, 8 };
 
-    GraphicsConfigTemplate3D gct = new GraphicsConfigTemplate3D(); 
+    GraphicsConfigTemplate3D gct = new GraphicsConfigTemplate3D();
     gct.setDoubleBuffer(GraphicsConfigTemplate3D.PREFERRED);
     gct.setStereo(GraphicsConfigTemplate3D.UNNECESSARY);
     gct.setSceneAntialiasing(GraphicsConfigTemplate3D.UNNECESSARY);
@@ -1084,8 +1090,7 @@ public class Display extends JPanel {
       gc = fallback;
 
     if (gc == null)
-      throw
-        new RuntimeException("FATAL ERROR: failed to initialize 3D graphics");
+      throw new RuntimeException("FATAL ERROR: failed to initialize 3D graphics");
 
     rBits = gc.getColorModel().getComponentSize(0);
     gBits = gc.getColorModel().getComponentSize(1);
@@ -1096,20 +1101,18 @@ public class Display extends JPanel {
     rCeil = 1 << rBits;
     gCeil = 1 << gBits;
     bCeil = 1 << bBits;
-    
+
 //    System.out.println("ceilings: " +
 //                       rCeil + ", " + gCeil + ", " + bCeil);
-    
-    rSpread = 256/rCeil;
-    gSpread = 256/gCeil;
-    bSpread = 256/bCeil;
-    
+
+    rSpread = 256 / rCeil;
+    gSpread = 256 / gCeil;
+    bSpread = 256 / bCeil;
+
 //    System.out.println("spreads: " +
 //                       rSpread + ", " + gSpread + ", " + bSpread);
-      
-    System.out.println("pixel format " +
-                       rBits + ":" + gBits + ":" + bBits +
-                       " " + dBits + "-bit depth");
+
+    System.out.println("pixel format " + rBits + ":" + gBits + ":" + bBits + " " + dBits + "-bit depth");
     return gc;
   }
 
@@ -1130,13 +1133,11 @@ public class Display extends JPanel {
   }
 
   public static double intensity(double r, double g, double b) {
-    return (r+g+b)/3.0;
+    return (r + g + b) / 3.0;
   }
 
   public static double intensity(Color3b c) {
-    return ((c.x & 0xff)/255.0 +
-            (c.y & 0xff)/255.0 +
-            (c.z & 0xff)/255.0)/3.0;
+    return ((c.x & 0xff) / 255.0 + (c.y & 0xff) / 255.0 + (c.z & 0xff) / 255.0) / 3.0;
   }
 
   private static double rnd(double min, double max) {
@@ -1144,13 +1145,13 @@ public class Display extends JPanel {
     min = Math.max(0.0, min);
     max = Math.min(1.0, max);
 
-    return min + Math.random()*(max-min);
+    return min + Math.random() * (max - min);
   }
 
   private static void randomSwap(double[] c) {
 
-    int i = (int) Math.floor(Math.random()*c.length);
-    int j = (int) Math.floor(Math.random()*c.length);
+    int i = (int) Math.floor(Math.random() * c.length);
+    int j = (int) Math.floor(Math.random() * c.length);
 
     double t = c[i];
     c[i] = c[j];
@@ -1161,15 +1162,15 @@ public class Display extends JPanel {
 
     double y = 0.5;
 
-    double sum = 3.0*y;
+    double sum = 3.0 * y;
 
     double[] c = new double[3];
 
-    c[0] = rnd(sum-2.0, sum);
+    c[0] = rnd(sum - 2.0, sum);
 
-    c[1] = rnd(sum-c[0]-1.0, sum-c[0]);
+    c[1] = rnd(sum - c[0] - 1.0, sum - c[0]);
 
-    c[2] = sum-(c[0]+c[1]);
+    c[2] = sum - (c[0] + c[1]);
 
     randomSwap(c);
     randomSwap(c);
@@ -1180,9 +1181,8 @@ public class Display extends JPanel {
     double g = c[1];
     double b = c[2];
 
-    return new Color3b((byte) (((int) Math.floor(r*rCeil))*rSpread),
-                       (byte) (((int) Math.floor(g*gCeil))*gSpread),
-                       (byte) (((int) Math.floor(b*bCeil))*bSpread));
+    return new Color3b((byte) (((int) Math.floor(r * rCeil)) * rSpread),
+        (byte) (((int) Math.floor(g * gCeil)) * gSpread), (byte) (((int) Math.floor(b * bCeil)) * bSpread));
   }
 
   private Visolate visolate;
@@ -1253,12 +1253,13 @@ public class Display extends JPanel {
   private int rCeil, gCeil, bCeil;
   private int rSpread, gSpread, bSpread;
 
-  private NumberFormat fpsFormat =
-  new DecimalFormat() {
+  private NumberFormat fpsFormat = new DecimalFormat() {
     private static final long serialVersionUID = 1L;
-  {
-    setMaximumFractionDigits(2); 
-    setMinimumFractionDigits(2); } };
+    {
+      setMaximumFractionDigits(2);
+      setMinimumFractionDigits(2);
+    }
+  };
 
   private JLabel fpsLabel;
 
@@ -1266,6 +1267,5 @@ public class Display extends JPanel {
 
   private Thread renderThread;
 
-  private Collection<Runnable> frameTasks =
-  Collections.synchronizedList(new LinkedList<Runnable>());
+  private Collection<Runnable> frameTasks = Collections.synchronizedList(new LinkedList<Runnable>());
 }
