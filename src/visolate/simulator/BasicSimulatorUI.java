@@ -40,7 +40,7 @@ public class BasicSimulatorUI implements SimulatorUI {
 
     System.out.println(msgBuf.toString());
 
-    //TBD
+    // TBD
 
     return false;
   }

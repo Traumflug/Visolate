@@ -59,9 +59,7 @@ public class Arc extends Stroke {
   }
 
   public String toString() {
-    return
-      "arc from " + start + " to " + end +
-      "; center " + center + "; " + aperture;
+    return "arc from " + start + " to " + end + "; center " + center + "; " + aperture;
   }
 
   private Vertex center;

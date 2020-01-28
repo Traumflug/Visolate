@@ -22,9 +22,12 @@ package visolate.simulator;
 
 public class LineLLInstance extends LineVectorInstance {
 
-  public LineLLInstance(double width, double height,
-                        double xLL, double yLL,
-                        double rotation) {
+  public LineLLInstance(
+      double width, 
+      double height,
+      double xLL, 
+      double yLL,
+      double rotation) {
     super(height,
           xLL, yLL+height/2,
           xLL+width, yLL+height/2,

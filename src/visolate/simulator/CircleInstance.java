@@ -34,11 +34,11 @@ public class CircleInstance extends PrimitiveInstance {
 
   protected void makeBounds() {
     double r = getRadius();
-    bounds = new Rect(x-r, y-r, 2*r, 2*r);
+    bounds = new Rect(x - r, y - r, 2 * r, 2 * r);
   }
 
   protected double getRadius() {
-    return Math.max(0.0, diameter/2 + signedOffset);
+    return Math.max(0.0, diameter / 2 + signedOffset);
   }
 
   protected void makeGeometries() {

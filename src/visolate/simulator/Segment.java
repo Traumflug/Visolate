@@ -31,7 +31,7 @@ import javax.vecmath.*;
 public class Segment extends Stroke {
 
   public static final int SEGMENTS = 16; // Must be a multiple of two.
-  public static final double SECTOR = 2.0*Math.PI/SEGMENTS;
+  public static final double SECTOR = 2.0 * Math.PI / SEGMENTS;
 
   public static final Vector3d Z = new Vector3d(0.0, 0.0, 1.0);
 
@@ -43,20 +43,20 @@ public class Segment extends Stroke {
     double dx = end.x - start.x;
     double dy = end.y - start.y;
 
-    double length = Math.sqrt(dx*dx + dy*dy);
+    double length = Math.sqrt(dx * dx + dy * dy);
 
-    double s = dy/length;
-    double c = dx/length;
+    double s = dy / length;
+    double c = dx / length;
 
     forwardDirection = Math.atan2(s, c);
 
     if (forwardDirection < 0.0)
-      forwardDirection = 2*Math.PI + forwardDirection;
+      forwardDirection = 2 * Math.PI + forwardDirection;
 
     reverseDirection = Math.atan2(-s, -c);
 
     if (reverseDirection < 0.0)
-      reverseDirection = 2*Math.PI + reverseDirection;
+      reverseDirection = 2 * Math.PI + reverseDirection;
 
 //    System.out.println(toString());
   }
@@ -67,13 +67,12 @@ public class Segment extends Stroke {
 
       lengthInches = 0.0;
 
-      lengthInches =
-        start.getInchCoordinates().distance(end.getInchCoordinates());
+      lengthInches = start.getInchCoordinates().distance(end.getInchCoordinates());
     }
 
     return lengthInches;
   }
-  
+
   public double getWidth() {
     return aperture.getWidth(forwardDirection);
   }
@@ -97,35 +96,29 @@ public class Segment extends Stroke {
   protected void makeBounds() {
 
     bounds = new Rect();
-    
+
     Point2f s = start.getInchCoordinates();
     Point2f e = end.getInchCoordinates();
-    
+
     Rect apBounds = aperture.getBounds();
-    
-    bounds.add(new Rect(apBounds.x + s.x,
-                        apBounds.y + s.y,
-                        apBounds.width,
-                        apBounds.height));
-    
-    bounds.add(new Rect(apBounds.x + e.x,
-                        apBounds.y + e.y,
-                        apBounds.width,
-                        apBounds.height));
-    
+
+    bounds.add(new Rect(apBounds.x + s.x, apBounds.y + s.y, apBounds.width, apBounds.height));
+
+    bounds.add(new Rect(apBounds.x + e.x, apBounds.y + e.y, apBounds.width, apBounds.height));
+
     getBodyRect();
 
-    //body rect is null if segment is 0 length
+    // body rect is null if segment is 0 length
     if (bodyRect != null) {
       for (int i = 0; i < bodyRect.length; i++)
         bounds.add(bodyRect[i].x, bodyRect[i].y);
     }
   }
-  
+
   protected Point2d[] getBodyRect() {
 
     if (bodyRect == null) {
-      
+
       if (getLength() < MIN_LENGTH)
         return null;
 
@@ -142,7 +135,7 @@ public class Segment extends Stroke {
       Vector3d n = new Vector3d();
       n.cross(d, Z);
 
-      n.scale(width/2);
+      n.scale(width / 2);
 
       bodyRect[0] = new Point2d(s.x + n.x, s.y + n.y);
       bodyRect[1] = new Point2d(e.x + n.x, e.y + n.y);
@@ -163,15 +156,15 @@ public class Segment extends Stroke {
     double ry = getLength() / 2 + rx;
     double radius = Math.min(rx, ry);
     double halfLength = Math.abs(ry - rx);
-    
+
     if (rx == 0.0 || ry == 0.0) {
       return;
     }
-    
+
     geometries = new LinkedList<GeometryArray>();
     int i = 0;
-    float[] coords = new float[3*(SEGMENTS + 4)];
-    
+    float[] coords = new float[3 * (SEGMENTS + 4)];
+
     // center
     coords[i++] = 0.0f;
     coords[i++] = 0.0f;
@@ -179,25 +172,25 @@ public class Segment extends Stroke {
 
     for (int j = 0; j <= SEGMENTS; j++) {
 
-      x = radius*Math.cos(angle);
-      y = radius*Math.sin(angle);
+      x = radius * Math.cos(angle);
+      y = radius * Math.sin(angle);
 
       // vertical stretch
       if (j <= SEGMENTS / 2) {
         coords[i++] = (float) (x);
-        coords[i++] = (float) (y+halfLength);
+        coords[i++] = (float) (y + halfLength);
         coords[i++] = 0.0f;
       }
       // Yes, j == SEGMENTS / 2 gives two points!
       if (j >= SEGMENTS / 2) {
         coords[i++] = (float) (x);
-        coords[i++] = (float) (y-halfLength);
+        coords[i++] = (float) (y - halfLength);
         coords[i++] = 0.0f;
       }
       // Close the oval, it's a double-point again.
       if (j == SEGMENTS) {
         coords[i++] = (float) (x);
-        coords[i++] = (float) (y+halfLength);
+        coords[i++] = (float) (y + halfLength);
         coords[i++] = 0.0f;
       }
 
@@ -205,7 +198,7 @@ public class Segment extends Stroke {
     }
 
     TriangleFanArray tfa = makeTFA(coords);
-    
+
     // Please don't ask why this PI thing is needed!
     rotateGeometry(tfa, forwardDirection - Math.PI / 2);
 
@@ -213,7 +206,7 @@ public class Segment extends Stroke {
     Point2f e = end.getInchCoordinates();
     Vector2f center = new Vector2f((s.x + e.x) / 2, (s.y + e.y) / 2);
     translateGeometry(tfa, center);
-    
+
     geometries.add(tfa);
 
   }
@@ -226,7 +219,7 @@ public class Segment extends Stroke {
     super.offsetChanged();
     bodyRect = null;
   }
-                                   
+
   protected void inverseChanged() {
     super.inverseChanged();
     bodyRect = null;

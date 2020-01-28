@@ -36,9 +36,8 @@ public abstract class MacroPrimitive {
 
     List<Double> actuals = new ArrayList<Double>();
 
-    for (Iterator<MacroExpression> it = exprs.iterator(); it.hasNext(); )
-      actuals.add(new Double(((MacroExpression) it.next()).
-                             getValue(modifiers)));
+    for (Iterator<MacroExpression> it = exprs.iterator(); it.hasNext();)
+      actuals.add(new Double(((MacroExpression) it.next()).getValue(modifiers)));
 
     return getInstanceInternal(actuals);
   }
@@ -49,13 +48,13 @@ public abstract class MacroPrimitive {
     buf.append(getName());
     buf.append(" ");
 
-    for (Iterator<MacroExpression> it = exprs.iterator(); it.hasNext(); ) {
+    for (Iterator<MacroExpression> it = exprs.iterator(); it.hasNext();) {
       buf.append((it.next()).toString());
       if (it.hasNext()) {
         buf.append(", ");
       }
     }
-    
+
     return buf.toString();
   }
 

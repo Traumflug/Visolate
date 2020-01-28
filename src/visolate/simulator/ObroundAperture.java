@@ -26,15 +26,11 @@ import visolate.misc.*;
 import javax.media.j3d.*;
 
 public class ObroundAperture extends StandardAperture {
-  
-  public static final int SEGMENTS = 16; // Must be a multiple of two.
-  public static final double SECTOR = 2.0*Math.PI/SEGMENTS;
 
-  public ObroundAperture(int number,
-                         double diameterX,
-                         double diameterY,
-                         double holeX,
-                         double holeY) {
+  public static final int SEGMENTS = 16; // Must be a multiple of two.
+  public static final double SECTOR = 2.0 * Math.PI / SEGMENTS;
+
+  public ObroundAperture(int number, double diameterX, double diameterY, double holeX, double holeY) {
     super(number, holeX, holeY);
     init(diameterX, diameterY);
   }
@@ -46,17 +42,14 @@ public class ObroundAperture extends StandardAperture {
   }
 
   public double getA() {
-    return Math.max(0.0, 0.5*diameterX + signedOffset);
+    return Math.max(0.0, 0.5 * diameterX + signedOffset);
   }
 
   public double getB() {
-    return Math.max(0.0, 0.5*diameterY + signedOffset);
+    return Math.max(0.0, 0.5 * diameterY + signedOffset);
   }
 
-  public ObroundAperture(int number,
-                         double diameterX,
-                         double diameterY,
-                         double hole) {
+  public ObroundAperture(int number, double diameterX, double diameterY, double hole) {
     super(number, hole);
     init(diameterX, diameterY);
   }
@@ -67,32 +60,27 @@ public class ObroundAperture extends StandardAperture {
   }
 
   public String toString() {
-    return
-      "Aperture " + number +
-      ": obround" +
-      " diameterX = " + diameterX +
-      " diameterY = " + diameterY +
-      " holeX = " + holeX +
-      " holeY = " + holeY;
+    return "Aperture " + number + ": obround" + " diameterX = " + diameterX + " diameterY = " + diameterY + " holeX = "
+        + holeX + " holeY = " + holeY;
   }
 
   protected void makeBounds() {
     double a = getA();
     double b = getB();
-    bounds = new Rect(-a, -b, 2*a, 2*b);
+    bounds = new Rect(-a, -b, 2 * a, 2 * b);
   }
 
   public double getWidth(double direction) {
-    //TBD this is for an ellipse...
-    return 2*radius(direction+Math.PI/2);
+    // TBD this is for an ellipse...
+    return 2 * radius(direction + Math.PI / 2);
   }
 
   private double radius(double theta) {
     double a = getA();
     double b = getB();
-    double p = b*Math.cos(theta);
-    double q = a*Math.sin(theta);
-    return a*b/Math.sqrt(p*p+q*q);
+    double p = b * Math.cos(theta);
+    double q = a * Math.sin(theta);
+    return a * b / Math.sqrt(p * p + q * q);
   }
 
   protected void makeGeometries() {
@@ -102,7 +90,7 @@ public class ObroundAperture extends StandardAperture {
 
     geometries = new LinkedList<GeometryArray>();
 
-    float[] coords = new float[3*(SEGMENTS + 4)];
+    float[] coords = new float[3 * (SEGMENTS + 4)];
 
     int i = 0;
 
@@ -120,25 +108,25 @@ public class ObroundAperture extends StandardAperture {
 
     for (int j = 0; j <= SEGMENTS; j++) {
 
-      x = radius*Math.cos(angle);
-      y = radius*Math.sin(angle);
+      x = radius * Math.cos(angle);
+      y = radius * Math.sin(angle);
 
       // vertical stretch
       if (j <= SEGMENTS / 2) {
         coords[i++] = (float) (x);
-        coords[i++] = (float) (y+halfLength);
+        coords[i++] = (float) (y + halfLength);
         coords[i++] = 0.0f;
       }
       // Yes, j == SEGMENTS / 2 gives two points!
       if (j >= SEGMENTS / 2) {
         coords[i++] = (float) (x);
-        coords[i++] = (float) (y-halfLength);
+        coords[i++] = (float) (y - halfLength);
         coords[i++] = 0.0f;
       }
       // Close the oval, it's a double-point again.
       if (j == SEGMENTS) {
         coords[i++] = (float) (x);
-        coords[i++] = (float) (y+halfLength);
+        coords[i++] = (float) (y + halfLength);
         coords[i++] = 0.0f;
       }
 
@@ -149,7 +137,7 @@ public class ObroundAperture extends StandardAperture {
     if (rx > ry) {
       rotateGeometry(tfa, Math.PI / 2);
     }
-    
+
     geometries.add(tfa);
   }
 

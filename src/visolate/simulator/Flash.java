@@ -33,7 +33,7 @@ public class Flash extends Action {
 
     this.aperture = aperture;
     this.location = location;
-    
+
     location.addIncidentAction(this);
 
 //    System.out.println(toString());
@@ -44,10 +44,10 @@ public class Flash extends Action {
   }
 
   protected void makeBounds() {
-    
+
     Rect b = aperture.getBounds();
     Point2f p = location.getInchCoordinates();
-    
+
     bounds = new Rect(b.x + p.x, b.y + p.y, b.width, b.height);
   }
 
@@ -63,7 +63,7 @@ public class Flash extends Action {
   protected void offsetChanged() {
     aperture.setOffset(offset);
   }
-                                   
+
   protected void inverseChanged() {
     aperture.setInverse(inverse);
   }

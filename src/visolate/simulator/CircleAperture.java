@@ -27,12 +27,9 @@ import visolate.misc.*;
 public class CircleAperture extends StandardAperture {
 
   public static final int SEGMENTS = 16;
-  public static final double SECTOR = 2.0*Math.PI/SEGMENTS;
+  public static final double SECTOR = 2.0 * Math.PI / SEGMENTS;
 
-  public CircleAperture(int number,
-                        double diameter,
-                        double holeX,
-                        double holeY) {
+  public CircleAperture(int number, double diameter, double holeX, double holeY) {
     super(number, holeX, holeY);
 
     this.diameter = diameter;
@@ -40,32 +37,27 @@ public class CircleAperture extends StandardAperture {
 
   public CircleAperture(int number, double diameter, double hole) {
     super(number, hole);
-    
+
     this.diameter = diameter;
   }
 
   public CircleAperture(int number, double diameter) {
     super(number);
-    
+
     this.diameter = diameter;
   }
 
   public String toString() {
-    return
-      "Aperture " + number +
-      ": circle" +
-      " diameter = " + diameter +
-      " holeX = " + holeX +
-      " holeY = " + holeY;
+    return "Aperture " + number + ": circle" + " diameter = " + diameter + " holeX = " + holeX + " holeY = " + holeY;
   }
 
   public double getWidth(double direction) {
-    return 2*getRadius();
+    return 2 * getRadius();
   }
 
   protected void makeBounds() {
     double r = getRadius();
-    bounds = new Rect(-r, -r, 2*r, 2*r);
+    bounds = new Rect(-r, -r, 2 * r, 2 * r);
   }
 
   protected void makeGeometries() {
@@ -73,39 +65,38 @@ public class CircleAperture extends StandardAperture {
   }
 
   protected double getRadius() {
-    return Math.max(0.0, diameter/2 + signedOffset);
+    return Math.max(0.0, diameter / 2 + signedOffset);
   }
 
-  public static Collection<GeometryArray> makeCircleGeometries(double xCenter, double yCenter,
-                                                double radius) {
+  public static Collection<GeometryArray> makeCircleGeometries(double xCenter, double yCenter, double radius) {
 
     Collection<GeometryArray> geometries = new LinkedList<GeometryArray>();
-    
-    float[] coords = new float[3*(SEGMENTS + 2)];
-    
+
+    float[] coords = new float[3 * (SEGMENTS + 2)];
+
     int i = 0;
-    
+
     coords[i++] = (float) xCenter;
     coords[i++] = (float) yCenter;
     coords[i++] = 0.0f;
-    
+
     double x, y;
     double angle = 0.0;
-    
+
     for (int j = 0; j <= SEGMENTS; j++) {
-      
-      x = radius*Math.cos(angle);
-      y = radius*Math.sin(angle);
-      
-      coords[i++] = (float) (x+xCenter);
-      coords[i++] = (float) (y+yCenter);
+
+      x = radius * Math.cos(angle);
+      y = radius * Math.sin(angle);
+
+      coords[i++] = (float) (x + xCenter);
+      coords[i++] = (float) (y + yCenter);
       coords[i++] = 0.0f;
-      
+
       angle += SECTOR;
     }
-    
+
     geometries.add(makeTFA(coords));
-    
+
     return geometries;
   }
 

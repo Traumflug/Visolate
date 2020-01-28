@@ -45,7 +45,7 @@ public class MacroInstance extends SimObject {
       bounds.add(prim.getBounds());
     }
   }
-      
+
   public double getWidth(double direction) {
     throw new UnsupportedOperationException("cannot draw with macro aperture");
   }
@@ -53,26 +53,26 @@ public class MacroInstance extends SimObject {
   protected void makeGeometries() {
 
     geometries = new LinkedList<GeometryArray>();
-      
-    for (Iterator<PrimitiveInstance> it = primInstances.iterator(); it.hasNext(); ) {
-        
+
+    for (Iterator<PrimitiveInstance> it = primInstances.iterator(); it.hasNext();) {
+
       Collection<GeometryArray> primGeoms = it.next().getGeometries();
-        
+
       if (primGeoms != null)
         geometries.addAll(primGeoms);
     }
   }
 
   protected void offsetChanged() {
-	  for (PrimitiveInstance prim : this.primInstances) {
-		prim.setOffset(offset);
-	  }
+    for (PrimitiveInstance prim : this.primInstances) {
+      prim.setOffset(offset);
+    }
   }
 
   protected void inverseChanged() {
-	  for (PrimitiveInstance prim : this.primInstances) {
-		  prim.setInverse(inverse);
-	  }
+    for (PrimitiveInstance prim : this.primInstances) {
+      prim.setInverse(inverse);
+    }
   }
 
   protected List<PrimitiveInstance> primInstances = new LinkedList<PrimitiveInstance>();

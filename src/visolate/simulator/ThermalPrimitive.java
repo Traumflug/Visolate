@@ -42,10 +42,7 @@ public class ThermalPrimitive extends MacroPrimitive {
 
     double rotation = getParam(i++, actuals);
 
-    return new ThermalInstance(x, y,
-                               od, id,
-                               xHairThickness,
-                               rotation);
+    return new ThermalInstance(x, y, od, id, xHairThickness, rotation);
   }
 
   protected String getName() {

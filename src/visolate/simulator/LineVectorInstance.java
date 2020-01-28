@@ -25,11 +25,9 @@ import javax.vecmath.*;
 
 public class LineVectorInstance extends OutlineInstance {
 
-	public LineVectorInstance(final double width,
-			final double xStart, final double yStart,
-			final double xEnd, final double yEnd,
-			final double rotation) {
-		super(4, computePoints(width, xStart, yStart, xEnd, yEnd), rotation);
+  public LineVectorInstance(final double width, final double xStart, final double yStart, final double xEnd,
+      final double yEnd, final double rotation) {
+    super(4, computePoints(width, xStart, yStart, xEnd, yEnd), rotation);
 
 //		this.width = width;
 //
@@ -40,36 +38,31 @@ public class LineVectorInstance extends OutlineInstance {
 //		this.yEnd = yEnd;
 //
 //		this.rotation = rotation;
-	}
+  }
 
-	private static List<Point2d> computePoints(final double width,
-			final double xStart, final double yStart,
-			final double xEnd, final double yEnd) {
+  private static List<Point2d> computePoints(final double width, final double xStart, final double yStart,
+      final double xEnd, final double yEnd) {
 
-		List<Point2d> points = new LinkedList<Point2d>();
+    List<Point2d> points = new LinkedList<Point2d>();
 
-		Vector3d d = new Vector3d((xEnd-xStart), (yEnd-yStart), 0.0f);
-		d.normalize();
+    Vector3d d = new Vector3d((xEnd - xStart), (yEnd - yStart), 0.0f);
+    d.normalize();
 
-		Vector3d n = new Vector3d();
-		n.cross(d, Z);
+    Vector3d n = new Vector3d();
+    n.cross(d, Z);
 
-		//no offset here, it will be takencare of in OutlineInstance.getPerimeter()
+    // no offset here, it will be takencare of in OutlineInstance.getPerimeter()
 
-		points.add(new Point2d((xStart + (width/2)*n.x),
-				(yStart + (width/2)*n.y)));
+    points.add(new Point2d((xStart + (width / 2) * n.x), (yStart + (width / 2) * n.y)));
 
-		points.add(new Point2d((xStart - (width/2)*n.x),
-				(yStart - (width/2)*n.y)));
+    points.add(new Point2d((xStart - (width / 2) * n.x), (yStart - (width / 2) * n.y)));
 
-		points.add(new Point2d((xEnd - (width/2)*n.x),
-				(yEnd - (width/2)*n.y)));
+    points.add(new Point2d((xEnd - (width / 2) * n.x), (yEnd - (width / 2) * n.y)));
 
-		points.add(new Point2d((xEnd + (width/2)*n.x),
-				(yEnd + (width/2)*n.y)));
+    points.add(new Point2d((xEnd + (width / 2) * n.x), (yEnd + (width / 2) * n.y)));
 
-		return points;
-	}
+    return points;
+  }
 
 //	private double width;
 //

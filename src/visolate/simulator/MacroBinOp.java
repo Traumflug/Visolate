@@ -29,7 +29,7 @@ public class MacroBinOp extends MacroExpression {
   public static final int MULTIPLY = 2;
   public static final int DIVIDE = 3;
 
-  public static final String[] OP_TEXT = new String[] {"+", "-", "*", "/"};
+  public static final String[] OP_TEXT = new String[] { "+", "-", "*", "/" };
 
   public MacroBinOp(int op, MacroExpression lhs, MacroExpression rhs) {
     this.op = op;
@@ -44,11 +44,16 @@ public class MacroBinOp extends MacroExpression {
     double rVal = rhs.getValue(actuals);
 
     switch (op) {
-    case ADD: return lVal + rVal;
-    case SUBTRACT: return lVal - rVal;
-    case MULTIPLY: return lVal*rVal;
-    case DIVIDE: return lVal/rVal;
-    default: return Double.NaN;
+    case ADD:
+      return lVal + rVal;
+    case SUBTRACT:
+      return lVal - rVal;
+    case MULTIPLY:
+      return lVal * rVal;
+    case DIVIDE:
+      return lVal / rVal;
+    default:
+      return Double.NaN;
     }
   }
 

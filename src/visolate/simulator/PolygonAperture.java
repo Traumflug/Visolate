@@ -28,12 +28,7 @@ import visolate.misc.*;
 
 public class PolygonAperture extends StandardAperture {
 
-  public PolygonAperture(int number,
-                         double od,
-                         int sides,
-                         double rotation,
-                         double holeX,
-                         double holeY) {
+  public PolygonAperture(int number, double od, int sides, double rotation, double holeX, double holeY) {
     super(number, holeX, holeY);
     init(od, sides, rotation);
   }
@@ -49,48 +44,34 @@ public class PolygonAperture extends StandardAperture {
       x = new float[sides];
       y = new float[sides];
       angle = new double[sides];
-      
-      computeXYAngle(x, y, angle,
-                     getRadius(),
-                     sides,
-                     rotation);
+
+      computeXYAngle(x, y, angle, getRadius(), sides, rotation);
     }
   }
 
   protected double getRadius() {
-    return Math.max(0.0,
-                    od/2 +
-                    Util.vertexOffset(signedOffset,
-                                      Math.PI*2.0/((double) sides)));
+    return Math.max(0.0, od / 2 + Util.vertexOffset(signedOffset, Math.PI * 2.0 / ((double) sides)));
   }
 
-  public static void computeXYAngle(float[] x, float[] y,
-                                    double[] angle,
-                                    double radius,
-                                    int sides,
-                                    double rotation) {
+  public static void computeXYAngle(float[] x, float[] y, double[] angle, double radius, int sides, double rotation) {
 
-    rotation = rotation*(Math.PI/180);
+    rotation = rotation * (Math.PI / 180);
 
-    double sector = Math.PI*2.0/((double) sides);
+    double sector = Math.PI * 2.0 / ((double) sides);
 
     for (int i = 0; i < sides; i++) {
 
-      double theta = Util.canonicalizeAngle(rotation + i*sector);
-      
+      double theta = Util.canonicalizeAngle(rotation + i * sector);
+
       if (angle != null)
         angle[i] = theta;
 
-      x[i] = (float) (Math.cos(theta)*radius);
-      y[i] = (float) (Math.sin(theta)*radius);
+      x[i] = (float) (Math.cos(theta) * radius);
+      y[i] = (float) (Math.sin(theta) * radius);
     }
   }
 
-  public PolygonAperture(int number,
-                         double od,
-                         int sides,
-                         double rotation,
-                         double hole) {
+  public PolygonAperture(int number, double od, int sides, double rotation, double hole) {
     super(number, hole);
     init(od, sides, rotation);
   }
@@ -106,14 +87,8 @@ public class PolygonAperture extends StandardAperture {
   }
 
   public String toString() {
-    return
-      "Aperture " + number +
-      ": polygon" +
-      " od = " + od +
-      " sides = " + sides +
-      " rotation = " + rotation +
-      " holeX = " + holeX +
-      " holeY = " + holeY;
+    return "Aperture " + number + ": polygon" + " od = " + od + " sides = " + sides + " rotation = " + rotation
+        + " holeX = " + holeX + " holeY = " + holeY;
   }
 
   protected void makeBounds() {
@@ -123,48 +98,41 @@ public class PolygonAperture extends StandardAperture {
 
   public double getWidth(double direction) {
     getPerimeter();
-    return Util.getPolyWidth(x, y, angle, direction + Math.PI/2);
+    return Util.getPolyWidth(x, y, angle, direction + Math.PI / 2);
   }
 
   protected void makeGeometries() {
     getPerimeter();
-    geometries = makeGeometriesFromXY(0.0, 0.0,
-                                      x, y,
-                                      sides,
-                                      getRadius(),
-                                      rotation);
+    geometries = makeGeometriesFromXY(0.0, 0.0, x, y, sides, getRadius(), rotation);
   }
 
-  public static Collection<GeometryArray> makeGeometriesFromXY(double xCenter, double yCenter,
-                                                float[] x, float[] y,
-                                                int sides,
-                                                double radius,
-                                                double rotation) {
+  public static Collection<GeometryArray> makeGeometriesFromXY(double xCenter, double yCenter, float[] x, float[] y,
+      int sides, double radius, double rotation) {
 
-    rotation = rotation*(Math.PI/180);
+    rotation = rotation * (Math.PI / 180);
 
     Collection<GeometryArray> geometries = new LinkedList<GeometryArray>();
-    
-    float[] coords = new float[3*(sides + 2)];
-    
+
+    float[] coords = new float[3 * (sides + 2)];
+
     int i = 0;
-    
+
     coords[i++] = (float) xCenter;
     coords[i++] = (float) yCenter;
     coords[i++] = 0.0f;
-    
+
     for (int j = 0; j < sides; j++) {
       coords[i++] = (float) (x[j] + xCenter);
       coords[i++] = (float) (y[j] + yCenter);
       coords[i++] = 0.0f;
     }
-    
+
     coords[i++] = (float) (x[0] + xCenter);
     coords[i++] = (float) (y[0] + yCenter);
     coords[i++] = 0.0f;
-    
+
     geometries.add(makeTFA(coords));
-  
+
     return geometries;
   }
 
@@ -173,7 +141,7 @@ public class PolygonAperture extends StandardAperture {
     x = y = null;
     angle = null;
   }
-                                   
+
   protected void inverseChanged() {
     super.inverseChanged();
     x = y = null;
