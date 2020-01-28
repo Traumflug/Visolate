@@ -50,11 +50,8 @@ public abstract class Processor {
     }
   }
 
-  public abstract void processTile(int r, int c,
-                                   int ulx, int uly,
-                                   int width, int height,
-                                   double left, double bottom,
-                                   double right, double top);
+  public abstract void processTile(int r, int c, int ulx, int uly, int width, int height, double left, double bottom,
+      double right, double top);
 
   private void process() {
     boolean borderGeometryWas;
@@ -68,10 +65,8 @@ public abstract class Processor {
     long startTime = System.currentTimeMillis();
 
     String processName = getClass().toString();
-    processName = processName.substring(processName.lastIndexOf(".") + 1,
-                                        processName.length());
-    System.out.println((new Date(startTime)).toString() +
-                       ": " + processName + " started");
+    processName = processName.substring(processName.lastIndexOf(".") + 1, processName.length());
+    System.out.println((new Date(startTime)).toString() + ": " + processName + " started");
 
     visolate.enableControls(false);
     model.enableControls(false);
@@ -99,10 +94,8 @@ public abstract class Processor {
 
     Rect b = model.getModelBounds();
 
-    mosaicBounds = new Rect(b.x - MOSAIC_BORDER_PELS/((double) dpi),
-                           b.y - MOSAIC_BORDER_PELS/((double) dpi),
-                           b.width + 2.0*MOSAIC_BORDER_PELS/((double) dpi),
-                           b.height + 2.0*MOSAIC_BORDER_PELS/((double) dpi));
+    mosaicBounds = new Rect(b.x - MOSAIC_BORDER_PELS / ((double) dpi), b.y - MOSAIC_BORDER_PELS / ((double) dpi),
+        b.width + 2.0 * MOSAIC_BORDER_PELS / ((double) dpi), b.height + 2.0 * MOSAIC_BORDER_PELS / ((double) dpi));
 
     canvasWidth = display.getVirtualCanvasWidth();
     canvasHeight = display.getVirtualCanvasHeight();
@@ -113,30 +106,30 @@ public abstract class Processor {
     modelWidth = mosaicBounds.width;
     modelHeight = mosaicBounds.height;
 
-    modelWidthPels = (int) Math.ceil(dpi*modelWidth);
-    modelHeightPels = (int) Math.ceil(dpi*modelHeight);
+    modelWidthPels = (int) Math.ceil(dpi * modelWidth);
+    modelHeightPels = (int) Math.ceil(dpi * modelHeight);
 
-    rows = modelHeight/canvasHeight;
-    cols = modelWidth/canvasWidth;
+    rows = modelHeight / canvasHeight;
+    cols = modelWidth / canvasWidth;
 
     numRows = (int) Math.ceil(rows);
     numCols = (int) Math.ceil(cols);
 
-    visolate.resetProgressBar(numRows*numCols);
+    visolate.resetProgressBar(numRows * numCols);
 
     processStarted();
 
     for (int r = 0; r < numRows; r++) {
       for (int c = 0; c < numCols; c++) {
 
-        double left = c*canvasWidth;
+        double left = c * canvasWidth;
 
-        double top = modelHeight - r*canvasHeight;
+        double top = modelHeight - r * canvasHeight;
 
         double right = left + canvasWidth;
         if (right > mosaicBounds.width)
           right = mosaicBounds.width;
-          
+
         double bottom = top - canvasHeight;
         if (bottom < 0.0)
           bottom = 0.0;
@@ -144,40 +137,37 @@ public abstract class Processor {
 //        int ulx = (int) Math.ceil(left*((double) dpi));
 //        int uly = (int) Math.ceil((modelHeight-top)*((double) dpi));
 
-        int ulx = c*canvasWidthPels;
-        int uly = r*canvasHeightPels;
+        int ulx = c * canvasWidthPels;
+        int uly = r * canvasHeightPels;
 
-        int lrx = ulx+canvasWidthPels;
+        int lrx = ulx + canvasWidthPels;
         if (lrx > modelWidthPels)
           lrx = modelWidthPels;
 
-        int lry = uly+canvasHeightPels;
+        int lry = uly + canvasHeightPels;
         if (lry > modelHeightPels)
           lry = modelHeightPels;
 
-        int width = lrx-ulx;
-        int height = lry-uly;
+        int width = lrx - ulx;
+        int height = lry - uly;
 
         left += mosaicBounds.x;
         bottom += mosaicBounds.y;
         right += mosaicBounds.x;
         top += mosaicBounds.y;
 
-        double cx = left + canvasWidth/2;
-        double cy = top - canvasHeight/2;
+        double cx = left + canvasWidth / 2;
+        double cy = top - canvasHeight / 2;
 
         display.setCenter(cx, cy);
 
         try {
           display.waitForViewUpdate();
         } catch (InterruptedException e) {
-          thread.interrupt(); //re-set interrupt status
+          thread.interrupt(); // re-set interrupt status
         }
 
-        processTile(r, c,
-                    ulx, uly,
-                    width, height,
-                    left, bottom, right, top);
+        processTile(r, c, ulx, uly, width, height, left, bottom, right, top);
 
         if (thread.isInterrupted()) {
 
@@ -189,9 +179,8 @@ public abstract class Processor {
           visolate.processFinished();
 
           long endTime = System.currentTimeMillis();
-          System.out.println((new Date(endTime)).toString() +
-                             ": " + processName + " interrupted " +
-                             "(" + (endTime-startTime) + "ms)");
+          System.out.println((new Date(endTime)).toString() + ": " + processName + " interrupted " + "("
+              + (endTime - startTime) + "ms)");
           return;
         }
 
@@ -200,7 +189,7 @@ public abstract class Processor {
     }
 
     processCompleted();
-    
+
     model.setToolDiameter(toolDiameterWas);
     model.setTranslucent2D(wasTranslucent);
     model.enableGCodeGeometry(gcodeGeometryWas);
@@ -213,30 +202,32 @@ public abstract class Processor {
     model.enableControls(true);
     display.processFinished();
     visolate.processFinished();
-    
+
     long endTime = System.currentTimeMillis();
-    System.out.println((new Date(endTime)).toString() +
-                       ": " + processName + " finished (" +
-                       (endTime-startTime) + "ms)");
+    System.out
+        .println((new Date(endTime)).toString() + ": " + processName + " finished (" + (endTime - startTime) + "ms)");
   }
- 
-  protected void processStarted() {}
 
-  protected void processInterrupted() {}
+  protected void processStarted() {
+  }
 
-  protected void processCompleted() {}
+  protected void processInterrupted() {
+  }
+
+  protected void processCompleted() {
+  }
 
   protected Thread thread = new Thread() {
 
-        {
-          setPriority(VirtualUniverse.getJ3DThreadPriority()-1);
-          setDaemon(true);
-        }
+    {
+      setPriority(VirtualUniverse.getJ3DThreadPriority() - 1);
+      setDaemon(true);
+    }
 
-      public void run() {
-        process();
-      }
-    };
+    public void run() {
+      process();
+    }
+  };
 
   protected Visolate visolate;
   protected Model model;
@@ -257,7 +248,7 @@ public abstract class Processor {
 
   protected int canvasWidthPels;
   protected int canvasHeightPels;
-  
+
   protected double rows;
   protected double cols;
 

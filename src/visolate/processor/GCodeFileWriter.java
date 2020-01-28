@@ -34,21 +34,21 @@ import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 
 public class GCodeFileWriter {
-  
+
   /**
    * This is the number format used for all numbers in the gcode.
    */
-  private static final NumberFormat gCodeFormat =
-      new DecimalFormat("###.#####", new DecimalFormatSymbols(Locale.ENGLISH));
+  private static final NumberFormat gCodeFormat = new DecimalFormat("###.#####",
+      new DecimalFormatSymbols(Locale.ENGLISH));
   private static final double MMPERINCH = 25.4;
-  
+
   private static final Color3f G_CODE_COLOR_RAPID = new Color3f(1.0f, 0.0f, 0.0f);
   private static final Color3f G_CODE_COLOR_PLUNGE = new Color3f(0.0f, 0.0f, 1.0f);
   private static final Color3f G_CODE_COLOR_MILLING = new Color3f(0.0f, 1.0f, 1.0f);
 
   public GCodeFileWriter() {
   }
-  
+
   public void open(final File outputFile) throws IOException {
     out = new FileWriter(outputFile);
   }
@@ -61,7 +61,7 @@ public class GCodeFileWriter {
    * If set to true, output metric coordinates instead of imperial ones.
    */
   private boolean isMetric = true;
-  
+
   public boolean getIsMetric() {
     return isMetric;
   }
@@ -69,12 +69,12 @@ public class GCodeFileWriter {
   public void setIsMetric(final boolean isMetric) {
     this.isMetric = isMetric;
   }
-  
+
   /**
    * If set to true, output absolute coordinates instead of relative ones.
    */
   private boolean isAbsolute = true;
-  
+
   public boolean getIsAbsolute() {
     return isAbsolute;
   }
@@ -82,13 +82,13 @@ public class GCodeFileWriter {
   public void setIsAbsolute(final boolean isAbsolute) {
     this.isAbsolute = isAbsolute;
   }
-  
+
   /**
-   * If we use absolute coordinates, then this
-   * is the X-value for the left upper corner.
+   * If we use absolute coordinates, then this is the X-value for the left upper
+   * corner.
    */
   private double xOffset = 0.0;
-  
+
   public double getXOffset() {
     return xOffset;
   }
@@ -96,13 +96,13 @@ public class GCodeFileWriter {
   public void setXOffset(final double offset) {
     this.xOffset = offset;
   }
-  
+
   /**
-   * If we use absolute coordinates, then this
-   * is the Y-value for the left upper corner.
+   * If we use absolute coordinates, then this is the Y-value for the left upper
+   * corner.
    */
   private double yOffset = 0.0;
-  
+
   public double getYOffset() {
     return yOffset;
   }
@@ -110,13 +110,13 @@ public class GCodeFileWriter {
   public void setYOffset(final double offset) {
     this.yOffset = offset;
   }
-  
+
   /**
-   * We move this much above origin for traveling.
-   * This is not to be converted from inches.
+   * We move this much above origin for traveling. This is not to be converted
+   * from inches.
    */
   private double zClearance = 1.0;
-  
+
   public double getZClearance() {
     return zClearance;
   }
@@ -124,13 +124,13 @@ public class GCodeFileWriter {
   public void setZClearance(final double zClearance) {
     this.zClearance = zClearance;
   }
-  
+
   /**
-   * When cutting, the head should have this z-coordinate, in mm or inch.
-   * This is not to be converted from inches.
+   * When cutting, the head should have this z-coordinate, in mm or inch. This is
+   * not to be converted from inches.
    */
   private double zCuttingHeight = -0.1;
-  
+
   public double getZCuttingHeight() {
     return zCuttingHeight;
   }
@@ -138,10 +138,10 @@ public class GCodeFileWriter {
   public void setZCuttingHeight(final double zCuttingHeight) {
     this.zCuttingHeight = zCuttingHeight;
   }
-  
+
   /**
-   * Feedrate when plunging from travel height to cutting height.
-   * This is not to be converted from inch to mm.
+   * Feedrate when plunging from travel height to cutting height. This is not to
+   * be converted from inch to mm.
    */
   private double plungeFeedrate = 60.0;
 
@@ -152,10 +152,9 @@ public class GCodeFileWriter {
   public void setPlungeFeedrate(final double plungeFeedrate) {
     this.plungeFeedrate = plungeFeedrate;
   }
-  
+
   /**
-   * Feedrate when cutting.
-   * This is not to be converted from inch to mm.
+   * Feedrate when cutting. This is not to be converted from inch to mm.
    */
   private double millingFeedrate = 250.0;
 
@@ -166,52 +165,53 @@ public class GCodeFileWriter {
   public void setMillingFeedrate(final double millingFeedrate) {
     this.millingFeedrate = millingFeedrate;
   }
-  
+
   /**
-   * @return The position of the end of
-   * the last stroke written to the G-code file.
+   * @return The position of the end of the last stroke written to the G-code
+   *         file.
    */
   public Point3d getCurrentPosition() {
     return currentPosition;
   }
-  
+
   public List<GCodeStroke> getGCodeStrokes() {
     return gCodeStrokes;
   }
-  
+
   public void preAmble() throws IOException {
 
     if (isMetric) {
-      out.write("G21\n");    // millimeters
+      out.write("G21\n"); // millimeters
     } else {
-      out.write("G20\n");    // inches
+      out.write("G20\n"); // inches
     }
-    out.write("G17\n");     // X-Y plane
+    out.write("G17\n"); // X-Y plane
     out.write("G40\nG49\n"); // Cancel tool lengh & cutter dia compensation
-    //    w.write("G53\n");     // Motion in machine co-ordinate system
-    out.write("G80\n");    // Cancel any existing motion cycle
+    // w.write("G53\n"); // Motion in machine co-ordinate system
+    out.write("G80\n"); // Cancel any existing motion cycle
 
     if (isAbsolute) {
-      out.write("G90\n");    // Absolute distance mode
+      out.write("G90\n"); // Absolute distance mode
     } else {
-      out.write("G91\n");    // Relative distance mode
+      out.write("G91\n"); // Relative distance mode
     }
-    
+
     currentPosition = new Point3d(0.0, 0.0, 0.0);
     currentFeedrate = millingFeedrate;
     gCodeStrokes.clear();
   }
-  
+
   public void postAmble() throws IOException {
 
     cutterUp();
-    
+
     out.write("M5\n"); // Spindle Stop
     out.write("M2\n"); // End of program
   }
 
   /**
-   * Add a G-code for moving up the cutter straight to zClearance at rapid feedrate.
+   * Add a G-code for moving up the cutter straight to zClearance at rapid
+   * feedrate.
    *
    * @throws IOException
    */
@@ -219,11 +219,10 @@ public class GCodeFileWriter {
 
     if (isAbsolute) {
       out.write("G0 Z" + gCodeFormat.format(zClearance) + "\n");
-    }
-    else {
+    } else {
       out.write("G0 Z" + gCodeFormat.format(zCuttingHeight - zClearance) + "\n");
     }
-    
+
     currentPosition.z = zClearance;
     gCodeStrokes.add(new GCodeStroke(currentPosition, G_CODE_COLOR_RAPID));
   }
@@ -236,12 +235,10 @@ public class GCodeFileWriter {
   public void cutterDown() throws IOException {
 
     if (isAbsolute) {
-      out.write("G1 Z" + gCodeFormat.format(zCuttingHeight) +
-                " F" + gCodeFormat.format(plungeFeedrate) + "\n");
-    }
-    else {
-      out.write("G1 Z" + gCodeFormat.format(zClearance - zCuttingHeight) +
-                " F" + gCodeFormat.format(plungeFeedrate) + "\n");
+      out.write("G1 Z" + gCodeFormat.format(zCuttingHeight) + " F" + gCodeFormat.format(plungeFeedrate) + "\n");
+    } else {
+      out.write(
+          "G1 Z" + gCodeFormat.format(zClearance - zCuttingHeight) + " F" + gCodeFormat.format(plungeFeedrate) + "\n");
     }
 
     currentPosition.z = zCuttingHeight;
@@ -259,12 +256,11 @@ public class GCodeFileWriter {
   public void rapidMovement(final Point2d target) throws IOException {
 
     if (isAbsolute) {
-      out.write("G0 X" + gCodeFormat.format(convertUnits(target.x) + xOffset) +
-                " Y" + gCodeFormat.format(convertUnits(target.y) + yOffset));
-    }
-    else {
-      out.write("G0 X" + gCodeFormat.format(convertUnits(target.x - currentPosition.x)) +
-                " Y" + gCodeFormat.format(convertUnits(target.y - currentPosition.y)));
+      out.write("G0 X" + gCodeFormat.format(convertUnits(target.x) + xOffset) + " Y"
+          + gCodeFormat.format(convertUnits(target.y) + yOffset));
+    } else {
+      out.write("G0 X" + gCodeFormat.format(convertUnits(target.x - currentPosition.x)) + " Y"
+          + gCodeFormat.format(convertUnits(target.y - currentPosition.y)));
     }
     out.write("\n");
 
@@ -283,12 +279,11 @@ public class GCodeFileWriter {
   public void linearMovement(final Point2d target) throws IOException {
 
     if (isAbsolute) {
-      out.write("G1 X" + gCodeFormat.format(convertUnits(target.x) + xOffset) +
-                " Y" + gCodeFormat.format(convertUnits(target.y) + yOffset));
-    }
-    else {
-      out.write("G1 X" + gCodeFormat.format(convertUnits(target.x - currentPosition.x)) +
-                " Y" + gCodeFormat.format(convertUnits(target.y - currentPosition.y)));
+      out.write("G1 X" + gCodeFormat.format(convertUnits(target.x) + xOffset) + " Y"
+          + gCodeFormat.format(convertUnits(target.y) + yOffset));
+    } else {
+      out.write("G1 X" + gCodeFormat.format(convertUnits(target.x - currentPosition.x)) + " Y"
+          + gCodeFormat.format(convertUnits(target.y - currentPosition.y)));
     }
     if (currentFeedrate != millingFeedrate) {
       out.write(" F" + gCodeFormat.format(millingFeedrate));
@@ -300,7 +295,7 @@ public class GCodeFileWriter {
     currentPosition.y = target.y;
     gCodeStrokes.add(new GCodeStroke(currentPosition, G_CODE_COLOR_MILLING));
   }
-  
+
   private double convertUnits(final double x) {
     if (isMetric) {
       return x * MMPERINCH;
@@ -309,12 +304,11 @@ public class GCodeFileWriter {
   }
 
   private FileWriter out;
-  
+
   private Point3d currentPosition;
   private double currentFeedrate;
-    
-  private List<GCodeStroke> gCodeStrokes = new LinkedList<GCodeStroke>();
 
+  private List<GCodeStroke> gCodeStrokes = new LinkedList<GCodeStroke>();
 
   public class GCodeStroke {
 

@@ -40,8 +40,8 @@ import visolate.processor.GCodeFileWriter;
 
 public class ToolpathPath {
 
-  public static final double[] HORIZ_DIR_BIAS = {-1, 1, 1, -1};
-  public static final double[] VERT_DIR_BIAS = {1, 1, -1, -1};
+  public static final double[] HORIZ_DIR_BIAS = { -1, 1, 1, -1 };
+  public static final double[] VERT_DIR_BIAS = { 1, 1, -1, -1 };
 
   ToolpathPath(final ToolpathsProcessor processor, final ToolpathNode seed) {
 
@@ -86,8 +86,7 @@ public class ToolpathPath {
 
     case 3: {
       for (int i = 0; i < 4; i++) {
-        if ((seed.getNeighbor(i) != null) &&
-            (seed.getNeighbor(oppositeDir(i)) != null)) {
+        if ((seed.getNeighbor(i) != null) && (seed.getNeighbor(oppositeDir(i)) != null)) {
           dir[TAIL] = i;
           dir[HEAD] = oppositeDir(i);
           break;
@@ -114,7 +113,7 @@ public class ToolpathPath {
   public void setStraightTolerance(final double tolerance) {
     straightTol = tolerance;
   }
-  
+
   private boolean extendTail() {
 
     ToolpathNode next = getNext((ToolpathNode) path.getLast(), TAIL);
@@ -182,9 +181,9 @@ public class ToolpathPath {
 
     return next;
   }
-  
+
   private int oppositeDir(int d) {
-    switch(d) {
+    switch (d) {
     case ToolpathNode.N:
       return ToolpathNode.S;
     case ToolpathNode.S:
@@ -212,8 +211,8 @@ public class ToolpathPath {
     for (ToolpathNode node : path) {
 
       if (prev != null) {
-        length += Util.distance(processor.toModelX(prev.x), processor.toModelY(prev.y),
-                                processor.toModelX(node.x), processor.toModelY(node.y));
+        length += Util.distance(processor.toModelX(prev.x), processor.toModelY(prev.y), processor.toModelX(node.x),
+            processor.toModelY(node.y));
       }
       prev = node;
     }
@@ -227,9 +226,9 @@ public class ToolpathPath {
 
       Color3f color = Net.toColor3f(processor.visolate.getDisplay().getRandomColor());
 
-      int vertexCount = path.size()*2;
+      int vertexCount = path.size() * 2;
 
-      float[] coords = new float[vertexCount*6];
+      float[] coords = new float[vertexCount * 6];
 
       int i = 0;
 
@@ -260,10 +259,7 @@ public class ToolpathPath {
       }
 
       geometry = new LineArray(vertexCount,
-                               GeometryArray.COORDINATES |
-                               GeometryArray.COLOR_3 |
-                               GeometryArray.INTERLEAVED |
-                               GeometryArray.BY_REFERENCE);
+          GeometryArray.COORDINATES | GeometryArray.COLOR_3 | GeometryArray.INTERLEAVED | GeometryArray.BY_REFERENCE);
       geometry.setInterleavedVertices(coords);
     }
 
@@ -274,12 +270,12 @@ public class ToolpathPath {
   // and a red dot for each fixed node. Swap it against getGeometry() in
   // ToolpathsProcessor.getSceneGraph().
   public Geometry getPointGeometry() {
-    
+
     final float[] normalColor = { 1.0f, 1.0f, 1.0f };
     final float[] fixedColor = { 1.0f, 0.0f, 0.0f };
-    
+
     int vertexCount = path.size();
-    float[] coords = new float[vertexCount*6];
+    float[] coords = new float[vertexCount * 6];
 
     int i = 0;
 
@@ -288,8 +284,7 @@ public class ToolpathPath {
         coords[i++] = fixedColor[0];
         coords[i++] = fixedColor[1];
         coords[i++] = fixedColor[2];
-      }
-      else {
+      } else {
         coords[i++] = normalColor[0];
         coords[i++] = normalColor[1];
         coords[i++] = normalColor[2];
@@ -300,10 +295,7 @@ public class ToolpathPath {
     }
 
     GeometryArray pointGeometry = new PointArray(vertexCount,
-                                                 GeometryArray.COORDINATES |
-                                                 GeometryArray.COLOR_3 |
-                                                 GeometryArray.INTERLEAVED |
-                                                 GeometryArray.BY_REFERENCE);
+        GeometryArray.COORDINATES | GeometryArray.COLOR_3 | GeometryArray.INTERLEAVED | GeometryArray.BY_REFERENCE);
     pointGeometry.setInterleavedVertices(coords);
 
     return pointGeometry;
@@ -312,19 +304,19 @@ public class ToolpathPath {
   public ToolpathNode getStartNode() {
     return (ToolpathNode) path.getFirst();
   }
-  
+
   public ToolpathNode getEndNode() {
     return (ToolpathNode) path.getLast();
   }
-  
+
   public void lockNode(ToolpathNode nodeToLock) {
-    
+
     for (ToolpathNode node : path) {
       if (node.equals(nodeToLock))
         node.setIsLocked(true);
     }
   }
-  
+
   public Point2d getStartPoint() {
 
     ToolpathNode start = (ToolpathNode) path.getFirst();
@@ -338,11 +330,10 @@ public class ToolpathPath {
     boolean first = true;
 
     for (ToolpathNode node : path) {
-      Point2d p = new Point2d(processor.toModelX(node.x),
-                              processor.toModelY(node.y));
+      Point2d p = new Point2d(processor.toModelX(node.x), processor.toModelY(node.y));
 
       if (first) {
-        writer.rapidMovement(p); //rapid to start
+        writer.rapidMovement(p); // rapid to start
         writer.cutterDown();
         first = false;
       } else {
@@ -352,18 +343,18 @@ public class ToolpathPath {
   }
 
   public void optimize() {
-    
+
     // TODO: Pre-optimize by removing nodes which are on a straight line.
-    //       Pretty simple, as such straight lines can be on X and Y only,
-    //       so if three consecutive nodes have the same X or the same Y value,
-    //       the middle one can be removed.
+    // Pretty simple, as such straight lines can be on X and Y only,
+    // so if three consecutive nodes have the same X or the same Y value,
+    // the middle one can be removed.
     //
-    //       Start and end of longer straight lines should be fixed at start
-    //       and end, so no almost-horizontal and almost-vertical lines appear?
-    
+    // Start and end of longer straight lines should be fixed at start
+    // and end, so no almost-horizontal and almost-vertical lines appear?
+
     LinkedList<ToolpathNode> optimizedPath = new LinkedList<ToolpathNode>();
     optimizedPath.add(path.get(0));
-    
+
     // Proceed until there are no nodes left.
     while (path.size() > 1) {
       int end = 0;
@@ -375,9 +366,9 @@ public class ToolpathPath {
       }
 
       while (end > 0) {
-        
+
         int segmentEnd = end;
-        
+
         // This algorithm is known as Douglas-Peucker Line Approximation.
         // It first lays a single path/segment from start to end, then
         // looks wether this is within tolerance. If not, it shortens the next
@@ -401,38 +392,30 @@ public class ToolpathPath {
           int maxDeviationIndex = 0; // actually, twice the index
 
           // For fully closed paths, the start-to-end line collapses.
-          if (path.get(0).x == path.get(segmentEnd).x &&
-              path.get(0).y == path.get(segmentEnd).y) {
-            point = new Point2D.Float(processor.toModelX(path.get(0).x),
-                                      processor.toModelY(path.get(0).y));
+          if (path.get(0).x == path.get(segmentEnd).x && path.get(0).y == path.get(segmentEnd).y) {
+            point = new Point2D.Float(processor.toModelX(path.get(0).x), processor.toModelY(path.get(0).y));
+          } else {
+            line = new Line2D.Float(processor.toModelX(path.get(0).x), processor.toModelY(path.get(0).y),
+                processor.toModelX(path.get(segmentEnd).x), processor.toModelY(path.get(segmentEnd).y));
           }
-          else {
-            line = new Line2D.Float(processor.toModelX(path.get(0).x),
-                                    processor.toModelY(path.get(0).y),
-                                    processor.toModelX(path.get(segmentEnd).x),
-                                    processor.toModelY(path.get(segmentEnd).y));
-          }
-          
+
           for (i = 1; i < segmentEnd; i++) {
             double deviation;
-            
+
             if (point != null)
-              deviation = point.distance(processor.toModelX(path.get(i).x),
-                                         processor.toModelY(path.get(i).y));
+              deviation = point.distance(processor.toModelX(path.get(i).x), processor.toModelY(path.get(i).y));
             else
-              deviation = line.ptLineDist(processor.toModelX(path.get(i).x),
-                                          processor.toModelY(path.get(i).y));
-            
+              deviation = line.ptLineDist(processor.toModelX(path.get(i).x), processor.toModelY(path.get(i).y));
+
             // Here we deal with the case several pixels have the about
             // same deviation. In this case, we want the middle pixel.
             if (Math.abs(deviation - maxDeviation) < straightTol / 100) {
-              if ( ! sameDeviation) {
+              if (!sameDeviation) {
                 maxDeviationIndex = (i - 1) * 2;
                 sameDeviation = true;
               }
               maxDeviationIndex++;
-            }
-            else {
+            } else {
               sameDeviation = false;
               if (deviation > maxDeviation) {
                 maxDeviation = deviation;
@@ -440,31 +423,30 @@ public class ToolpathPath {
               }
             }
           }
-          
+
           if (maxDeviation <= straightTol) {
             // No intermediate node was out of tolerance -> make the segment.
             optimizedPath.add(path.get(segmentEnd));
-            
+
             // Remove processed nodes.
-            for ( ; segmentEnd > 0; segmentEnd--, end--) {
+            for (; segmentEnd > 0; segmentEnd--, end--) {
               path.removeFirst();
             }
-            
+
             break;
-          }
-          else {
+          } else {
             // Try again with a shorter distance.
             segmentEnd = maxDeviationIndex / 2;
           }
         }
       }
     }
-    
+
     path = optimizedPath;
   }
 
   private ToolpathsProcessor processor = null;
-  
+
   int[] dir = new int[2];
 
   final int HEAD = 0;
@@ -473,7 +455,7 @@ public class ToolpathPath {
   private LinkedList<ToolpathNode> path = new LinkedList<ToolpathNode>();
 
   GeometryArray geometry;
-  
+
   private double straightTol;
 
 }

@@ -27,17 +27,14 @@ import visolate.model.*;
 
 public class TopologyProcessor extends Processor {
 
-  public static final double EPS = 1.0/256.0;
+  public static final double EPS = 1.0 / 256.0;
 
   public TopologyProcessor(Visolate visolate) {
     super(visolate);
   }
 
-  public void processTile(int r, int c,
-                          int ulx, int uly,
-                          int width, int height,
-                          double left, double bottom,
-                          double right, double top) {
+  public void processTile(int r, int c, int ulx, int uly, int width, int height, double left, double bottom,
+      double right, double top) {
 
 //    System.out.println("processTile: " +
 //                       "(row, col) = (" + r + ", " + c + "); " +
@@ -52,8 +49,8 @@ public class TopologyProcessor extends Processor {
     try {
 
 //      display.getStill(tile);
-      tile = display.getStill(); //work around j3d bug
-      buffer = tile.getRaster().getDataBuffer(); //work around j3d bug
+      tile = display.getStill(); // work around j3d bug
+      buffer = tile.getRaster().getDataBuffer(); // work around j3d bug
 
       for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
@@ -62,22 +59,22 @@ public class TopologyProcessor extends Processor {
 
           if (!ignoreColors.contains(new Integer(color)))
             mergeNets(x, y, left, top, color);
-          
+
           if (thread.isInterrupted())
             return;
         }
       }
-      
+
     } catch (InterruptedException e) {
-      thread.interrupt(); //reset interrupt status
+      thread.interrupt(); // reset interrupt status
     }
   }
 
-  private void mergeNets(final int x, final int y, final double left, final double top, final int color) 
-    throws InterruptedException {
-    
-    double px = left+x/((double) dpi);
-    double py = top-y/((double) dpi);
+  private void mergeNets(final int x, final int y, final double left, final double top, final int color)
+      throws InterruptedException {
+
+    double px = left + x / ((double) dpi);
+    double py = top - y / ((double) dpi);
 
 //    System.out.println("merge " + Model.colorToString(color) + " at (" + x + ", " + y +
 //                       ") -> (" + px + ", " + py + ")");
@@ -87,7 +84,7 @@ public class TopologyProcessor extends Processor {
 
     Set<Net> nets = new LinkedHashSet<Net>();
 
-    model.getNetsAtPoint(px, py, 1.0/dpi, nets);
+    model.getNetsAtPoint(px, py, 1.0 / dpi, nets);
 
 //    System.out.println(nets.size() + " nets at point");
 
@@ -105,24 +102,24 @@ public class TopologyProcessor extends Processor {
   public static void mergeNets(Collection<Net> nets) {
 
     Set<Net> superNet = null;
-    
+
     for (Net net : nets) {
       if (superNet == null) {
         superNet = net.getSuperNet();
       }
     }
-    
+
     if (superNet == null) {
       superNet = new LinkedHashSet<Net>();
     }
 
     for (Net net : nets) {
-    	net.setSuperNet(superNet);
+      net.setSuperNet(superNet);
     }
   }
 
   private int getPixel(int x, int y) {
-    return buffer.getElem(y*canvasWidthPels + x);
+    return buffer.getElem(y * canvasWidthPels + x);
   }
 
   protected void processStarted() {
@@ -149,7 +146,7 @@ public class TopologyProcessor extends Processor {
 
     ignoreColors = new LinkedHashSet<Integer>();
 
-    for (Iterator<Integer> it = netColors.iterator(); it.hasNext(); ) {
+    for (Iterator<Integer> it = netColors.iterator(); it.hasNext();) {
 
       int c = it.next().intValue();
 
@@ -165,9 +162,9 @@ public class TopologyProcessor extends Processor {
 
       for (int i = 1; i < 8; i++) {
 
-        r += (cr >> i) + ((cr >> (i-1)) & 1);
-        g += (cg >> i) + ((cg >> (i-1)) & 1);
-        b += (cb >> i) + ((cb >> (i-1)) & 1);
+        r += (cr >> i) + ((cr >> (i - 1)) & 1);
+        g += (cg >> i) + ((cg >> (i - 1)) & 1);
+        b += (cb >> i) + ((cb >> (i - 1)) & 1);
 
         int j = ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
 

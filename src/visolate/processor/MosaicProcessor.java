@@ -32,11 +32,8 @@ public class MosaicProcessor extends Processor {
     super(visolate);
   }
 
-  public void processTile(int r, int c,
-                          int ulx, int uly,
-                          int width, int height,
-                          double left, double bottom,
-                          double right, double top) {
+  public void processTile(int r, int c, int ulx, int uly, int width, int height, double left, double bottom,
+      double right, double top) {
 
 //    System.out.println("processTile: " +
 //                       "(row, col) = (" + r + ", " + c + "); " +
@@ -52,7 +49,7 @@ public class MosaicProcessor extends Processor {
 //      mosaicG2D.drawRenderedImage(display.getStill(tile), transform); //work around j3d bug
       mosaicG2D.drawRenderedImage(display.getStill(), transform);
     } catch (InterruptedException e) {
-      thread.interrupt(); //reset interrupt status
+      thread.interrupt(); // reset interrupt status
     }
   }
 

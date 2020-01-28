@@ -31,20 +31,20 @@ public class ToolpathNode {
 
     this.x = x;
     this.y = y;
-    
+
     locked = false;
 
-    hashCode = x^(y*31);
+    hashCode = x ^ (y * 31);
   }
 
   public int hashCode() {
     return hashCode;
   }
-  
+
   public void setIsLocked(boolean locked) {
     this.locked = locked;
   }
-  
+
   public boolean isLocked() {
     return locked;
   }
@@ -83,7 +83,7 @@ public class ToolpathNode {
   }
 
   public ToolpathNode getNeighbor(int d) {
-    switch(d) {
+    switch (d) {
     case N:
       return north;
     case S:
@@ -98,7 +98,7 @@ public class ToolpathNode {
   }
 
   public void setNeighbor(int d, ToolpathNode n) {
-    switch(d) {
+    switch (d) {
     case N:
       north = n;
       break;
@@ -118,7 +118,7 @@ public class ToolpathNode {
 
   int x;
   int y;
-  
+
   boolean locked;
 
   ToolpathNode north = null;
