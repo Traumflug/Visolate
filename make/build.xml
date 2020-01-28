@@ -1,0 +1,68 @@
+<project name="Visolate" default="jar" basedir=".">
+
+<!-- https://ant.apache.org/manual/using.html -->
+
+  <description>
+    Build Visolate JAR
+  </description>
+
+  <property name="src.dir" value="../src/visolate"/>
+  <property name="lib.dir" value="../lib"/>
+  <property name="build.dir" value="build"/>
+  <property name="dest.dir" value="dest"/>
+
+  <path id="visolate.classpath">
+  <!-- include all jars in the lib directory and sub-directories -->
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
+  <target name="clean" 
+          description="Remove all generated files">
+    <delete dir="${build.dir}"/>
+    <delete dir="${dest.dir}"/>
+  </target>
+
+  <target name="init" depends="clean">
+    <!-- Create the time stamp -->
+    <tstamp/>
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${dest.dir}"/>
+  </target>
+
+  <target name="compile" depends="init"
+          description="Compile the source code">
+    <javac destdir="${build.dir}"
+           includeantruntime="false">
+      <src path="${src.dir}"/>
+      <classpath refid="visolate.classpath"/>
+    </javac>
+  </target>
+
+  <target name="jar" depends="compile" 
+          description="Generates visolate.jar file in to the 'dest' directory">
+
+    <manifestclasspath property="lib.list" 
+                       jarfile="${dest.dir}/visolate.jar">
+      <classpath refid="visolate.classpath"/>
+    </manifestclasspath>
+
+    <jar jarfile="${dest.dir}/Visolate.jar" basedir="${build.dir}">
+      <manifest>
+        <attribute name="Main-Class"                value="visolate.Main"/>
+        <attribute name="Class-Path"                value="${lib.list}"/>
+        <attribute name="Manifest-Version"          value="1.0"/>
+        <attribute name="Specification-Title"       value="${build.spec.title}"/>
+        <attribute name="Specification-Version"     value="1.6"/>
+        <attribute name="Specification-Vendor"      value="${build.spec.vendor}"/>
+        <attribute name="Implementation-Title"      value="Visolate"/>
+        <attribute name="Implementation-Version"    value="${version_base}"/>
+        <attribute name="Implementation-Vendor"     value="${build.impl.vendor}"/>
+        <attribute name="Implementation-Vendor-Id"  value="${build.impl.vendor.id}"/>
+      </manifest>
+    </jar>
+  </target>
+
+</project>
+
