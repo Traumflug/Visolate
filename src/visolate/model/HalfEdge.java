@@ -76,21 +76,21 @@ public class HalfEdge {
   }
 
   public double angleTo(HalfEdge he) {
-    
+
     double myDir = getEndDirection();
     double hisDir = he.getStartDirection();
 
     double himToMe;
-    
+
     if (myDir >= hisDir)
       himToMe = myDir - hisDir;
     else
-      himToMe = 2*Math.PI - (hisDir - myDir);
+      himToMe = 2 * Math.PI - (hisDir - myDir);
 
     if (himToMe <= Math.PI)
       return Math.PI - himToMe;
     else
-      return 2*Math.PI - (himToMe - Math.PI);
+      return 2 * Math.PI - (himToMe - Math.PI);
   }
 
   private Stroke stroke;

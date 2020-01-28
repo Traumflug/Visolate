@@ -32,13 +32,13 @@ import java.util.*;
 public class Net implements Comparable<Net> {
 
   public static final int CIRCLE_SEGMENTS = 16;
-  public static final double CIRCLE_SECTOR = 2.0*Math.PI/CIRCLE_SEGMENTS;
+  public static final double CIRCLE_SECTOR = 2.0 * Math.PI / CIRCLE_SEGMENTS;
 
   public static final Vector3f Z = new Vector3f(0.0f, 0.0f, 1.0f);
 
   public static final float TAIL_SIZE = 0.001f;
-  public static final double MIN_TAIL_ANGLE = 5*Math.PI/180;
-  public static final double MAX_TAIL_ANGLE = 30*Math.PI/180;
+  public static final double MIN_TAIL_ANGLE = 5 * Math.PI / 180;
+  public static final double MAX_TAIL_ANGLE = 30 * Math.PI / 180;
   public static final double LINE_TWIDDLE = 0.0005;
 
   public static final float GCODE_Z_MIN = 0.2f;
@@ -67,8 +67,8 @@ public class Net implements Comparable<Net> {
   }
 
   public double getArea() {
-    double ipd = 1.0/((double) areaDPI);
-    return ((double) areaPixels)*ipd*ipd;
+    double ipd = 1.0 / ((double) areaDPI);
+    return ((double) areaPixels) * ipd * ipd;
   }
 
   public double getFatness() {
@@ -76,15 +76,15 @@ public class Net implements Comparable<Net> {
     double length = getLength();
 
     if (length > 0.0)
-      return getArea()/length;
+      return getArea() / length;
     else
-      return getArea()/getWidth();
+      return getArea() / getWidth();
   }
 
   public double getLength() {
-   
+
     double length = 0.0;
-    
+
     if (mySuperNet == null) {
       length = getLocalLength();
     } else {
@@ -100,7 +100,7 @@ public class Net implements Comparable<Net> {
 
     double length = 0.0;
 
-    for (Iterator<Stroke> it = strokes.iterator(); it.hasNext(); )
+    for (Iterator<Stroke> it = strokes.iterator(); it.hasNext();)
       length += it.next().getLength();
 
     return length;
@@ -111,24 +111,17 @@ public class Net implements Comparable<Net> {
       return getBounds().width;
     } else {
       Rect r = new Rect();
-      for (Iterator<Net> it = mySuperNet.iterator(); it.hasNext(); )
+      for (Iterator<Net> it = mySuperNet.iterator(); it.hasNext();)
         r.add(it.next().getBounds());
       return r.width;
     }
   }
 
   public void dump() {
-    System.out.println("(R, G, B): " + color + ": " +
-                       + ((mySuperNet != null) ? (mySuperNet.size()-1) : 0) +
-                       " siblings; " +
-                       + strokes.size() + " strokes; " +
-                       + pads.size() + " pads" +
-                       "\n  bounds: " + getBounds() +
-                       "\n  length: " + getLength() +
-                       "; area: " + getArea() +
-                       "; fatness: " + getFatness() +
-                       "; areaDPI: " + areaDPI +
-                       "; areaPixels: " + areaPixels);
+    System.out.println("(R, G, B): " + color + ": " + +((mySuperNet != null) ? (mySuperNet.size() - 1) : 0)
+        + " siblings; " + +strokes.size() + " strokes; " + +pads.size() + " pads" + "\n  bounds: " + getBounds()
+        + "\n  length: " + getLength() + "; area: " + getArea() + "; fatness: " + getFatness() + "; areaDPI: " + areaDPI
+        + "; areaPixels: " + areaPixels);
   }
 
   public void setSuperNet(final Set<Net> aSuperNet) {
@@ -143,7 +136,7 @@ public class Net implements Comparable<Net> {
 
     aSuperNet.add(this);
 
-    for (Iterator<Net> it = aSuperNet.iterator(); it.hasNext(); ) {
+    for (Iterator<Net> it = aSuperNet.iterator(); it.hasNext();) {
 
       Net net = it.next();
       net.mySuperNet = aSuperNet;
@@ -170,7 +163,7 @@ public class Net implements Comparable<Net> {
     bounds = null;
 
     for (Stroke stroke : strokes) {
-    	stroke.setOffset(offset);
+      stroke.setOffset(offset);
     }
 
     for (Flash flash : pads) {
@@ -193,7 +186,7 @@ public class Net implements Comparable<Net> {
   }
 
   public int getNumEdges() {
-    return halfEdges.size()/2;
+    return halfEdges.size() / 2;
   }
 
   public int getNumPads() {
@@ -201,7 +194,6 @@ public class Net implements Comparable<Net> {
   }
 
   public int makeHalfEdgeLoops() {
-
 
     Set<HalfEdge> halfEdges = new HashSet<HalfEdge>();
     halfEdges.addAll(this.halfEdges);
@@ -239,12 +231,12 @@ public class Net implements Comparable<Net> {
           break;
 
         HalfEdge next = end.getNextOutgoingHalfEdge(he);
-        
+
         assert next != he;
         assert (he != null);
 
         he.setNext(next);
-        
+
         he = next;
       }
 
@@ -305,18 +297,17 @@ public class Net implements Comparable<Net> {
   private Color3f applyHighlight(Color3f color) {
 
     if (highlighted) {
-      color.x += HIGHLIGHT*(1.0f-color.x);
-      color.y += HIGHLIGHT*(1.0f-color.y);
-      color.z += HIGHLIGHT*(1.0f-color.z);
+      color.x += HIGHLIGHT * (1.0f - color.x);
+      color.y += HIGHLIGHT * (1.0f - color.y);
+      color.z += HIGHLIGHT * (1.0f - color.z);
     }
-    
+
     return color;
   }
 
   public static Color3f toColor3f(Color3b color) {
-    return new Color3f(unsignedByteToInt(color.x)/255.0f,
-                       unsignedByteToInt(color.y)/255.0f,
-                       unsignedByteToInt(color.z)/255.0f);
+    return new Color3f(unsignedByteToInt(color.x) / 255.0f, unsignedByteToInt(color.y) / 255.0f,
+        unsignedByteToInt(color.z) / 255.0f);
   }
 
   public static int unsignedByteToInt(byte b) {
@@ -328,7 +319,7 @@ public class Net implements Comparable<Net> {
   }
 
   public void enableLineGeometry(boolean enable) {
-   
+
     if (enable && (lineGeometry == null))
       makeLineGeometry();
 
@@ -342,7 +333,7 @@ public class Net implements Comparable<Net> {
   }
 
   public void enableVoronoiGeometry(boolean enable) {
-    
+
     if (enable && (loopGeometry == null))
       makeVoronoiGeometry();
 
@@ -353,7 +344,6 @@ public class Net implements Comparable<Net> {
     enableGeometry(coneS3D, coneGeometry, enable);
 //    enableGeometry(coneEdgesS3D, coneGeometry, enable);
   }
-
 
   private void rebuildVoronoiGeometry() {
 
@@ -370,7 +360,7 @@ public class Net implements Comparable<Net> {
   private void rebuildFlatGeometry() {
 
     boolean flatGeometryWas = showFlatGeometry;
-    
+
     enableFlatGeometry(false);
 
     flatGeometry = null;
@@ -379,17 +369,17 @@ public class Net implements Comparable<Net> {
   }
 
   public void enableFlatGeometry(boolean enable) {
-    
+
     if (enable && (flatGeometry == null))
       makeFlatGeometry();
 
     showFlatGeometry = enable;
-    
+
     enableGeometry(flatS3D, flatGeometry, enable);
   }
 
   public void setTranslucent2D(boolean enable) {
-    
+
     if (enable == translucent2D)
       return;
 
@@ -403,35 +393,33 @@ public class Net implements Comparable<Net> {
     else
       appearance2D.setTransparencyAttributes(null);
   }
-  
+
   public boolean isTranslucent2D() {
     return (appearance2D.getTransparencyAttributes() != null);
   }
 
-  private void enableGeometry(final Shape3D shape3D,
-                              final Geometry geometry,
-                              final boolean enable) {
+  private void enableGeometry(final Shape3D shape3D, final Geometry geometry, final boolean enable) {
 
     if ((geometry == null) || (shape3D == null))
       return;
 
     Runnable task = new Runnable() {
-        public void run() {
-          if (enable) {
-            if (shape3D.indexOfGeometry(geometry) < 0) {
-              if (!geometry.isLive()) {
-                geometry.setCapability(Geometry.ALLOW_INTERSECT);
-                geometry.setCapability(GeometryArray.ALLOW_COORDINATE_READ);
-                geometry.setCapability(GeometryArray.ALLOW_COUNT_READ);
-                geometry.setCapability(GeometryArray.ALLOW_FORMAT_READ);
-              }
-              shape3D.addGeometry(geometry);
+      public void run() {
+        if (enable) {
+          if (shape3D.indexOfGeometry(geometry) < 0) {
+            if (!geometry.isLive()) {
+              geometry.setCapability(Geometry.ALLOW_INTERSECT);
+              geometry.setCapability(GeometryArray.ALLOW_COORDINATE_READ);
+              geometry.setCapability(GeometryArray.ALLOW_COUNT_READ);
+              geometry.setCapability(GeometryArray.ALLOW_FORMAT_READ);
             }
-          } else {
-            shape3D.removeAllGeometries();
+            shape3D.addGeometry(geometry);
           }
+        } else {
+          shape3D.removeAllGeometries();
         }
-      };
+      }
+    };
 
     if (shape3D.isLive())
       visolate.addFrameTask(task);
@@ -451,49 +439,30 @@ public class Net implements Comparable<Net> {
       if (color != null)
         coloringAttributes.setColor(applyHighlight(toColor3f(color)));
       appearance.setColoringAttributes(coloringAttributes);
-      PolygonAttributes polygonAttributes =
-        new PolygonAttributes(PolygonAttributes.POLYGON_FILL,
-                              PolygonAttributes.CULL_NONE,
-                              0.0f);
+      PolygonAttributes polygonAttributes = new PolygonAttributes(PolygonAttributes.POLYGON_FILL,
+          PolygonAttributes.CULL_NONE, 0.0f);
       appearance.setPolygonAttributes(polygonAttributes);
 
-/*
-      Appearance appearanceEdges = new Appearance();
-      appearanceEdges.
-        setColoringAttributes(new ColoringAttributes(0.0f,
-                                                     1.0f,
-                                                     0.0f,
-                                                     ColoringAttributes.
-                                                     SHADE_FLAT));
-      appearanceEdges.
-        setPolygonAttributes(new PolygonAttributes(
-          PolygonAttributes.POLYGON_LINE,
-          PolygonAttributes.CULL_NONE,
-          1.0f,
-          true,
-          -1.0f));
-      appearanceEdges.setLineAttributes(new LineAttributes(1.0f,
-                                                           LineAttributes.
-                                                           PATTERN_SOLID,
-                                                           true));
-//      appearanceEdges.
-//        setTransparencyAttributes(new TransparencyAttributes(
-//          TransparencyAttributes.SCREEN_DOOR,
-//          0.8f));
-*/
-
+      /*
+       * Appearance appearanceEdges = new Appearance(); appearanceEdges.
+       * setColoringAttributes(new ColoringAttributes(0.0f, 1.0f, 0.0f,
+       * ColoringAttributes. SHADE_FLAT)); appearanceEdges. setPolygonAttributes(new
+       * PolygonAttributes( PolygonAttributes.POLYGON_LINE,
+       * PolygonAttributes.CULL_NONE, 1.0f, true, -1.0f));
+       * appearanceEdges.setLineAttributes(new LineAttributes(1.0f, LineAttributes.
+       * PATTERN_SOLID, true)); // appearanceEdges. // setTransparencyAttributes(new
+       * TransparencyAttributes( // TransparencyAttributes.SCREEN_DOOR, // 0.8f));
+       */
 
       Appearance appearance1D = new Appearance();
 
-      LineAttributes lineAttributes1D = new LineAttributes(1.0f, 
+      LineAttributes lineAttributes1D = new LineAttributes(1.0f,
 //                                                           4.0f,
-                                                           LineAttributes.
-                                                           PATTERN_SOLID,
-                                                           false);
+          LineAttributes.PATTERN_SOLID, false);
       appearance1D.setLineAttributes(lineAttributes1D);
       PointAttributes pointAttributes1D = new PointAttributes(1.0f,
-                                                              //4.0f,
-                                                              false);
+          // 4.0f,
+          false);
       appearance1D.setPointAttributes(pointAttributes1D);
       ColoringAttributes coloringAttributes1D = new ColoringAttributes();
       coloringAttributes1D.setColor(new Color3f(0.0f, 0.0f, 0.0f));
@@ -506,13 +475,10 @@ public class Net implements Comparable<Net> {
       appearance2D = new Appearance();
       appearance2D.setColoringAttributes(coloringAttributes);
       appearance2D.setPolygonAttributes(polygonAttributes);
-      appearance2D.
-        setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_READ);
-      appearance2D.
-        setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
-      transparencyAttributes =
-        new TransparencyAttributes(TransparencyAttributes.BLENDED, 0.5f);
-      
+      appearance2D.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_READ);
+      appearance2D.setCapability(Appearance.ALLOW_TRANSPARENCY_ATTRIBUTES_WRITE);
+      transparencyAttributes = new TransparencyAttributes(TransparencyAttributes.BLENDED, 0.5f);
+
       if (translucent2D)
         appearance2D.setTransparencyAttributes(transparencyAttributes);
 
@@ -523,7 +489,7 @@ public class Net implements Comparable<Net> {
       loopS3D = new Shape3D();
 //      loopEdgesS3D = new Shape3D();
       flatS3D = new Shape3D();
-      
+
       lineS3D.setPickable(false);
       pointS3D.setPickable(false);
       coneS3D.setPickable(false);
@@ -547,10 +513,10 @@ public class Net implements Comparable<Net> {
       loopS3D.setAppearance(appearance);
 //      loopEdgesS3D.setAppearance(appearanceEdges);
       flatS3D.setAppearance(appearance2D);
-      
+
       lineS3D.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
       lineS3D.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
-      
+
       pointS3D.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
       pointS3D.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
 
@@ -558,7 +524,7 @@ public class Net implements Comparable<Net> {
       coneS3D.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
 //      coneEdgesS3D.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
 //      coneEdgesS3D.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
-      
+
       loopS3D.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
       loopS3D.setCapability(Shape3D.ALLOW_GEOMETRY_WRITE);
 //      loopEdgesS3D.setCapability(Shape3D.ALLOW_GEOMETRY_READ);
@@ -582,7 +548,7 @@ public class Net implements Comparable<Net> {
       enableVoronoiGeometry(showVoronoiGeometry);
       enableFlatGeometry(showFlatGeometry);
     }
-    
+
     return sceneBG;
   }
 
@@ -600,10 +566,10 @@ public class Net implements Comparable<Net> {
       return;
 
 //    int vertexCount = 4*strokes.size();// + 4*2;
-    int vertexCount = 2*strokes.size();// + 4*2;
+    int vertexCount = 2 * strokes.size();// + 4*2;
 
-    float[] coords = new float[3*vertexCount];
-   
+    float[] coords = new float[3 * vertexCount];
+
     int i = 0;
     for (Stroke stroke : strokes) {
 
@@ -615,73 +581,61 @@ public class Net implements Comparable<Net> {
 
       if (stroke instanceof Segment) {
 
-        d.set(e.x-s.x, e.y-s.y, 0.0f);
+        d.set(e.x - s.x, e.y - s.y, 0.0f);
         d.normalize();
         n.cross(d, Z);
 
 //        float t = (float) (-LINE_TWIDDLE/2 + LINE_TWIDDLE*Math.random());
         float t = 0.0f;
-        
-        coords[i++] = s.x + t*n.x;
-        coords[i++] = s.y + t*n.y;
+
+        coords[i++] = s.x + t * n.x;
+        coords[i++] = s.y + t * n.y;
         coords[i++] = LINE_Z;
 
-        coords[i++] = e.x + t*n.x;
-        coords[i++] = e.y + t*n.y;
+        coords[i++] = e.x + t * n.x;
+        coords[i++] = e.y + t * n.y;
         coords[i++] = LINE_Z;
-/* (tail)
-        coords[i++] = e.x + t*n.x;
-        coords[i++] = e.y + t*n.y;
-        coords[i++] = LINE_Z;
-
-        double a =
-          MIN_TAIL_ANGLE + (MAX_TAIL_ANGLE-MIN_TAIL_ANGLE)*Math.random();
-        float sa = (float) Math.sin(a);
-        float ca = (float) Math.cos(a);
-
-        coords[i++] = e.x+t*n.x+(n.x*sa-d.x*ca)*TAIL_SIZE;
-        coords[i++] = e.y+t*n.y+(n.y*sa-d.y*ca)*TAIL_SIZE;
-        coords[i++] = LINE_Z;
-*/
+        /*
+         * (tail) coords[i++] = e.x + t*n.x; coords[i++] = e.y + t*n.y; coords[i++] =
+         * LINE_Z;
+         * 
+         * double a = MIN_TAIL_ANGLE + (MAX_TAIL_ANGLE-MIN_TAIL_ANGLE)*Math.random();
+         * float sa = (float) Math.sin(a); float ca = (float) Math.cos(a);
+         * 
+         * coords[i++] = e.x+t*n.x+(n.x*sa-d.x*ca)*TAIL_SIZE; coords[i++] =
+         * e.y+t*n.y+(n.y*sa-d.y*ca)*TAIL_SIZE; coords[i++] = LINE_Z;
+         */
       } else {
         System.out.println("WARNING: unsupported stroke: " + stroke);
       }
     }
-/*
-    Rect bounds = getBounds();
-
-    coords[i++] = (float) bounds.x;
-    coords[i++] = (float) bounds.y;
-    coords[i++] = LINE_Z;
-
-    coords[i++] = (float) (bounds.x + bounds.width);
-    coords[i++] = (float) bounds.y;
-    coords[i++] = LINE_Z;
-
-    coords[i++] = (float) (bounds.x + bounds.width);
-    coords[i++] = (float) bounds.y;
-    coords[i++] = LINE_Z;
-
-    coords[i++] = (float) (bounds.x + bounds.width);
-    coords[i++] = (float) (bounds.y + bounds.height);
-    coords[i++] = LINE_Z;
-
-    coords[i++] = (float) (bounds.x + bounds.width);
-    coords[i++] = (float) (bounds.y + bounds.height);
-    coords[i++] = LINE_Z;
-
-    coords[i++] = (float) bounds.x;
-    coords[i++] = (float) (bounds.y + bounds.height);
-    coords[i++] = LINE_Z;
-
-    coords[i++] = (float) bounds.x;
-    coords[i++] = (float) (bounds.y + bounds.height);
-    coords[i++] = LINE_Z;
-
-    coords[i++] = (float) bounds.x;
-    coords[i++] = (float) bounds.y;
-    coords[i++] = LINE_Z;
-*/
+    /*
+     * Rect bounds = getBounds();
+     * 
+     * coords[i++] = (float) bounds.x; coords[i++] = (float) bounds.y; coords[i++] =
+     * LINE_Z;
+     * 
+     * coords[i++] = (float) (bounds.x + bounds.width); coords[i++] = (float)
+     * bounds.y; coords[i++] = LINE_Z;
+     * 
+     * coords[i++] = (float) (bounds.x + bounds.width); coords[i++] = (float)
+     * bounds.y; coords[i++] = LINE_Z;
+     * 
+     * coords[i++] = (float) (bounds.x + bounds.width); coords[i++] = (float)
+     * (bounds.y + bounds.height); coords[i++] = LINE_Z;
+     * 
+     * coords[i++] = (float) (bounds.x + bounds.width); coords[i++] = (float)
+     * (bounds.y + bounds.height); coords[i++] = LINE_Z;
+     * 
+     * coords[i++] = (float) bounds.x; coords[i++] = (float) (bounds.y +
+     * bounds.height); coords[i++] = LINE_Z;
+     * 
+     * coords[i++] = (float) bounds.x; coords[i++] = (float) (bounds.y +
+     * bounds.height); coords[i++] = LINE_Z;
+     * 
+     * coords[i++] = (float) bounds.x; coords[i++] = (float) bounds.y; coords[i++] =
+     * LINE_Z;
+     */
 
 //    System.out.println(coords.length/6 + " segments");
 //
@@ -689,8 +643,7 @@ public class Net implements Comparable<Net> {
 //      System.out.println("(" + coords[6*i] + ", " + coords[6*i+1] + ") -> (" +
 //                         coords[6*i+3] + ", " + coords[6*i+4] + ")");
 
-    lineGeometry = new LineArray(vertexCount, GeometryArray.COORDINATES |
-                                              GeometryArray.BY_REFERENCE);
+    lineGeometry = new LineArray(vertexCount, GeometryArray.COORDINATES | GeometryArray.BY_REFERENCE);
     lineGeometry.setCoordRefFloat(coords);
   }
 
@@ -701,10 +654,10 @@ public class Net implements Comparable<Net> {
 
     int vertexCount = pads.size();
 
-    float[] coords = new float[3*vertexCount];
-   
+    float[] coords = new float[3 * vertexCount];
+
     int i = 0;
-    for (Iterator<Flash> it = pads.iterator(); it.hasNext(); ) {
+    for (Iterator<Flash> it = pads.iterator(); it.hasNext();) {
       Point2f p = (it.next().getLocation()).getInchCoordinates();
 
       coords[i++] = p.x;
@@ -713,8 +666,7 @@ public class Net implements Comparable<Net> {
 
     }
 
-    pointGeometry = new PointArray(vertexCount, GeometryArray.COORDINATES |
-                                                GeometryArray.BY_REFERENCE);
+    pointGeometry = new PointArray(vertexCount, GeometryArray.COORDINATES | GeometryArray.BY_REFERENCE);
     pointGeometry.setCoordRefFloat(coords);
   }
 
@@ -751,7 +703,7 @@ public class Net implements Comparable<Net> {
     if (parts.size() != 0) {
       coneGeometry = makeConesFromFanList(parts);
     }
-    
+
 //    // This is for debugging.
 //    // Draw upper and lower edge of all cones. Useful if offsetOut in
 //    // makeConesFromFanList() is set to something like zCeiling()/10.
@@ -780,7 +732,7 @@ public class Net implements Comparable<Net> {
 //                                                  GeometryArray.BY_REFERENCE);
 //    lineGeometry.setCoordRefFloat(lineCoords);
 //    // End of debugging part.
-    
+
   }
 
   private TriangleStripArray makeConesFromFanList(List<TriangleFanArray> fanList) {
@@ -789,7 +741,7 @@ public class Net implements Comparable<Net> {
     int fanListVertexCount = 0;
     for (TriangleFanArray fan : fanList) {
 
-      // For each strip, this gives us 1 for the center + 
+      // For each strip, this gives us 1 for the center +
       // the number of segments, ...
       int partVertexCount = fan.getVertexCount();
       // ... but cones have no center and two vertices per segment:
@@ -800,16 +752,16 @@ public class Net implements Comparable<Net> {
       fanListStripCount += numStrips;
     }
 
-    float[] coords = new float[fanListVertexCount*3];
+    float[] coords = new float[fanListVertexCount * 3];
     int[] vertexCounts = new int[fanListStripCount];
     int vertexCount = 0;
     int stripCount = 0;
     int i = 0;
-    
+
     for (TriangleFanArray fan : fanList) {
 
       int numStrips = ((GeometryStripArray) fan).getNumStrips();
-      int[] fanVertexCounts = new int [numStrips];
+      int[] fanVertexCounts = new int[numStrips];
       ((GeometryStripArray) fan).getStripVertexCounts(fanVertexCounts);
 
       // This gives us all the coordinates for one or more
@@ -818,7 +770,7 @@ public class Net implements Comparable<Net> {
       int stripCoordsPtr = 0;
 
       for (int j = 0; j < numStrips; j++) {
-        
+
         // This is a bit a hack. To avoid drawing artefacts, we need to
         // overlap the cone a bit into the pad. To simplify things,
         // the distance of the first two points is taken as the magnitude
@@ -826,7 +778,7 @@ public class Net implements Comparable<Net> {
         float dx = fanCoords[stripCoordsPtr + 6] - fanCoords[stripCoordsPtr + 3];
         float dy = fanCoords[stripCoordsPtr + 7] - fanCoords[stripCoordsPtr + 4];
         float offsetIn = -1.0f * (float) Math.sqrt(dx * dx + dy * dy);
-        
+
         float offsetOut = zCeiling();
 
         // On how to properly offset a bunch of lines:
@@ -846,8 +798,7 @@ public class Net implements Comparable<Net> {
           if (k == 1) {
             p1.x = fanCoords[stripCoordsPtr + (fanVertexCounts[j] - 2) * 3];
             p1.y = fanCoords[stripCoordsPtr + (fanVertexCounts[j] - 2) * 3 + 1];
-          }
-          else {
+          } else {
             p1.x = fanCoords[stripCoordsPtr + (k - 1) * 3];
             p1.y = fanCoords[stripCoordsPtr + (k - 1) * 3 + 1];
           }
@@ -856,8 +807,7 @@ public class Net implements Comparable<Net> {
           if (k == fanVertexCounts[j] - 1) {
             p3.x = fanCoords[stripCoordsPtr + 2 * 3];
             p3.y = fanCoords[stripCoordsPtr + 2 * 3 + 1];
-          }
-          else {
+          } else {
             p3.x = fanCoords[stripCoordsPtr + (k + 1) * 3];
             p3.y = fanCoords[stripCoordsPtr + (k + 1) * 3 + 1];
           }
@@ -867,7 +817,7 @@ public class Net implements Comparable<Net> {
           coords[i++] = intersection.x;
           coords[i++] = intersection.y;
           coords[i++] = CONE_Z_MAX - offsetIn;
-          
+
           intersection = offsetCorner(p1, p2, p3, offsetOut);
 
           coords[i++] = intersection.x;
@@ -876,27 +826,24 @@ public class Net implements Comparable<Net> {
         }
         vertexCounts[stripCount++] = (fanVertexCounts[j] - 1) * 2;
         vertexCount += (fanVertexCounts[j] - 1) * 2;
-        
+
         stripCoordsPtr += fanVertexCounts[j];
       }
     }
 
     TriangleStripArray cones = null;
-    cones = new TriangleStripArray(vertexCount,
-                                   GeometryArray.COORDINATES |
-                                   GeometryArray.BY_REFERENCE,
-                                   vertexCounts);
+    cones = new TriangleStripArray(vertexCount, GeometryArray.COORDINATES | GeometryArray.BY_REFERENCE, vertexCounts);
     cones.setCoordRefFloat(coords);
-    
+
     return cones;
   }
-  
+
   // This offsets a corner defined by the previous point p1, the
   // corner point p2 and the next point p3 by offsetting the lines (p1, p2)
   // and (p2, p3) and returning the intersection of both offsets.
   // All is done on the X-Y plane.
   private Point2f offsetCorner(Point2f p1, Point2f p2, Point2f p3, float offset) {
-    
+
     // Normal to V = (x, y) is N = (-y, x).
     Vector2f n1 = new Vector2f(p2.y - p1.y, -(p2.x - p1.x));
     Vector2f n2 = new Vector2f(p3.y - p2.y, -(p3.x - p2.x));
@@ -920,53 +867,51 @@ public class Net implements Comparable<Net> {
     float b2 = off21.y - off22.y;
     float c2 = off21.y - off11.y;
 
-    float t = (b1*c2 - b2*c1) / (a2*b1 - a1*b2);
+    float t = (b1 * c2 - b2 * c1) / (a2 * b1 - a1 * b2);
 
-    Point2f intersection = new Point2f(off11.x + t * (off12.x - off11.x),
-                                       off11.y + t * (off12.y - off11.y));
-    
+    Point2f intersection = new Point2f(off11.x + t * (off12.x - off11.x), off11.y + t * (off12.y - off11.y));
+
     return intersection;
   }
-  
+
   private void makeLoopGeometry() {
 
     List<TriangleFanArray> parts = new ArrayList<TriangleFanArray>();
 
-    //half edge loops
+    // half edge loops
     for (HalfEdge startEdge : loopStarts) {
 
       HalfEdge he = startEdge;
-      
+
       do {
-        
+
         Stroke stroke = he.getStroke();
 
         if (stroke instanceof Segment) {
 
           Collection<GeometryArray> geometries = stroke.getGeometries();
-          
+
           if (geometries == null)
             continue;
 
           for (GeometryArray geometry : geometries) {
-            
+
             if (geometry instanceof TriangleFanArray) {
               parts.add((TriangleFanArray) geometry);
-            }
-            else {
+            } else {
               System.out.println("unsupported stroke geometry: " + stroke);
             }
           }
         } else {
           System.out.println("WARNING: unsupported stroke: " + stroke);
         }
-        
+
         HalfEdge next = he.getNext();
         he = next;
-        
+
       } while (he != startEdge);
     }
-      
+
     if (parts.size() != 0) {
       loopGeometry = makeConesFromFanList(parts);
     }
@@ -980,10 +925,10 @@ public class Net implements Comparable<Net> {
   private void makeFlatGeometry() {
 
     if (Float.isNaN(flatZ))
-      flatZ = (float) (FLAT_Z_MAX + Math.random()*(FLAT_Z_MIN-FLAT_Z_MAX));
+      flatZ = (float) (FLAT_Z_MAX + Math.random() * (FLAT_Z_MIN - FLAT_Z_MAX));
 
     Collection<TriangleFanArray> fanParts = new LinkedHashSet<TriangleFanArray>();
-    
+
     for (Stroke stroke : strokes) {
 
       Collection<GeometryArray> geometries = stroke.getGeometries();
@@ -1009,17 +954,17 @@ public class Net implements Comparable<Net> {
     for (Flash flash : pads) {
 
       Collection<GeometryArray> geometries = flash.getGeometries();
-      
+
       if (geometries == null) {
         continue;
       }
-      
+
       for (GeometryArray geometry : geometries) {
-        
+
         if (geometry == null) {
           continue;
         }
-      
+
         if (geometry instanceof TriangleFanArray) {
           fanParts.add((TriangleFanArray) geometry);
         } else {
@@ -1027,19 +972,17 @@ public class Net implements Comparable<Net> {
         }
       }
     }
-    
+
     if (fanParts.size() != 0) {
 
       int numFans = fanParts.size();
       int[] vertexCounts = new int[numFans];
       int vertexCount = computeVertexCounts(fanParts, vertexCounts);
-      float[] coords = new float[vertexCount*3];
+      float[] coords = new float[vertexCount * 3];
       populateCoords(fanParts, coords);
-      
-      flatGeometry = new TriangleFanArray(vertexCount,
-                                          GeometryArray.COORDINATES |
-                                          GeometryArray.BY_REFERENCE,
-                                          vertexCounts);
+
+      flatGeometry = new TriangleFanArray(vertexCount, GeometryArray.COORDINATES | GeometryArray.BY_REFERENCE,
+          vertexCounts);
       flatGeometry.setCoordRefFloat(coords);
     }
 
@@ -1050,12 +993,12 @@ public class Net implements Comparable<Net> {
     int total = 0;
     int i = 0;
     for (GeometryArray part : parts) {
-      
+
       int vertexCount = part.getVertexCount();
       total += vertexCount;
       vertexCounts[i++] = vertexCount;
     }
-  
+
     return total;
   }
 
@@ -1063,34 +1006,33 @@ public class Net implements Comparable<Net> {
 
     int i = 0;
     for (GeometryArray gpart : parts) {
-      
+
       float[] part = gpart.getCoordRefFloat();
-      
+
       int len = part.length;
       System.arraycopy(part, 0, coords, i, len);
       i += len;
     }
-    
-    for (i = 0; i < coords.length/3; i++) {
-      coords[3*i+2] = flatZ;
+
+    for (i = 0; i < coords.length / 3; i++) {
+      coords[3 * i + 2] = flatZ;
     }
   }
-                                                                   
-  
+
   public Rect getBounds() {
 
     if (bounds == null) {
-      
+
       bounds = new Rect();
 
-      for (Iterator<Stroke> it = strokes.iterator(); it.hasNext(); ) {
+      for (Iterator<Stroke> it = strokes.iterator(); it.hasNext();) {
 
         Rect strokeBounds = (it.next()).getBounds();
-        
+
         bounds.add(strokeBounds);
       }
 
-      for (Iterator<Flash> it = pads.iterator(); it.hasNext(); )
+      for (Iterator<Flash> it = pads.iterator(); it.hasNext();)
         bounds.add(it.next().getBounds());
 
     }
@@ -1123,7 +1065,7 @@ public class Net implements Comparable<Net> {
     if (flatZ > otherFlatZ) {
       return -1;
     }
-    
+
     if (flatZ < otherFlatZ) {
       return 1;
     }
