@@ -42,36 +42,36 @@ public class Rect {
   }
 
   public Rect(float[] x, float[] y) {
-    
+
     float minX = Float.POSITIVE_INFINITY;
     float minY = Float.POSITIVE_INFINITY;
-    
+
     float maxX = Float.NEGATIVE_INFINITY;
     float maxY = Float.NEGATIVE_INFINITY;
-    
+
     for (int i = 0; i < x.length; i++) {
-      
+
       if (x[i] < minX)
         minX = x[i];
-      
+
       if (y[i] < minY)
         minY = y[i];
-      
+
       if (x[i] > maxX)
         maxX = x[i];
-      
+
       if (y[i] > maxY)
         maxY = y[i];
     }
-    
+
     this.x = minX;
     this.y = minY;
-    this.width = maxX-minX;
-    this.height = maxY-minY;
+    this.width = maxX - minX;
+    this.height = maxY - minY;
   }
 
   public Rect add(Rect other) {
-    
+
     if (uninitialized) {
       this.x = other.x;
       this.y = other.y;
@@ -90,7 +90,7 @@ public class Rect {
   }
 
   public Rect add(double x, double y) {
-   
+
 //    System.out.println("adding (" + x + ", " + y + ") to " + toString());
 
     if (uninitialized) {
@@ -117,14 +117,12 @@ public class Rect {
     }
 
 //    System.out.println("  result " + toString());
-    
+
     return this;
   }
 
   public String toString() {
-    return
-      "LLC: (" + x + ", " + y +
-      "); width = " + width + "; height = " + height;
+    return "LLC: (" + x + ", " + y + "); width = " + width + "; height = " + height;
   }
 
   public void translate(double x, double y) {
