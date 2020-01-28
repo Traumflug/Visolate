@@ -1,1 +1,12 @@
+# ant
 bin/
+make/build
+make/dest
+
+javadoc/
+
+# Eclipse
+.classpath
+
+# MacOS
+.DS_Store
