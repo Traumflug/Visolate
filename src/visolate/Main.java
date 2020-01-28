@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2004 Marsette A. Vona, III
  *               2012 Markus Hitter <mah@jump-ing.de>
+ *               2020 Johan van Oostrum
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,36 +30,13 @@ import java.util.Set;
 
 import org.apache.commons.cli.*;
 
-public class Main extends JApplet {
+public class Main extends JPanel {
 
   private static final long serialVersionUID = 1L;
 
   public static final String APPNAME = "Visolate 3.1.1";
   public static final int DEF_LOC_X = 100;
   public static final int DEF_LOC_Y = 100;
-
-  // This is needed when Visolate is run as an applet.
-  public void init() {
-
-    visolate = new Visolate();
-
-    Container contentPane = getContentPane();
-    contentPane.setLayout(new BorderLayout());
-    contentPane.add(visolate, "Center");
-    contentPane.setBackground(Color.WHITE);
-
-    SwingUtilities.invokeLater(new Runnable() {
-      public void run() {
-        visolate.loadDemo();
-      }
-    });
-
-  }
-
-  // This is needed when Visolate is run as an applet.
-  public void destroy() {
-    visolate.destroy();
-  }
 
   public static void main(final String[] argv) {
 
@@ -112,10 +90,16 @@ public class Main extends JApplet {
       System.exit(1);
     }
 
+    final Visolate visolate = new Visolate();
+    visolate.commandline = commandline;
+
     final JFrame frame = new JFrame(APPNAME);
 
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setLocation(DEF_LOC_X, DEF_LOC_Y);
+    frame.setLayout(new BorderLayout());
+    frame.setBackground(Color.WHITE);
+    frame.add(visolate, "Center");
 
     // Add the Enter key to the forward traversal keys, so fields loose focus
     // when using it in a field and we don't need to set up both, an ActionListener
@@ -125,14 +109,6 @@ public class Main extends JApplet {
     Set<AWTKeyStroke> newForwardKeys = new HashSet<AWTKeyStroke>(forwardKeys);
     newForwardKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
     frame.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, newForwardKeys);
-
-    final Visolate visolate = new Visolate();
-    visolate.commandline = commandline;
-
-    Container contentPane = frame.getContentPane();
-    contentPane.setLayout(new BorderLayout());
-    contentPane.add(visolate, "Center");
-    contentPane.setBackground(Color.WHITE);
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
