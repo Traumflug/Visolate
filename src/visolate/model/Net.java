@@ -29,8 +29,12 @@ import visolate.misc.*;
 
 import java.util.*;
 
+/**
+ * Create geometry for the PCB nets.
+ */
 public class Net implements Comparable<Net> {
 
+  public static final boolean DEBUG_CONES = false; // set true to enhance visibility of the cones
   public static final int CIRCLE_SEGMENTS = 16;
   public static final double CIRCLE_SECTOR = 2.0 * Math.PI / CIRCLE_SEGMENTS;
 
@@ -560,6 +564,9 @@ public class Net implements Comparable<Net> {
     sceneBG = null;
   }
 
+  /**
+   * Lines for PCB tracks
+   */
   private void makeLineGeometry() {
 
     if (strokes.isEmpty())
@@ -670,6 +677,9 @@ public class Net implements Comparable<Net> {
     pointGeometry.setCoordRefFloat(coords);
   }
 
+  /**
+   * Cones for PCB pads
+   */
   private void makeConeGeometry() {
 
     if (pads.isEmpty())
@@ -704,34 +714,37 @@ public class Net implements Comparable<Net> {
       coneGeometry = makeConesFromFanList(parts);
     }
 
-//    // This is for debugging.
-//    // Draw upper and lower edge of all cones. Useful if offsetOut in
-//    // makeConesFromFanList() is set to something like zCeiling()/10.
-//    int coneStripCount = ((GeometryStripArray) coneGeometry).getNumStrips();
-//    int lineVertexCount = (coneGeometry.getVertexCount() - coneStripCount * 2) * 2;
-//    float[] coneCoords = coneGeometry.getCoordRefFloat();
-//    float[] lineCoords = new float[lineVertexCount * 3];
-//    int[] coneVertexCounts = new int[coneStripCount];
-//    ((GeometryStripArray) coneGeometry).getStripVertexCounts(coneVertexCounts);
-//    
-//    int i = 0;
-//    int coneCoordPtr = 0;
-//    
-//    for (int j = 0; j < coneStripCount; j++) {
-//      for (int k = 0; k < coneVertexCounts[j] - 2; k++) {
-//        lineCoords[i++] = coneCoords[coneCoordPtr + k * 3];
-//        lineCoords[i++] = coneCoords[coneCoordPtr + k * 3 + 1];
-//        lineCoords[i++] = FLAT_Z_MAX;
-//        lineCoords[i++] = coneCoords[coneCoordPtr + k * 3 + 6];
-//        lineCoords[i++] = coneCoords[coneCoordPtr + k * 3 + 7];
-//        lineCoords[i++] = FLAT_Z_MAX;
-//      }
-//      coneCoordPtr += coneVertexCounts[j] * 3;
-//    }
-//    lineGeometry = new LineArray(lineVertexCount, GeometryArray.COORDINATES |
-//                                                  GeometryArray.BY_REFERENCE);
-//    lineGeometry.setCoordRefFloat(lineCoords);
-//    // End of debugging part.
+
+    if (DEBUG_CONES) {
+      // This is for debugging.
+      // Draw upper and lower edge of all cones. Useful if offsetOut in
+      // makeConesFromFanList() is set to something like zCeiling()/10.
+      int coneStripCount = ((GeometryStripArray) coneGeometry).getNumStrips();
+      int lineVertexCount = (coneGeometry.getVertexCount() - coneStripCount * 2) * 2;
+      float[] coneCoords = coneGeometry.getCoordRefFloat();
+      float[] lineCoords = new float[lineVertexCount * 3];
+      int[] coneVertexCounts = new int[coneStripCount];
+      ((GeometryStripArray) coneGeometry).getStripVertexCounts(coneVertexCounts);
+      
+      int i = 0;
+      int coneCoordPtr = 0;
+      
+      for (int j = 0; j < coneStripCount; j++) {
+        for (int k = 0; k < coneVertexCounts[j] - 2; k++) {
+          lineCoords[i++] = coneCoords[coneCoordPtr + k * 3];
+          lineCoords[i++] = coneCoords[coneCoordPtr + k * 3 + 1];
+          lineCoords[i++] = FLAT_Z_MAX;
+          lineCoords[i++] = coneCoords[coneCoordPtr + k * 3 + 6];
+          lineCoords[i++] = coneCoords[coneCoordPtr + k * 3 + 7];
+          lineCoords[i++] = FLAT_Z_MAX;
+        }
+        coneCoordPtr += coneVertexCounts[j] * 3;
+      }
+      lineGeometry = new LineArray(lineVertexCount, GeometryArray.COORDINATES |
+                                                    GeometryArray.BY_REFERENCE);
+      lineGeometry.setCoordRefFloat(lineCoords);
+      // End of debugging part.
+    }
 
   }
 
@@ -780,6 +793,7 @@ public class Net implements Comparable<Net> {
         float offsetIn = -1.0f * (float) Math.sqrt(dx * dx + dy * dy);
 
         float offsetOut = zCeiling();
+        if (DEBUG_CONES) offsetOut /= 10;
 
         // On how to properly offset a bunch of lines:
         // http://stackoverflow.com/questions/3749678/expand-fill-of-convex-polygon

@@ -3,7 +3,6 @@
  *
  * Copyright (C) 2004 Marsette A. Vona, III
  *               2012 Markus Hitter <mah@jump-ing.de>
- *               2020 Johan van Oostrum
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
