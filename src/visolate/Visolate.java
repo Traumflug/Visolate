@@ -1077,10 +1077,6 @@ public class Visolate extends JPanel implements SimulatorUI {
   private JTextField gcodeField;
   private JButton gcodeBrowseButton;
 
-  /**
-   * The ToolpathsProcessor generates the g-code that we write to a file.
-   */
-
   private Set<Net> selectedNets = new LinkedHashSet<Net>();
   private Net selectedNet = null;
 
