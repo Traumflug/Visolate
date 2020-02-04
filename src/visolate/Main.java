@@ -96,9 +96,6 @@ public class Main extends JPanel {
 
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setLocation(DEF_LOC_X, DEF_LOC_Y);
-    frame.setLayout(new BorderLayout());
-    frame.setBackground(Color.WHITE);
-    frame.add(visolate, "Center");
 
     // Add the Enter key to the forward traversal keys, so fields loose focus
     // when using it in a field and we don't need to set up both, an ActionListener
@@ -108,6 +105,11 @@ public class Main extends JPanel {
     Set<AWTKeyStroke> newForwardKeys = new HashSet<AWTKeyStroke>(forwardKeys);
     newForwardKeys.add(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0));
     frame.setFocusTraversalKeys(KeyboardFocusManager.FORWARD_TRAVERSAL_KEYS, newForwardKeys);
+
+    Container cp = frame.getContentPane();
+    cp.setLayout(new BorderLayout());
+    cp.setBackground(Color.WHITE);
+    cp.add(visolate, "Center");
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
