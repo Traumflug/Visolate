@@ -342,6 +342,9 @@ public class ToolpathPath {
     }
   }
 
+  /**
+   * Optimize the toolpath using the Douglas-Peucker Line Approximation algorithm.
+   */
   public void optimize() {
 
     // TODO: Pre-optimize by removing nodes which are on a straight line.
@@ -371,7 +374,7 @@ public class ToolpathPath {
 
         // This algorithm is known as Douglas-Peucker Line Approximation.
         // It first lays a single path/segment from start to end, then
-        // looks wether this is within tolerance. If not, it shortens the next
+        // looks whether this is within tolerance. If not, it shortens the next
         // segment to the node with the previously farthest deviation and tries
         // again.
         //
