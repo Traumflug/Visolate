@@ -4,6 +4,10 @@ manufacturing printed circuit boards (PCBs) by isolation milling. As an
 outstanding feature, this calculation is done on the computer's screen,
 using the features of 3D graphics drivers.
 
+Please note that branch 'master' isn't the single best branch. There are
+multiple branches from various contributors, all on a similar development level.
+One of these branches might work better for your operating system or your use
+case than another.
 
 USAGE
 
