@@ -1,3 +1,9 @@
+Archiving hint: In late summer 2023, Github started to enforce 2FA (Two Factor
+                Authentication), so I had to archive it before losing control
+                over it.  See also https://github.com/Traumflug/Visolate/issues/12
+
+                Traumflug, August 2023
+
 
 Visolate is an application for calculating machining toolpaths (G-code) for
 manufacturing printed circuit boards (PCBs) by isolation milling. As an
